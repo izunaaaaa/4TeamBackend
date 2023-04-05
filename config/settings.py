@@ -29,6 +29,9 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 # SECRET_KEY = "django-insecure-t*^bw!qd7(qdhn&9n#35z5xl(oy)rsah8(kx&^=qb-rfqz103+"
 
 SECRET_KEY = env("SECRET_KEY")
+# CF_TOKEN = env("CF_TOKEN")
+# CF_ID = env("CF_ID")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -38,11 +41,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 THIRD_PARTY_APPS = [
-    # "rest_framework",
-    # "corsheaders",
-    # "drf_yasg",
-    # "django_seed",
-    # "rest_framework_simplejwt",
+    "rest_framework",
+    "rest_framework_swagger",
 ]
 
 CUSTOM_APPS = [
