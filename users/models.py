@@ -33,8 +33,9 @@ class User(AbstractUser):
         max_length=100,
         choices=GenderChoices.choices,
     )
-    # group = models.ForeignKey(
-    #     "groups.Group",
-    #     on_delete=models.CASCADE,
-    # )
+    group = models.ForeignKey(
+        "groups.Group",
+        on_delete=models.CASCADE,
+        null=True,
+    )
     is_coach = models.BooleanField(default=False)
