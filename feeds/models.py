@@ -11,9 +11,18 @@ class Feed(CommonModel):
         "groups.Group",
         on_delete=models.CASCADE,
     )
+    category = models.ForeignKey(
+        "categories.Category",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     visited = models.PositiveIntegerField(
         editable=False,
         default=0,
     )
+
+    def __str__(self) -> str:
+        return f"{self.title}"

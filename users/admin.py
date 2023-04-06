@@ -8,11 +8,8 @@ class CustomUserAdmin(UserAdmin):
 
     list_display = (
         "pk",
+        "username",
         "is_coach",
-        "username",
-        "name",
-        "username",
-        "email",
     )
 
     fieldsets = (
