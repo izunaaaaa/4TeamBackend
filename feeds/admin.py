@@ -10,24 +10,24 @@ class FeedAdmin(admin.ModelAdmin):
         "group",
         "title",
         "description",
-        "visited",
     )
 
     fieldsets = (
         (
             "User Info",
             {
-                "fields": ("user",),
+                "fields": (
+                    "user",
+                    "group",
+                ),
             },
         ),
         (
             "Feed Info",
             {
                 "fields": (
-                    "group",
                     "title",
                     "description",
-                    "visited",
                 )
             },
         ),
