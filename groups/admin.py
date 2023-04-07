@@ -4,4 +4,7 @@ from .models import Group
 
 @admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
-    list_display = ("pk",)
+    list_display = (
+        "pk",
+        "name",
+    )

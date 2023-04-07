@@ -1,10 +1,10 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Group
+from .models import Feedlike
 
 
-class GroupSerializer(ModelSerializer):
+class FeedLikeSerializer(ModelSerializer):
     class Meta:
-        model = Group
+        model = Feedlike
         exclude = (
             "created_at",
             "updated_at",

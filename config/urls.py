@@ -40,6 +40,7 @@ urlpatterns = [
     path("api/v1/letters/", include("letters.urls")),
     path("api/v1/categories/", include("categories.urls")),
     path("api/v1/comments/", include("comments.urls")),
+    path("api/v1/likes/", include("likes.urls")),
     path(
         "swagger/",
         schema_view.with_ui("swagger", cache_timeout=0),
