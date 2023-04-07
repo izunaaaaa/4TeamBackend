@@ -26,7 +26,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
-# SECRET_KEY = "django-insecure-t*^bw!qd7(qdhn&9n#35z5xl(oy)rsah8(kx&^=qb-rfqz103+"
 
 SECRET_KEY = env("SECRET_KEY")
 # CF_TOKEN = env("CF_TOKEN")
