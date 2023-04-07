@@ -13,11 +13,10 @@ class Feeds(APIView):
     def get(self, request):
         feed = Feed.objects.all()
 
-        sort = request.GET.get("sort")
-
         # 최신순
-        if sort == "created_at":
-            feed = feed.order_by("-created_at")
+        feed = feed.order_by("-created_at")
+
+        sort = request.GET.get("sort")
 
         # 인기순
         # if sort == likes:
@@ -53,7 +52,6 @@ class FeedDetail(APIView):
     def get(self, request, pk):
         feed = self.get_object(pk)
         feed.visited += 1
-
         feed.save()
 
         serializer = serializers.FeedSerializer(feed)
