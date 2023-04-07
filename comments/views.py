@@ -12,6 +12,7 @@ class Comments(APIView):
 
     def get(self, request):
         comment = Comment.objects.all()
+        comment = comment.order_by("-created_at")
         serializer = serializers.CommentSerializer(
             comment,
             many=True,

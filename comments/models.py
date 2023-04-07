@@ -14,3 +14,6 @@ class Comment(CommonModel):
     description = models.TextField(
         max_length=255,
     )
+
+    def __str__(self) -> str:
+        return f"{self.feed}"

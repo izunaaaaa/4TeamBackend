@@ -3,9 +3,10 @@ from .models import Feedlike, Commentlike
 
 
 @admin.register(Feedlike)
-class LikeAdmin(admin.ModelAdmin):
+class FeedlikeAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
+        "user",
         "feed",
     )
 
@@ -14,5 +15,6 @@ class LikeAdmin(admin.ModelAdmin):
 class CommonlikeAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
+        "user",
         "comment",
     )

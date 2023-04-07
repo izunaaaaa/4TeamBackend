@@ -4,4 +4,8 @@ from .models import Letter
 
 @admin.register(Letter)
 class LetterAdmin(admin.ModelAdmin):
-    list_display = ("pk",)
+    list_display = (
+        "pk",
+        "sender",
+        "receiver",
+    )
