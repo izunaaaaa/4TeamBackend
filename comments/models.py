@@ -16,4 +16,4 @@ class Comment(CommonModel):
     )
 
     def __str__(self) -> str:
-        return f"{self.feed}"
+        return self.description
