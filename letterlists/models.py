@@ -7,5 +7,4 @@ class Letterlist(CommonModel):
         "users.User",
         on_delete=models.CASCADE,
     )
-    letter = models.ManyToManyField("letters.Letter")
-    
+    message = models.ManyToManyField("letters.Letter")
