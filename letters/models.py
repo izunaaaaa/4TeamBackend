@@ -13,4 +13,8 @@ class Letter(CommonModel):
         on_delete=models.CASCADE,
         related_name="receiver",
     )
+    list = models.ForeignKey(
+        "letterlists.Letterlist",
+        on_delete=models.CASCADE,
+    )
     description = models.CharField(max_length=100)

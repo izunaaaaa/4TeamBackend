@@ -15,7 +15,7 @@ class Groups(APIView):
 class GroupDetail(APIView):
     def get_object(self, pk):
         try:
-            Group.objects.get(pk=pk)
+            return Group.objects.get(pk=pk)
         except Group.DoesNotExist:
             raise NotFound
 

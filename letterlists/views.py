@@ -1,14 +1,14 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Letter
 from . import serializers
+from .models import Letterlist
 
 
-class Letters(APIView):
+class Letterlists(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        letter = Letter.objects.filter(sender=request.user)
-        serializer = serializers.LetterSerializer(letter)
-        return Response(serializer.data)
+        letterlist = Letterlist.objects.filter(user=request.user)
+        serialzier = serializers.LetterliseSerialzer(letterlist)
+        return Response(serialzier.data)

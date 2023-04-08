@@ -41,6 +41,7 @@ urlpatterns = [
     path("api/v1/comments/", include("comments.urls")),
     path("api/v1/recomments/", include("recomments.urls")),
     path("api/v1/likes/", include("likes.urls")),
+    path("api/v1/letterlists/", include("letterlists.urls")),
     path(
         "swagger/",
         schema_view.with_ui("swagger", cache_timeout=0),

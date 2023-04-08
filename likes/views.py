@@ -6,9 +6,7 @@ from . import serializers
 from .models import Feedlike, Commentlike
 from feeds.models import Feed
 
-
 class FeedLikes(APIView):
-
     permission_classes = [IsAuthenticated]
 
     def get_object(self, pk):
@@ -52,7 +50,6 @@ class FeedLikes(APIView):
 
 
 class CommentLikes(APIView):
-
     permission_classes = [IsAuthenticated]
 
     def get_object(self, pk):

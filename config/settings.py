@@ -55,6 +55,7 @@ CUSTOM_APPS = [
     "medias.apps.MediasConfig",
     "letters.apps.LettersConfig",
     "login.apps.LoginConfig",
+    "letterlists.apps.LetterlistsConfig",
 ]
 
 SYSTEM_APPS = [

@@ -5,9 +5,10 @@ from rest_framework.exceptions import NotFound, ParseError
 from .models import Feed
 from . import serializers
 
+# from django.shortcuts import get_object_or_404
+
 
 class Feeds(APIView):
-
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
@@ -40,7 +41,6 @@ class Feeds(APIView):
 
 
 class FeedDetail(APIView):
-
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_object(self, pk):
@@ -51,6 +51,7 @@ class FeedDetail(APIView):
 
     def get(self, request, pk):
         feed = self.get_object(pk)
+        # feed = get_object_or_404(Feed, pk=pk)
         feed.visited += 1
         feed.save()
 

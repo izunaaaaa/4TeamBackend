@@ -7,4 +7,5 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "name",
+        "group",
     )
