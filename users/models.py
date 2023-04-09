@@ -37,5 +37,6 @@ class User(AbstractUser):
         "groups.Group",
         on_delete=models.CASCADE,
         null=True,
+        related_name="members",
     )
     is_coach = models.BooleanField(default=False)

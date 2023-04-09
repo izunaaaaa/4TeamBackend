@@ -8,7 +8,6 @@ authors = ["KimDuHong <art970@naver.com>"]
 python = "^3.10"
 Django = "^4.2"
 django-environ = "^0.10.0"
-djangorestframework = "^3.14.0"
 drf-yasg = "^1.21.5"
 djangorestframework-simplejwt = "^5.2.2"
 
