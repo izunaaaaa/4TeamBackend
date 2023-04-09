@@ -6,12 +6,12 @@ class Letterlist(CommonModel):
     sender = models.ForeignKey(
         "users.User",
         on_delete=models.CASCADE,
-        related_name="sender",
+        related_name="letterlist",
     )
     receiver = models.ForeignKey(
         "users.User",
         on_delete=models.CASCADE,
-        related_name="receiver",
+        related_name="letterlist",
     )
 
     def __str__(self) -> str:

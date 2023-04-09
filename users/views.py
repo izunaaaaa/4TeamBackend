@@ -1,5 +1,6 @@
-from drf_yasg import openapi
-from rest_framework_swagger.views import get_swagger_view
+# from drf_yasg import openapi
+
+# from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,9 +8,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound, ParseError
 from . import serializers
 from .models import User
-
-# from drf_yasg.utils import swagger_auto_schema
-# from drf_yasg import openapi
 
 
 class Me(APIView):
