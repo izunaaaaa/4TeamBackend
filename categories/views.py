@@ -3,11 +3,16 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, PermissionDenied
 from .models import Category
 from . import serializers
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from django.shortcuts import get_object_or_404
+from groups.models import Group
 
 
 class Categories(APIView):
     def get(self, request):
-        category = Category.objects.all()
+        group = get_object_or_404(Group, name=request.GET.get("group"))
+        category = Category.objects.filter(group=group)
         serializer = serializers.CategorySerializer(
             category,
             many=True,
