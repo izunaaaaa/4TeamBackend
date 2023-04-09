@@ -40,7 +40,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 THIRD_PARTY_APPS = [
-    "drf-yasg",
+    "drf_yasg",
     "rest_framework",
 ]
 
