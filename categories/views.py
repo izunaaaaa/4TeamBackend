@@ -17,9 +17,6 @@ class Categories(APIView):
     def post(self, request):
         serializer = serializers.CategorySerializer(data=request.data)
 
-        if not request.user.is_coach:
-            raise PermissionDenied
-
         if serializer.is_valid():
             feed = serializer.save()
 

@@ -6,6 +6,5 @@ from .models import Letter
 class LetterAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
-        "sender",
-        "receiver",
+        "description",
     )

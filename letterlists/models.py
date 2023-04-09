@@ -3,8 +3,16 @@ from common.models import CommonModel
 
 
 class Letterlist(CommonModel):
-    user = models.ForeignKey(
+    sender = models.ForeignKey(
         "users.User",
         on_delete=models.CASCADE,
+        related_name="sender",
     )
-    message = models.ManyToManyField("letters.Letter")
+    receiver = models.ForeignKey(
+        "users.User",
+        on_delete=models.CASCADE,
+        related_name="receiver",
+    )
+
+    def __str__(self) -> str:
+        return f"To {self.sender} from {self.receiver}"
