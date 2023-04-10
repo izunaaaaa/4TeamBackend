@@ -56,26 +56,24 @@ class Categories(APIView):
     )
     def post(self, request):
         serializer = serializers.CategorySerializer(data=request.data)
+        
+        #만약 request.user이 is_coach가 false인경우
+        if request.user.is_coach == False:
+            raise PermissionDenied
         print(request.GET.get("group"))
         if serializer.is_valid():
-            feed = serializer.save()
-
+            print(1)
+            group = request.GET.get("group")
+            group = get_object_or_404(Group, name=group)
+            category = serializer.save(group=group)
+            serializer = serializers.CategorySerializer(category)
             return Response(serializer.data)
         else:
+            print(2)
             return Response(serializer.errors, status=400)
 
-
-# class CategoryDetail(APIView):
-#     def get_object(self, pk):
-#         try:
-#             return Category.objects.get(pk=pk)
-#         except Category.DoesNotExist:
-#             raise NotFound
-
-#     def get(self, request, pk):
-#         category = self.get_object(pk)
-#         serializer = serializers.CategorySerializer(
-#             category,
-#             many=True,
-#         )
-#         return Response(serializer.data)
+    def delete(self, request):
+        pass
+        # category = get_object_or_404(Category, name=request.data.get("name"))
+        # category.delete()
+        # return Response(status=204)

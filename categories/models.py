@@ -14,3 +14,6 @@ class Category(CommonModel):
 
     class Meta:
         verbose_name_plural = "categories"
+
+    def add_default_data():
+        Category.objects.get_or_create(name='전체글')
