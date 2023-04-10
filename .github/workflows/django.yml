@@ -24,7 +24,7 @@ jobs:
     
 
     - name: Install Poetry
-    - uses: actions/setup-poetry@v3
+      uses: actions/setup-poetry@v3
       with:
         poetry-version: 1.1.14
   
