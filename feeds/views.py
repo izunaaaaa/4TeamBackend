@@ -1,3 +1,5 @@
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -11,6 +13,15 @@ from . import serializers
 class Feeds(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
+    @swagger_auto_schema(
+        operation_summary="피드 전체 조회 api",
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                schema=serializers.FeedSerializer(),
+            )
+        },
+    )
     def get(self, request):
         feed = Feed.objects.all()
 
@@ -39,6 +50,30 @@ class Feeds(APIView):
             {"page_size": page_size, "now_page": page, "data": serializer.data}
         )
 
+    @swagger_auto_schema(
+        operation_summary="[미완성]피드 생성 api",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["user", "group", "title"],
+            properties={
+                "user": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="유저정보 자동생성"
+                ),
+                "group": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="그룹정보 자동생성"
+                ),
+                "title": openapi.Schema(type=openapi.TYPE_STRING, description="타이틀"),
+            },
+        ),
+        responses={
+            200: openapi.Response(description="OK"),
+            400: openapi.Response(description="Invalid request data"),
+            401: openapi.Response(description="The user is not authenticated"),
+        },
+    )
+    def post(self, request):
+        pass
+
 
 class FeedDetail(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -49,6 +84,15 @@ class FeedDetail(APIView):
         except Feed.DoesNotExist:
             raise NotFound
 
+    @swagger_auto_schema(
+        operation_summary="피드 조회 api",
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                schema=serializers.FeedSerializer(),
+            )
+        },
+    )
     def get(self, request, pk):
         feed = self.get_object(pk)
         # feed = get_object_or_404(Feed, pk=pk)
@@ -57,3 +101,17 @@ class FeedDetail(APIView):
 
         serializer = serializers.FeedSerializer(feed)
         return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="[미완성]피드 수정 api",
+        responses={
+            200: openapi.Response(
+                description="Successful response",
+                schema=serializers.FeedSerializer(),
+            ),
+            400: "Bad Request",
+        },
+        request_body=serializers.FeedSerializer(),
+    )
+    def put(self, request, pk):
+        pass

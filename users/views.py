@@ -1,6 +1,5 @@
-# from drf_yasg import openapi
-
-# from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -13,11 +12,31 @@ from .models import User
 class Me(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="유저 조회 api",
+        responses={
+            200: openapi.Response(
+                description="Successful response",
+                schema=serializers.PrivateUserSerializer(),
+            ),
+        },
+    )
     def get(self, request):
         user = request.user
         serializer = serializers.PrivateUserSerializer(user)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_summary="유저 수정 api",
+        responses={
+            200: openapi.Response(
+                description="Successful response",
+                schema=serializers.PrivateUserSerializer(),
+            ),
+            400: "Bad Request",
+        },
+        request_body=serializers.PrivateUserSerializer(),
+    )
     def put(self, request):
         serilaizer = serializers.PrivateUserSerializer(
             request.user,
@@ -37,6 +56,18 @@ class Me(APIView):
 
 
 class UserDetail(APIView):
+    @swagger_auto_schema(
+        operation_summary="특정 유저 조회 api",
+        responses={
+            200: openapi.Response(
+                description="Successful response",
+                schema=serializers.TinyUserSerializer(),
+            ),
+            404: openapi.Response(
+                description="User not found",
+            ),
+        },
+    )
     def get(self, request, username):
         try:
             user = User.objects.get(username=username)
@@ -47,6 +78,22 @@ class UserDetail(APIView):
 
 
 class LogIn(APIView):
+    @swagger_auto_schema(
+        operation_summary="[미완성]유저 로그인 api",
+        responses={200: "OK", 400: "name or password error"},
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["username", "password"],
+            properties={
+                "username": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="유저 id ( username )"
+                ),
+                "password": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="유저 비밀번호"
+                ),
+            },
+        ),
+    )
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
