@@ -13,7 +13,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.8, 3.9, '3.10']
+        python-version: ['3.10']
 
     steps:
     - uses: actions/checkout@v3
@@ -29,9 +29,9 @@ jobs:
         
     - name: Install dependencies
       run: |
-        poetry install
+        poetry config virtualenvs.create false
+        poetry install --no-interaction --no-ansi
 
     - name: Run Tests
       run: |
-        poetry shell
         python manage.py test
