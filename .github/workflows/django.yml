@@ -24,10 +24,10 @@ jobs:
     
 
     - name: Install Poetry
-      uses: actions/setup-poetry@v3
-      with:
-        poetry-version: 1.1.14
-  
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 - --version 1.1.14
+        source $HOME/.poetry/env
+        
     - name: Install dependencies
       run: |
         source $HOME/.poetry/env
