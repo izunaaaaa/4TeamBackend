@@ -23,9 +23,9 @@ from drf_yasg import openapi
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="BangSam BackEnd API",
+        title="CurB backend API",
         default_version="v1",
-        description="https://github.com/izunaaaaa/BangSam",
+        description="https://github.com/izunaaaaa/CurB_Backend",
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
