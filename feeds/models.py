@@ -27,3 +27,11 @@ class Feed(CommonModel):
 
     def __str__(self) -> str:
         return f"{self.title}"
+
+    @property
+    def likeCount(self):
+        return self.feedlike.count()
+    
+    @property
+    def CommentCount(self):
+        return self.comment.count()

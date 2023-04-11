@@ -1,8 +1,8 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Image
+from .models import Media
 
 
-class ImageSerializer(ModelSerializer):
+class MediaSerializer(ModelSerializer):
     class Meta:
-        model = Image
+        model = Media
         fields = ("url",)
