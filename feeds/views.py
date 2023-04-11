@@ -38,6 +38,9 @@ class Feeds(APIView):
         # 최신순
         feed = feed.order_by("-created_at")
         
+        # feedlike = Feed.objects.annotate(feed_like_count=Count("feedlike"))
+        # commentlike = Feed.objects.annotate(comment_like_count=Count("commentlike"))
+                
         # pagenations
         current_page = request.GET.get("page", 1)
         items_per_page = 10
