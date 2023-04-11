@@ -33,10 +33,10 @@ class Comments(APIView):
         operation_summary="[미완성]댓글 생성 api",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=["user", "all_feed", "description"],
+            required=["user", "feed", "description"],
             properties={
                 "user": openapi.Schema(type=openapi.TYPE_STRING, description="유저정보"),
-                "all_feed": openapi.Schema(type=openapi.TYPE_STRING, description="피드 정보"),
+                "feed": openapi.Schema(type=openapi.TYPE_STRING, description="피드 정보"),
                 "description": openapi.Schema(
                     type=openapi.TYPE_STRING, description="내용"
                 ),

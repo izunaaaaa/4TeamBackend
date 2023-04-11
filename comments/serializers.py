@@ -5,4 +5,11 @@ from .models import Comment
 class CommentSerializer(ModelSerializer):
     class Meta:
         model = Comment
-        exclude = ("updated_at",)
+        fields = (
+            "id",
+            "user",
+            "feed",
+            "description",
+            "created_at",
+            "top_comment_like",
+        )

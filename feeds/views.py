@@ -21,7 +21,7 @@ class Feeds(APIView):
             openapi.Parameter(
                 "page",
                 openapi.IN_QUERY,
-                description="1 페이지당 24개의 데이터 \n - num_pages : 총 페이지수 \n - current_page : 현재 페이지 \n - count : 총 개수 \n - results : 순서",
+                description="1 페이지당 24개의 데이터 \n - total_pages : 총 페이지수 \n - now_page : 현재 페이지 \n - count : 총 개수 \n - results : 순서",
                 type=openapi.TYPE_INTEGER,
             ),
         ],
@@ -34,7 +34,8 @@ class Feeds(APIView):
     )
     def get(self, request):
         feed = Feed.objects.all()
-
+        
+        print(Count("feedlike"))
         # 최신순
         feed = feed.order_by("-created_at")
         
@@ -57,8 +58,8 @@ class Feeds(APIView):
         )
 
         data = {
-            "num_pages": paginator.num_pages,
-            "current_page": page.number,
+            "total_pages": paginator.num_pages,
+            "now_page": page.number,
             "count": paginator.count,
             "results": serializer.data,
         }
