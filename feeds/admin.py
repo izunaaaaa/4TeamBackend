@@ -4,7 +4,7 @@ from .models import Feed
 
 @admin.register(Feed)
 class FeedAdmin(admin.ModelAdmin):
-    listdisplay = (
+    list_display = (
         "id",
         "user",
         "group",
@@ -26,6 +26,7 @@ class FeedAdmin(admin.ModelAdmin):
             "Feed Info",
             {
                 "fields": (
+                    "category",
                     "title",
                     "description",
                 )

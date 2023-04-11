@@ -8,6 +8,7 @@ class Category(CommonModel):
         "groups.Group",
         on_delete=models.CASCADE,
     )
+    unique_together = ("name", "group")
 
     def __str__(self) -> str:
         return f"{self.name}"
@@ -20,5 +21,5 @@ class Category(CommonModel):
 
     def save(self):
         if not self.name:
-            self.name = '전체글'
+            self.name = "전체글"
         super().save()

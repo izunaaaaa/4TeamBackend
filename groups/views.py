@@ -3,8 +3,10 @@ from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import Group
 from . import serializers
+from django.shortcuts import get_object_or_404
 
 
 class Groups(APIView):
@@ -43,6 +45,8 @@ class Groups(APIView):
 
 
 class GroupDetail(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get_object(self, pk):
         try:
             return Group.objects.get(pk=pk)
@@ -60,7 +64,7 @@ class GroupDetail(APIView):
     )
     def get(self, request, pk):
         group = self.get_object(pk)
-        serializer = serializers.GroupSerializer(group)
+        serializer = serializers.GroupDetailSerializer(group)
         return Response(serializer.data)
 
     @swagger_auto_schema(
@@ -75,4 +79,12 @@ class GroupDetail(APIView):
         request_body=serializers.GroupSerializer(),
     )
     def put(self, request, pk):
-        pass
+        group = get_object_or_404(Group, pk=pk)
+        serializer = serializers.GroupDetailSerializer(
+            group,
+            data=request.data,
+            partial=True,
+        )
+        if serializer.is_valid():
+            group = serializer.save()
+            return Response(serializers.GroupDetailSerializer(group).data)

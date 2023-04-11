@@ -2,10 +2,10 @@ from django.db import models
 from common.models import CommonModel
 
 
-class Media(CommonModel):
+class Image(CommonModel):
     feed = models.ForeignKey(
         "feeds.Feed",
         on_delete=models.CASCADE,
-        related_name="media"
+        related_name="images",
     )
     url = models.URLField()

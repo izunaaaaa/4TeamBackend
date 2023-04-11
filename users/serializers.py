@@ -13,6 +13,8 @@ class TinyUserSerializer(ModelSerializer):
             "name",
             "email",
             "avatar",
+            "is_coach",
+            # "_coach",
             # "is_naver",
             # "is_kakao",
         )
