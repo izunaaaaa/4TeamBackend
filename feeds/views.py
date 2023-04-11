@@ -91,8 +91,23 @@ class Feeds(APIView):
         },
     )
     def post(self, request):
-        pass
+        serializer = serializers.FeedSerializer(data=request.data)
+        if serializer.is_valid():
+            feed = serializer.save(user=request.user)
+            serializer = serializers.FeedSerializer(feed=feed, many=True,)
+            return Response({"result": "create success"})
+        else:
+            return Response(serializer.errors, status=400)
 
+
+class GroupFeeds(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def get(self, request, group):
+        feed = Feed.objects.filter(group=group)
+        feed = feed.order_by("-created_at")
+        serializer = serializers.FeedSerializer(feed, many=True,)
+        return Response(serializer.data)
 
 class FeedDetail(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
