@@ -75,30 +75,3 @@ class Categories(APIView):
         else:
             return Response(serializer.errors, status=400)
     
-    @swagger_auto_schema(
-        operation_summary="카테고리 삭제 api",
-        manual_parameters=[
-            openapi.Parameter(
-                "group",
-                openapi.IN_QUERY,
-                description="그룹 데이터 \n - group의 name로 작성",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
-                "delete_category_name",
-                openapi.IN_QUERY,
-                description="삭제할 카테고리 \n - category의 id로 작성",
-                type=openapi.TYPE_INTEGER,
-            ),
-        ],
-        responses={
-            200: openapi.Response(
-                description="Successful response",
-                schema=serializers.CategorySerializer(many=True),
-            )
-        },
-    )
-    def delete(self, request):
-        delete_category_id = request.GET.get("delete_category_id")
-        Category.objects.get(pk=delete_category_id).delete()
-        return Response(status=204)

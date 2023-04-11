@@ -20,8 +20,5 @@ class Comment(CommonModel):
         return f"{self.description}"
     
     @property
-    def top_comment_like(self):
-        if self.media.all().count() > 0:
-            return self.media.all()[0]
-        else:
-            return ""
+    def commentlikeCount(self):
+        return self.commentlike.count()

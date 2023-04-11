@@ -10,6 +10,7 @@ class Feedlike(CommonModel):
     feed = models.ForeignKey(
         "feeds.Feed",
         on_delete=models.CASCADE,
+        related_name="feedlike",
     )
 
 
@@ -21,4 +22,5 @@ class Commentlike(CommonModel):
     comment = models.ForeignKey(
         "comments.Comment",
         on_delete=models.CASCADE,
+        related_name="commentlike",
     )

@@ -11,5 +11,5 @@ class CommentSerializer(ModelSerializer):
             "feed",
             "description",
             "created_at",
-            "top_comment_like",
+            "commentlikeCount",
         )
