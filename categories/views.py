@@ -37,14 +37,19 @@ class Categories(APIView):
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        operation_summary="[미완성]카테고리 생성 api",
+        operation_summary="카테고리 생성 api",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=["group", "name"],
+            manual_parameters=[
+            openapi.Parameter(
+                "group",
+                openapi.IN_QUERY,
+                description="그룹 데이터 \n - group의 name로 작성",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+            required=["name"],
             properties={
-                "group": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="params값으로 자동 입력"
-                ),
                 "name": openapi.Schema(type=openapi.TYPE_STRING, description="카테고리명"),
             },
         ),
@@ -60,20 +65,40 @@ class Categories(APIView):
         #만약 request.user이 is_coach가 false인경우
         if request.user.is_coach == False:
             raise PermissionDenied
-        print(request.GET.get("group"))
+        
         if serializer.is_valid():
-            print(1)
             group = request.GET.get("group")
             group = get_object_or_404(Group, name=group)
             category = serializer.save(group=group)
             serializer = serializers.CategorySerializer(category)
             return Response(serializer.data)
         else:
-            print(2)
             return Response(serializer.errors, status=400)
-
+    
+    @swagger_auto_schema(
+        operation_summary="카테고리 삭제 api",
+        manual_parameters=[
+            openapi.Parameter(
+                "group",
+                openapi.IN_QUERY,
+                description="그룹 데이터 \n - group의 name로 작성",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "delete_category_name",
+                openapi.IN_QUERY,
+                description="삭제할 카테고리 \n - category의 id로 작성",
+                type=openapi.TYPE_INTEGER,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Successful response",
+                schema=serializers.CategorySerializer(many=True),
+            )
+        },
+    )
     def delete(self, request):
-        pass
-        # category = get_object_or_404(Category, name=request.data.get("name"))
-        # category.delete()
-        # return Response(status=204)
+        delete_category_id = request.GET.get("delete_category_id")
+        Category.objects.get(pk=delete_category_id).delete()
+        return Response(status=204)

@@ -35,7 +35,6 @@ class Feeds(APIView):
     def get(self, request):
         feed = Feed.objects.all()
         
-        print(Count("feedlike"))
         # 최신순
         feed = feed.order_by("-created_at")
         

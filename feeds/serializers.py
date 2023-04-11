@@ -20,6 +20,7 @@ class FeedSerializer(ModelSerializer):
             "description",
             "visited",
             "created_at",
+            "feedlikeCount",
             "feed_comment",
             "media",
         )
