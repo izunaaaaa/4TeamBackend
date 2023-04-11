@@ -1,6 +1,7 @@
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.core.paginator import Paginator
+from django.db.models import Count
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -130,3 +131,21 @@ class FeedDetail(APIView):
     )
     def put(self, request, pk):
         pass
+
+class TopLikeView(APIView):
+    @swagger_auto_schema(
+        operation_summary="피드 전체 조회(좋아요순) api",
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                schema=serializers.FeedSerializer(),
+            )
+        },
+    )
+    def get(self, request):
+        feed = (
+            Feed.objects.annotate(like_count=Count("feedlike"))
+            .order_by("-like_count")
+        )
+        serializer = serializers.FeedSerializer(feed, many=True)
+        return Response(serializer.data)
