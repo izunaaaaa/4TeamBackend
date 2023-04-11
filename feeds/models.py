@@ -1,5 +1,6 @@
 from django.db import models
 from common.models import CommonModel
+from django.db.models import Count
 
 
 class Feed(CommonModel):
@@ -23,12 +24,30 @@ class Feed(CommonModel):
         editable=False,
         default=0,
     )
-    
 
     def __str__(self) -> str:
         return f"{self.title}"
 
     @property
-    def feedlikeCount(self):
+    def like_count(self):
         return self.feedlike.count()
-    
+
+    @property
+    def comments_count(self):
+        return self.comment.count()
+
+    @property
+    def highest_like_comments(self):
+        return self.comment.annotate(like_count=Count("commentlike")).order_by(
+            "-like_count"
+        )[:3]
+
+        return (
+            self.comment.all()
+            .annotate(like_count=Count("commentlike"))
+            .order_by("-like_count")[:3]
+        )
+
+    @property
+    def thumbnail(self):
+        return self.images.all()[:1]

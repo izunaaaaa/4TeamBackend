@@ -56,8 +56,8 @@ CUSTOM_APPS = [
     "likes.apps.LikesConfig",
     "medias.apps.MediasConfig",
     "letters.apps.LettersConfig",
-    "login.apps.LoginConfig",
     "letterlists.apps.LetterlistsConfig",
+    "accessinfo.apps.AccessinfoConfig",
 ]
 
 SYSTEM_APPS = [

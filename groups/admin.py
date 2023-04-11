@@ -7,4 +7,5 @@ class GroupAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "name",
+        "members_count",
     )

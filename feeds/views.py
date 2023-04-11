@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ParseError
 from .models import Feed
 from . import serializers
-
-# from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404
+from groups.models import Group
 
 
 class Feeds(APIView):
@@ -106,11 +106,43 @@ class GroupFeeds(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, group):
+        group = get_object_or_404(Group, name=group)
         feed = Feed.objects.filter(group=group)
         feed = feed.order_by("-created_at")
+        current_page = request.GET.get("page", 1)
+        items_per_page = 10
+        paginator = Paginator(feed, items_per_page)
+        try:
+            page = paginator.page(current_page)
+        except:
+            page = paginator.page(paginator.num_pages)
+
+        if int(current_page) > int(paginator.num_pages):
+            raise ParseError("that page is out of range")
+
         serializer = serializers.FeedSerializer(
-            feed,
+            page,
             many=True,
+            context={"request": request},
+        )
+        data = {
+            "total_pages": paginator.num_pages,
+            "now_page": page.number,
+            "count": paginator.count,
+            "results": serializer.data,
+        }
+        return Response(data)
+
+
+class GroupFeedDetail(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request, group, pk):
+        # group = get_object_or_404(Group, name=group)
+        feed = get_object_or_404(Feed, group__name=group, pk=pk)
+        serializer = serializers.FeedDetailSerializer(
+            feed,
+            context={"request": request},
         )
         return Response(serializer.data)
 

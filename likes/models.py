@@ -12,6 +12,7 @@ class Feedlike(CommonModel):
         on_delete=models.CASCADE,
         related_name="feedlike",
     )
+    unique_together = ("user", "feed")
 
 
 class Commentlike(CommonModel):
@@ -24,3 +25,4 @@ class Commentlike(CommonModel):
         on_delete=models.CASCADE,
         related_name="commentlike",
     )
+    unique_together = ("user", "comment")
