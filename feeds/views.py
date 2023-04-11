@@ -34,13 +34,13 @@ class Feeds(APIView):
     )
     def get(self, request):
         feed = Feed.objects.all()
-        
+
         # 최신순
         feed = feed.order_by("-created_at")
-        
+
         # feedlike = Feed.objects.annotate(feed_like_count=Count("feedlike"))
         # commentlike = Feed.objects.annotate(comment_like_count=Count("commentlike"))
-                
+
         # pagenations
         current_page = request.GET.get("page", 1)
         items_per_page = 10
@@ -49,7 +49,7 @@ class Feeds(APIView):
             page = paginator.page(current_page)
         except:
             page = paginator.page(paginator.num_pages)
-        
+
         if int(current_page) > int(paginator.num_pages):
             raise ParseError("that page is out of range")
 
@@ -65,9 +65,8 @@ class Feeds(APIView):
             "count": paginator.count,
             "results": serializer.data,
         }
-        
-        return Response(data)
 
+        return Response(data)
 
     @swagger_auto_schema(
         operation_summary="[미완성]피드 생성 api",
@@ -94,7 +93,10 @@ class Feeds(APIView):
         serializer = serializers.FeedSerializer(data=request.data)
         if serializer.is_valid():
             feed = serializer.save(user=request.user)
-            serializer = serializers.FeedSerializer(feed=feed, many=True,)
+            serializer = serializers.FeedSerializer(
+                feed=feed,
+                many=True,
+            )
             return Response({"result": "create success"})
         else:
             return Response(serializer.errors, status=400)
@@ -102,19 +104,23 @@ class Feeds(APIView):
 
 class GroupFeeds(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
-    
+
     def get(self, request, group):
         feed = Feed.objects.filter(group=group)
         feed = feed.order_by("-created_at")
-        serializer = serializers.FeedSerializer(feed, many=True,)
+        serializer = serializers.FeedSerializer(
+            feed,
+            many=True,
+        )
         return Response(serializer.data)
+
 
 class FeedDetail(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_object(self, pk):
         try:
-            return Feed.objects.get(pk=pk) 
+            return Feed.objects.get(pk=pk)
         except Feed.DoesNotExist:
             raise NotFound
 
@@ -150,6 +156,7 @@ class FeedDetail(APIView):
     def put(self, request, pk):
         pass
 
+
 class TopLikeView(APIView):
     @swagger_auto_schema(
         operation_summary="피드 전체 조회(좋아요순) api",
@@ -161,9 +168,13 @@ class TopLikeView(APIView):
         },
     )
     def get(self, request):
-        feed = (
-            Feed.objects.annotate(like_count=Count("feedlike"))
-            .order_by("-like_count")
+        feed = Feed.objects.annotate(like_count=Count("feedlike")).order_by(
+            "-like_count"
         )
         serializer = serializers.FeedSerializer(feed, many=True)
         return Response(serializer.data)
+
+
+class error(APIView):
+    def get(self, request):
+        return 1 / 0
