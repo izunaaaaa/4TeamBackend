@@ -23,6 +23,7 @@ class Feed(CommonModel):
         editable=False,
         default=0,
     )
+    
 
     def __str__(self) -> str:
         return f"{self.title}"

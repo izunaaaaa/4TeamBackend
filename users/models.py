@@ -40,3 +40,6 @@ class User(AbstractUser):
         related_name="members",
     )
     is_coach = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return f"{self.name}"

@@ -6,5 +6,5 @@ from .models import Comment
 class CommentAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
-        "feed",
+        "all_feed",
     )
