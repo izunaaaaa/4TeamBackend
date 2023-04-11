@@ -7,7 +7,7 @@ class Comment(CommonModel):
         "users.User",
         on_delete=models.CASCADE,
     )
-    feed = models.ForeignKey(
+    all_feed = models.ForeignKey(
         "feeds.Feed",
         on_delete=models.CASCADE,
     )
@@ -15,5 +15,5 @@ class Comment(CommonModel):
         max_length=255,
     )
 
-    def __str__(self) -> str:
-        return self.description
+    # def __str__(self) -> str:
+    #     return f"{self.description}"
