@@ -20,7 +20,6 @@ COPY poetry.lock pyproject.toml /srv/docker-server/
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
 
-ENV SECRET_KEY ${{ secrets.SECRET_KEY }}
 
 RUN python manage.py makemigrations
 RUN python manage.py migrate
