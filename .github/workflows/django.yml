@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: SSH to Naver Cloud
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.NAVER_CLOUD_HOST }}
           username: ${{ secrets.NAVER_CLOUD_USERNAME }}
