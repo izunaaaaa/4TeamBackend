@@ -173,8 +173,3 @@ class TopLikeView(APIView):
         )
         serializer = serializers.FeedSerializer(feed, many=True)
         return Response(serializer.data)
-
-
-class error(APIView):
-    def get(self, request):
-        return 1 / 0
