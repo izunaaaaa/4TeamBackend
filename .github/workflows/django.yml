@@ -9,8 +9,6 @@ on:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
-    env: 
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
     steps:
     - name: Checkout repo
       uses: actions/checkout@v2
@@ -34,6 +32,8 @@ jobs:
     - name: Build Docker image
       run: |
         docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/django:latest .
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
 
     - name: Push Docker image
