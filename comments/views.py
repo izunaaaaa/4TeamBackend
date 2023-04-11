@@ -1,5 +1,6 @@
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.db.models import Count
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ParseError
@@ -85,3 +86,22 @@ class CommentDetail(APIView):
     )
     def put(serl, request, pk):
         pass
+    
+    
+class TopLikeView(APIView):
+    @swagger_auto_schema(
+        operation_summary="베스트 댓글 api",
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                schema=serializers.CommentSerializer(),
+            )
+        },
+    )
+    def get(self, request):
+        feed = (
+        Comment.objects.annotate(like_count=Count("commentlike"))
+            .order_by("-like_count").first()
+        )
+        serializer = serializers.CommentSerializer(feed, many=True)
+        return Response(serializer.data)
