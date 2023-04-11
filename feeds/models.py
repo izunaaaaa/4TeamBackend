@@ -29,7 +29,7 @@ class Feed(CommonModel):
         return f"{self.title}"
 
     @property
-    def likeCount(self):
+    def feedlikeCount(self):
         return self.feedlike.count()
     
     @property
