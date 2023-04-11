@@ -160,8 +160,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "users.User"
 
-print("config")
-
 
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration

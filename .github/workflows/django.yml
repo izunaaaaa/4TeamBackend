@@ -36,14 +36,14 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-        
+
       - name: Docker Login
         run: |
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-        
+
       - name: Build Docker image
         run: |
-          docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/django:latest --build-arg SECRET_KEY=$SECRET_KEY .
+          docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/django:latest --build-arg SECRET_KEY=$${{ secrets.SECRET_KEY }} .
 
       - name: Push Docker image
         run: |
