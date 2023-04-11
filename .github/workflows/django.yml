@@ -28,8 +28,11 @@ jobs:
         poetry install --no-interaction --no-ansi
     - name: Docker Login
       run : docker login
+      
     - name: Build Docker image
       run: docker buildx build --platform linux/amd64 -t kimduhong/django:latest .
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     - name: Push Docker image
       run: |
