@@ -7,13 +7,21 @@ class Comment(CommonModel):
         "users.User",
         on_delete=models.CASCADE,
     )
-    all_feed = models.ForeignKey(
+    feed = models.ForeignKey(
         "feeds.Feed",
         on_delete=models.CASCADE,
+        related_name="all_feed",
     )
     description = models.TextField(
         max_length=255,
     )
 
-    # def __str__(self) -> str:
-    #     return f"{self.description}"
+    def __str__(self) -> str:
+        return f"{self.description}"
+    
+    @property
+    def top_comment_like(self):
+        if self.media.all().count() > 0:
+            return self.media.all()[0]
+        else:
+            return ""

@@ -11,7 +11,6 @@ class FeedSerializer(ModelSerializer):
      
     class Meta:
         model = Feed
-        # fields = "__all__"
         fields = (
             "id",
             "user",
@@ -21,7 +20,6 @@ class FeedSerializer(ModelSerializer):
             "description",
             "visited",
             "created_at",
-            "CommentCount",
             "feed_comment",
             "media",
         )
