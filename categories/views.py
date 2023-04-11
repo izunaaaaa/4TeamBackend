@@ -2,7 +2,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied, ParseError
 from .models import Category
 from . import serializers
 from django.shortcuts import get_object_or_404
@@ -68,8 +68,11 @@ class Categories(APIView):
         
         if serializer.is_valid():
             group = request.GET.get("group")
-            group = get_object_or_404(Group, name=group)
-            category = serializer.save(group=group)
+            group = get_object_or_404(Group, name=group) 
+            name = request.data.get("name")
+            if Group.objects.filter(name=name).exists():
+                raise ParseError("that group already exists")
+            category = serializer.save(group=group, name=name,)
             serializer = serializers.CategorySerializer(category)
             return Response(serializer.data)
         else:

@@ -17,3 +17,8 @@ class Category(CommonModel):
 
     # def add_default_data():
     #     Category.objects.get_or_create(name='전체글')
+
+    def save(self):
+        if not self.name:
+            self.name = '전체글'
+        super().save()
