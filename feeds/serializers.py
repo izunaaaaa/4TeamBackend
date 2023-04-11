@@ -22,4 +22,5 @@ class FeedSerializer(ModelSerializer):
             "created_at",
             "comment",
             "media",
+            "feedlikeCount",
         )

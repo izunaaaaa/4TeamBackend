@@ -32,6 +32,3 @@ class Feed(CommonModel):
     def feedlikeCount(self):
         return self.feedlike.count()
     
-    @property
-    def commentlikeCount(self):
-        return self.commentlike.count()
