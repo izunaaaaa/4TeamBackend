@@ -55,4 +55,4 @@ jobs:
           script: |
             cd docker
             docker pull kimduhong/django:latest
-            docker-compose up --build
+            docker-compose up --build -d
