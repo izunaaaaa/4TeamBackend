@@ -10,12 +10,12 @@ class Comment(CommonModel):
     feed = models.ForeignKey(
         "feeds.Feed",
         on_delete=models.CASCADE,
-        related_name="all_feed",
+        related_name="comment",
     )
     description = models.TextField(
         max_length=255,
     )
-
+ 
     def __str__(self) -> str:
         return f"{self.description}"
     

@@ -5,7 +5,7 @@ from comments.serializers import CommentSerializer
 from medias.serializers import MediaSerializer
 
 class FeedSerializer(ModelSerializer):
-    feed_comment = CommentSerializer(many=True,read_only=True)
+    comment= CommentSerializer(many=True,read_only=True)
     user = TinyUserSerializer(read_only=True)
     media = MediaSerializer(many=True, read_only=True)
      
@@ -20,7 +20,6 @@ class FeedSerializer(ModelSerializer):
             "description",
             "visited",
             "created_at",
-            "feedlikeCount",
-            "feed_comment",
+            "comment",
             "media",
         )
