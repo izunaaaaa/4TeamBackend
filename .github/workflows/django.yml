@@ -32,20 +32,25 @@ jobs:
 
   build-and-push:
     needs: test
-    - name: Docker Login
-      run: docker login
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
 
-    - name: Build Docker image
-      run: |
-        docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/django:latest --build-arg SECRET_KEY=${{ secrets.SECRET_KEY }} .
+      - name: Docker Login
+        run: |
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Push Docker image
-      run: |
-        docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-        docker push kimduhong/django:latest
+      - name: Build Docker image
+        run: |
+          docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/django:latest --build-arg SECRET_KEY=$${{ secrets.SECRET_KEY }} .
+
+      - name: Push Docker image
+        run: |
+          docker push kimduhong/django:latest
 
   deploy:
-    needs: build_and_push
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
