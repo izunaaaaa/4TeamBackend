@@ -28,6 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 SECRET_KEY = env("SECRET_KEY")
+
 # CF_TOKEN = env("CF_TOKEN")
 # CF_ID = env("CF_ID")
 
@@ -158,3 +159,24 @@ CORS_ALLOW_CREDENTIALS = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "users.User"
+
+print("config")
+
+
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+if os.environ.get("SERVER") == "NAVER":
+    sentry_sdk.init(
+        dsn="https://c0fee42386b94b578ecdc3a6a032555e@o4504859857387520.ingest.sentry.io/4504996177903616",
+        integrations=[
+            DjangoIntegration(),
+        ],
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production.
+        traces_sample_rate=1.0,
+        # If you wish to associate users to errors (assuming you are using
+        # django.contrib.auth) you may enable sending PII data.
+        send_default_pii=True,
+    )

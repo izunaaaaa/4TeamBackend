@@ -10,49 +10,49 @@ jobs:
   build_and_push:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v2
+      - name: Checkout repo
+        uses: actions/checkout@v2
 
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v2
-      with:
-        python-version: "3.10"
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 - --version 1.1.14
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 - --version 1.1.14
 
-    - name: Install dependencies
-      run: |
-        poetry config virtualenvs.create false
-        poetry install --no-interaction --no-ansi
-    - name: Docker Login
-      run : docker login
-      
-    - name: Build Docker image
-      run: |
-        docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/django:latest --build-arg SECRET_KEY=$SECRET_KEY .
+      - name: Install dependencies
+        run: |
+          poetry config virtualenvs.create false
+          poetry install --no-interaction --no-ansi
+      - name: Docker Login
+        run: docker login
 
-    - name: Push Docker image
-      run: |
-        docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-        docker push kimduhong/django:latest
+      - name: Build Docker image
+        run: |
+          docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/django:latest --build-arg SECRET_KEY=$SECRET_KEY .
+
+      - name: Push Docker image
+        run: |
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          docker push kimduhong/django:latest
 
   deploy:
     needs: build_and_push
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v2
+      - name: Checkout repo
+        uses: actions/checkout@v2
 
-    - name: SSH to Naver Cloud
-      uses: appleboy/ssh-action@v1
-      with:
-        host: ${{ secrets.NAVER_CLOUD_HOST }}
-        username: ${{ secrets.NAVER_CLOUD_USERNAME }}
-        password: ${{ secrets.NAVER_CLOUD_PASSWORD }}
-        port: ${{ secrets.NAVER_CLOUD_PORT }}
-        script: |
-          cd docker
-          docker pull kimduhong/django:latest
-          docker-compose up --build
+      - name: SSH to Naver Cloud
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.NAVER_CLOUD_HOST }}
+          username: ${{ secrets.NAVER_CLOUD_USERNAME }}
+          password: ${{ secrets.NAVER_CLOUD_PASSWORD }}
+          port: ${{ secrets.NAVER_CLOUD_PORT }}
+          script: |
+            cd docker
+            docker pull kimduhong/django:latest
+            docker-compose up --build -d

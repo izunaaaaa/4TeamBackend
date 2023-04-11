@@ -16,6 +16,7 @@ ENV PATH="/root/.local/bin:$PATH"
 
 ARG SECRET_KEY
 ENV SECRET_KEY=$SECRET_KEY
+ENV SERVER "NAVER"
 
 COPY poetry.lock pyproject.toml /srv/docker-server/
 RUN poetry config virtualenvs.create false \
