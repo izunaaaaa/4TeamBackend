@@ -43,7 +43,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/django:latest --build-arg SECRET_KEY=$${{ secrets.SECRET_KEY }} .
+          docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/django:latest --build-arg SECRET_KEY='${{ secrets.SECRET_KEY }}' .
 
       - name: Push Docker image
         run: |
