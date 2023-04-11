@@ -41,5 +41,9 @@ class User(AbstractUser):
     )
     is_coach = models.BooleanField(default=False)
 
+    # @property
+    # def _coach(self):
+    #     return self.group.coach == self
+
     def __str__(self) -> str:
         return f"{self.name}"

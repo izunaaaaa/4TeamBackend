@@ -7,13 +7,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound, ParseError
 from . import serializers
 from .models import User
+from django.contrib.auth import authenticate, login, logout
 
 
 class Me(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_summary="유저 조회 api",
+        operation_summary="요청 유저의 데이터",
         responses={
             200: openapi.Response(
                 description="Successful response",
@@ -104,3 +105,8 @@ class LogIn(APIView):
             username=username,
             password=password,
         )
+        if user:
+            login(request, user)
+            return Response({"LogIn": "Success"})
+        else:
+            return Response({"error": "wrong name or password"}, status=400)

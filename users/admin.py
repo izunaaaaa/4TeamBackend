@@ -5,11 +5,11 @@ from .models import User
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-
     list_display = (
         "pk",
         "username",
         "is_coach",
+        # "_coach",
     )
 
     fieldsets = (
@@ -17,6 +17,7 @@ class CustomUserAdmin(UserAdmin):
             "Profile",
             {
                 "fields": (
+                    "group",
                     "username",
                     "password",
                     "name",
