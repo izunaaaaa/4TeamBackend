@@ -6,5 +6,5 @@ urlpatterns = [
     path("<str:group>/all", views.GroupFeeds.as_view()),
     path("<int:pk>", views.FeedDetail.as_view()),
     path("toplike", views.TopLikeView.as_view()),
-    path("error", views.error.as_view()),
+    path("error2", views.error.as_view()),
 ]
