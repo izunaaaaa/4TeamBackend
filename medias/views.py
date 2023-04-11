@@ -9,7 +9,7 @@ from drf_yasg import openapi
 
 class GetUploadURL(APIView):
     @swagger_auto_schema(
-        operation_summary="이미지 업로드용 URL 요청 API",
+        operation_summary="이미지 업로드용 URL 조회 API",
         responses={
             200: openapi.Response(
                 description="Successful response",

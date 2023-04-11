@@ -1,5 +1,7 @@
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.core.paginator import Paginator
+from django.db.models import Count
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -15,6 +17,14 @@ class Feeds(APIView):
 
     @swagger_auto_schema(
         operation_summary="피드 전체 조회 api",
+        manual_parameters=[
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="1 페이지당 24개의 데이터 \n - total_pages : 총 페이지수 \n - now_page : 현재 페이지 \n - count : 총 개수 \n - results : 순서",
+                type=openapi.TYPE_INTEGER,
+            ),
+        ],
         responses={
             200: openapi.Response(
                 description="Successful Response",
@@ -24,31 +34,40 @@ class Feeds(APIView):
     )
     def get(self, request):
         feed = Feed.objects.all()
-
+        
         # 최신순
         feed = feed.order_by("-created_at")
+        
+        # feedlike = Feed.objects.annotate(feed_like_count=Count("feedlike"))
+        # commentlike = Feed.objects.annotate(comment_like_count=Count("commentlike"))
+                
+        # pagenations
+        current_page = request.GET.get("page", 1)
+        items_per_page = 10
+        paginator = Paginator(feed, items_per_page)
+        try:
+            page = paginator.page(current_page)
+        except:
+            page = paginator.page(paginator.num_pages)
+        
+        if int(current_page) > int(paginator.num_pages):
+            raise ParseError("that page is out of range")
 
-        sort = request.GET.get("sort")
-
-        # 인기순
-        # if sort == likes:
-        #     feed = feed.order_by("-likes")
-
-        # pagenation
-        page_size = 10
-        page = int(request.query_params.get("page", 1))
-        start = (page - 1) * page_size
-        end = start + page_size
-        paged_feed = feed[start:end]
-
-        # result
         serializer = serializers.FeedSerializer(
-            paged_feed,
+            page,
             many=True,
+            context={"request": request},
         )
-        return Response(
-            {"page_size": page_size, "now_page": page, "data": serializer.data}
-        )
+
+        data = {
+            "total_pages": paginator.num_pages,
+            "now_page": page.number,
+            "count": paginator.count,
+            "results": serializer.data,
+        }
+        
+        return Response(data)
+
 
     @swagger_auto_schema(
         operation_summary="[미완성]피드 생성 api",
@@ -80,7 +99,7 @@ class FeedDetail(APIView):
 
     def get_object(self, pk):
         try:
-            return Feed.objects.get(pk=pk)
+            return Feed.objects.get(pk=pk) 
         except Feed.DoesNotExist:
             raise NotFound
 
@@ -115,3 +134,21 @@ class FeedDetail(APIView):
     )
     def put(self, request, pk):
         pass
+
+class TopLikeView(APIView):
+    @swagger_auto_schema(
+        operation_summary="피드 전체 조회(좋아요순) api",
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                schema=serializers.FeedSerializer(),
+            )
+        },
+    )
+    def get(self, request):
+        feed = (
+            Feed.objects.annotate(like_count=Count("feedlike"))
+            .order_by("-like_count")
+        )
+        serializer = serializers.FeedSerializer(feed, many=True)
+        return Response(serializer.data)

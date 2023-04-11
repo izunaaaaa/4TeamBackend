@@ -6,5 +6,6 @@ class Media(CommonModel):
     feed = models.ForeignKey(
         "feeds.Feed",
         on_delete=models.CASCADE,
+        related_name="media"
     )
     url = models.URLField()

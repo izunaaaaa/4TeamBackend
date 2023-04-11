@@ -23,6 +23,15 @@ class Feed(CommonModel):
         editable=False,
         default=0,
     )
+    
 
     def __str__(self) -> str:
         return f"{self.title}"
+
+    @property
+    def feedlikeCount(self):
+        return self.feedlike.count()
+    
+    @property
+    def commentlikeCount(self):
+        return self.commentlike.count()

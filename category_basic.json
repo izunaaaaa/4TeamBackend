@@ -1,0 +1,16 @@
+[
+    {
+      "model": "categories.Category",
+      "pk": 1,
+      "fields": {
+        "name": "전체글"
+      }
+    },
+    {
+      "model": "categories.Category",
+      "pk": 2,
+      "fields": {
+        "name": "인기글"
+      }
+    }
+  ]
