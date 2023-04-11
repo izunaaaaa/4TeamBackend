@@ -1,4 +1,3 @@
-#!/bin/bash
 FROM python:3.10.7
 
 ENV PYTHONUNBUFFERED 1
@@ -15,11 +14,12 @@ WORKDIR /srv/docker-server
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="/root/.local/bin:$PATH"
 
+ARG SECRET_KEY
+ENV SECRET_KEY=$SECRET_KEY
 
 COPY poetry.lock pyproject.toml /srv/docker-server/
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
-
 
 RUN python manage.py makemigrations
 RUN python manage.py migrate
