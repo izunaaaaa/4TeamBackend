@@ -42,4 +42,4 @@ class User(AbstractUser):
     is_coach = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        return f"{self.name}"
+        return f"{self.username}"
