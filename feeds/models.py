@@ -42,12 +42,9 @@ class Feed(CommonModel):
             "-like_count"
         )[:3]
 
-        return (
-            self.comment.all()
-            .annotate(like_count=Count("commentlike"))
-            .order_by("-like_count")[:3]
-        )
-
     @property
     def thumbnail(self):
-        return self.images.all()[:1]
+        if self.images.exists():
+            return self.images.all()[0].url
+        else:
+            return None
