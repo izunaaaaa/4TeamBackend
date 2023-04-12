@@ -10,7 +10,6 @@ RUN apt-get update \
 RUN mkdir /srv/docker-server
 ADD . /srv/docker-server
 WORKDIR /srv/docker-server
-ENTRYPOINT [ "executable" ]
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="/root/.local/bin:$PATH"
 
