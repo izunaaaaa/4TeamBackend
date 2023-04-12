@@ -46,4 +46,4 @@ class User(AbstractUser):
     #     return self.group.coach == self
 
     def __str__(self) -> str:
-        return f"{self.name}"
+        return f"{self.username}"
