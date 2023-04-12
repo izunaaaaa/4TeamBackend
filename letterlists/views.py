@@ -24,5 +24,5 @@ class Letterlists(APIView):
         letterlist = Letterlist.objects.filter(
             Q(sender=request.user) | Q(receiver=request.user)
         )
-        serialzier = serializers.LetterlistSerializer(letterlist)
+        serialzier = serializers.LetterlistSerializer(letterlist, many=True)
         return Response(serialzier.data)
