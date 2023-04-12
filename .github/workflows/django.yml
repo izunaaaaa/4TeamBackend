@@ -47,11 +47,11 @@ jobs:
           build --platform linux/amd64 \
           -t ${{ secrets.DOCKERHUB_USERNAME }}/django:latest \
           --build-arg SECRET_KEY='${{ secrets.SECRET_KEY }}' \
-          --build-arg POSTGRES_NAME='${{ secrets.POSTGRES_NAME }}' \
-          --build-arg POSTGRES_USER='${{ secrets.POSTGRES_USER }}' \
-          --build-arg POSTGRES_PASSWORD='${{ secrets.POSTGRES_PASSWORD }}' \
-          --build-arg POSTGRES_HOST='${{ secrets.POSTGRES_HOST }}' \
-          --build-arg POSTGRES_PORT='${{ secrets.POSTGRES_PORT }}' .
+          --build-arg POSTGRES_NAME=${{ secrets.POSTGRES_NAME }} \
+          --build-arg POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
+          --build-arg POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+          --build-arg POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} \
+          --build-arg POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} .
 
       - name: Push Docker image
         run: |
