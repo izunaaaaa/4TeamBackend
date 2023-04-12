@@ -5,6 +5,7 @@ from users.models import User
 import random
 from categories.models import Category
 from faker import Faker
+from PyKakao import KoGPT
 
 
 class Command(BaseCommand):
@@ -25,6 +26,11 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        api = KoGPT(service_key="8339db42bc5529b05e34a447d6b05dc8")
+        prompt = "게시글 예시를 써줘"
+        max_tokens = 64
+        result = api.generate(prompt, max_tokens, temperature=0.7, top_p=0.8)
+        print(result)
         total, group = options.get("total"), options.get("group")
         group = Group.objects.get_or_create(name=group)
         if User.objects.count() == 0:
@@ -39,5 +45,3 @@ class Command(BaseCommand):
         #         pk=random.choice([i for i in range(Category.objects.count() - 1)])
         #     )
         # )
-        fake = Faker(["ko_KR"])
-        print(fake.building_name())
