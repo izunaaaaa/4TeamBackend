@@ -11,9 +11,9 @@ from groups.models import Group
 
 
 class Categories(APIView):
-    
-    permission_classes = [IsAuthenticated]
-    
+
+    # permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         operation_summary="전체 카테고리 조회 api",
         responses={
@@ -70,7 +70,7 @@ class GroupCategories(APIView):
     )
     def post(self, request, group):
         serializer = serializers.CategorySerializer(data=request.data)
-        
+
         # if request.user.is_coach == False:
             # raise PermissionDenied
         if serializer.is_valid():
@@ -79,7 +79,7 @@ class GroupCategories(APIView):
             return Response(serializer.data, status=201)
         else:
             return Response(serializer.errors, status=400)
-    
+
 class GroupCategoryDetail(APIView):
     @swagger_auto_schema(
         operation_summary="그룹 카테고리 조회 api",
