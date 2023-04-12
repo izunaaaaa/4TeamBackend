@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from . import serializers
 from .models import Letterlist
+from django.db.models import Q
 
 
 class Letterlists(APIView):
@@ -20,6 +21,8 @@ class Letterlists(APIView):
         },
     )
     def get(self, request):
-        letterlist = Letterlist.objects.filter(user=request.user)
+        letterlist = Letterlist.objects.filter(
+            Q(sender=request.user) | Q(receiver=request.user)
+        )
         serialzier = serializers.LetterlistSerializer(letterlist)
         return Response(serialzier.data)
