@@ -58,8 +58,7 @@ class Me(APIView):
         else:
             return Response(serializer.errors, status=400)
 
-
-class UserDetail(APIView):
+    # class UserDetail(APIView):
     @swagger_auto_schema(
         operation_summary="특정 유저 조회 api",
         responses={
@@ -251,3 +250,162 @@ class CommentLikes(APIView):
                 return Response({"result": "create success"})
         else:
             return Response(serializer.errors, status=400)
+
+
+class CheckID(APIView):
+    @swagger_auto_schema(
+        operation_summary="중복 아이디 체크 api",
+        responses={
+            200: openapi.Response(
+                description="Successful response",
+            ),
+            409: "Conflct Response",
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                description="검사할 아이디",
+                type=openapi.TYPE_STRING,
+                required=True,
+            )
+        ],
+    )
+    def get(self, request):
+        id = request.GET.get("id")
+        if User.objects.filter(username=id).exists():
+            return Response(status=409)
+        return Response(status=200)
+
+
+class SignUp(APIView):
+    def validate_password(self, password):
+        REGEX_PASSWORD = "^(?=.*[\d])(?=.*[a-z])(?=.*[!@#$%^&*()])[\w\d!@#$%^&*()]{8,}$"
+        if not re.fullmatch(REGEX_PASSWORD, password):
+            raise ParseError(
+                "비밀번호를 확인하세요. 최소 1개 이상의 소문자, 숫자, 특수문자로 구성되어야 하며 길이는 8자리 이상이어야 합니다."
+            )
+
+    @swagger_auto_schema(
+        operation_summary="회원가입 api",
+        responses={
+            201: "Created",
+            400: "bad request",
+        },
+        request_body=serializers.PrivateUserSerializer(),
+    )
+    def post(self, request):
+        password = str(request.data.get("password"))
+        if not password:
+            raise ParseError("password 가 입력되지 않았습니다.")
+
+        serializer = serializers.PrivateUserSerializer(data=request.data)
+        if serializer.is_valid():
+            self.validate_password(password)
+            user = serializer.save()
+            if request.data.get("avatar"):
+                user.avatar = request.data.get("avatar")
+            user.set_password(password)
+            # user.password = password 시에는 raw password로 저장
+            user.save()
+            # set_password 후 다시 저장
+            serializer = serializers.PrivateUserSerializer(user)
+            login(request, user)
+
+            refresh = RefreshToken.for_user(user)
+            return Response(
+                {
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh),
+                    "data": serializer.data,
+                },
+                status=201,
+            )
+        else:
+            return Response(serializer.errors, status=400)
+
+
+class ChangePassword(APIView):
+    def validate_password(self, password):
+        REGEX_PASSWORD = "^(?=.*[\d])(?=.*[a-z])(?=.*[!@#$%^&*()])[\w\d!@#$%^&*()]{8,}$"
+        if not re.fullmatch(REGEX_PASSWORD, password):
+            raise ParseError(
+                "비밀번호를 확인하세요. 최소 1개 이상의 소문자, 숫자, 특수문자로 구성되어야 하며 길이는 8자리 이상이어야 합니다."
+            )
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="비밀번호 수정 api",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["old_password", "new_password"],
+            properties={
+                "old_password": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="현재 비밀번호 입력"
+                ),
+                "new_password": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="새로운 비밀번호 입력"
+                ),
+            },
+        ),
+        responses={
+            200: openapi.Response(description="OK"),
+            400: openapi.Response(description="Invalid request data"),
+            401: openapi.Response(description="The user is not authenticated"),
+        },
+    )
+    def put(self, request):
+        user = request.user
+        old_password = request.data.get("old_password")
+        new_password = request.data.get("new_password")
+        if not old_password or not new_password:
+            raise ParseError("Invalid password")
+        if user.check_password(old_password):
+            self.validate_password(new_password)
+            user.set_password(new_password)
+            user.save()
+            return Response(status=200)
+        else:
+            return Response(status=400)
+
+
+class FindId(APIView):
+    def post(self, request):
+        name = request.data.get("name")
+        email = request.data.get("email")
+        phone_number = request.data.get("phone_number")
+        if not name or not email or not phone_number:
+            raise ParseError("Invalid field")
+        try:
+            user = User.objects.get(
+                name=name,
+                email=email,
+                phone_number=phone_number,
+            )
+        except User.DoesNotExist:
+            return Response(status=404)
+
+        return Response({"id": user.username}, status=200)
+
+class FindPassword(APIView):
+
+    
+    
+    def post(self, request):
+        username = request.data.get("id")
+        name = request.data.get("name")
+        email = request.data.get("email")
+        phone_number = request.data.get("phone_number")
+        if not username or not name or not email or not phone_number:
+            raise ParseError("Invalid field")
+        try:
+            user = User.objects.get(
+                username=username,
+                name=name,
+                email=email,
+                phone_number=phone_number,
+            )
+        except User.DoesNotExist:
+            return Response(status=404)
+        return Response(status=200)
