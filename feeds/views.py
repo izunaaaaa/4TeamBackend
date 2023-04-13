@@ -68,39 +68,6 @@ class Feeds(APIView):
 
         return Response(data)
 
-    @swagger_auto_schema(
-        operation_summary="[미완성]피드 생성 api",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=["user", "group", "title"],
-            properties={
-                "user": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="유저정보 자동생성"
-                ),
-                "group": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="그룹정보 자동생성"
-                ),
-                "title": openapi.Schema(type=openapi.TYPE_STRING, description="타이틀"),
-            },
-        ),
-        responses={
-            200: openapi.Response(description="OK"),
-            400: openapi.Response(description="Invalid request data"),
-            401: openapi.Response(description="The user is not authenticated"),
-        },
-    )
-    def post(self, request):
-        serializer = serializers.FeedSerializer(data=request.data)
-        if serializer.is_valid():
-            feed = serializer.save(user=request.user)
-            serializer = serializers.FeedSerializer(
-                feed=feed,
-                many=True,
-            )
-            return Response({"result": "create success"})
-        else:
-            return Response(serializer.errors, status=400)
-
 
 class GroupFeeds(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -132,6 +99,42 @@ class GroupFeeds(APIView):
             "results": serializer.data,
         }
         return Response(data)
+
+    @swagger_auto_schema(
+        operation_summary="[미완성]피드 생성 api",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["user", "group", "title"],
+            properties={
+                "user": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="유저정보 자동생성"
+                ),
+                "group": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="그룹정보 자동생성"
+                ),
+                "title": openapi.Schema(type=openapi.TYPE_STRING, description="타이틀"),
+            },
+        ),
+        responses={
+            200: openapi.Response(description="OK"),
+            400: openapi.Response(description="Invalid request data"),
+            401: openapi.Response(description="The user is not authenticated"),
+        },
+    )
+    def post(self, request, group):
+        serializer = serializers.FeedSerializer(data=request.data)
+        group = get_object_or_404(Group, name=group)
+        feed = Feed.objects.filter(group=group)
+
+        if serializer.is_valid():
+            feed = serializer.save(user=request.user, group=group)
+            serializer = serializers.FeedSerializer(
+                feed=feed,
+                many=True,
+            )
+            return Response({"result": "create success"})
+        else:
+            return Response(serializer.errors, status=400)
 
 
 class GroupFeedDetail(APIView):
