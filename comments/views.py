@@ -62,7 +62,7 @@ class CommentDetail(APIView):
             raise NotFound
 
     @swagger_auto_schema(
-        operation_summary="[미완성]댓글 조회 api",
+        operation_summary="댓글 조회 api",
         responses={
             200: openapi.Response(
                 description="Successful Response",
@@ -70,8 +70,10 @@ class CommentDetail(APIView):
             )
         },
     )
-    def get(serl, request, pk):
-        pass
+    def get(self, request, pk):
+        comment = self.get_object(pk)
+        serializer = serializers.CommentSerializer(comment)
+        return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_summary="[미완성]댓글 수정 api",
