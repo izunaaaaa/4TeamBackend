@@ -23,3 +23,8 @@ class Letters(APIView):
         letter = Letter.objects.filter(sender=request.user)
         serializer = serializers.LetterSerializer(letter)
         return Response(serializer.data)
+    
+    def post(self,request):
+        letter = Letter.objects.filter(sender=request.user)
+        serializer = serializers.LetterSerializer(data=request.data)
+        #미완성
