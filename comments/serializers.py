@@ -13,7 +13,7 @@ class CommentSerializer(ModelSerializer):
         fields = (
             "id",
             "user",
-            # "feed",
+            # "feed"
             "description",
             "created_at",
             "commentlikeCount",
