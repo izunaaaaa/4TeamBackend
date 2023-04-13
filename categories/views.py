@@ -95,6 +95,22 @@ class GroupCategoryDetail(APIView):
         serializer = serializers.CategorySerializer(category)
         return Response(serializer.data)
     
+    
+    def put(self, request, pk, group):
+        serializer = serializers.CategorySerializer(data=request.data, partial=True)
+        # category = get_object_or_404(Category, pk=pk, group=group)
+        # group = get_object_or_404(Group, name=group)
+        
+        if request.user.is_coach == False:
+            raise PermissionDenied
+        
+        if serializer.is_valid():
+            category = serializer.save(group=group)
+            serializer = serializers.CategorySerializer(category)
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=400)
+    
     @swagger_auto_schema(
         operation_summary="그룹 카테고리 삭제 api",
         responses={

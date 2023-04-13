@@ -10,5 +10,6 @@ class Recomment(CommonModel):
     comment = models.ForeignKey(
         "comments.Comment",
         on_delete=models.CASCADE,
+        related_name="recomment"
     )
     description = models.TextField()

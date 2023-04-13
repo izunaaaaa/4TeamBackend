@@ -9,10 +9,11 @@ from django.db.models import Q
 
 
 class Letterlists(APIView):
+    
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_summary="쪽지 목록 api",
+        operation_summary="쪽지 목록 조회 api",
         responses={
             200: openapi.Response(
                 description="Successful Response",
