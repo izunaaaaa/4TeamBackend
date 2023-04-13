@@ -16,7 +16,7 @@ class FeedSerializer(ModelSerializer):
     is_like = SerializerMethodField()
     group = GroupSerializer(read_only=True)
     # category = CategorySerializer(read_only=True)
-    # highest_like_comments = CommentSerializer(many=True, read_only=True)
+    highest_like_comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Feed
@@ -31,7 +31,7 @@ class FeedSerializer(ModelSerializer):
             "created_at",
             "like_count",
             "comments_count",
-            # "highest_like_comments",
+            "highest_like_comments",          
             "is_like",
             "thumbnail",
         )
