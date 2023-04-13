@@ -161,7 +161,7 @@ class FeedDetail(APIView):
         responses={
             200: openapi.Response(
                 description="Successful Response",
-                schema=serializers.FeedSerializer(),
+                schema=serializers.FeedDetailSerializer(),
             )
         },
     )
@@ -171,7 +171,7 @@ class FeedDetail(APIView):
         feed.visited += 1
         feed.save()
 
-        serializer = serializers.FeedSerializer(feed)
+        serializer = serializers.FeedDetailSerializer(feed)
         return Response(serializer.data)
 
     @swagger_auto_schema(
@@ -179,11 +179,11 @@ class FeedDetail(APIView):
         responses={
             200: openapi.Response(
                 description="Successful response",
-                schema=serializers.FeedSerializer(),
+                schema=serializers.FeedDetailSerializer(),
             ),
             400: "Bad Request",
         },
-        request_body=serializers.FeedSerializer(),
+        request_body=serializers.FeedDetailSerializer(),
     )
     def put(self, request, pk):
         pass

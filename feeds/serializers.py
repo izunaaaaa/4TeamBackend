@@ -11,12 +11,12 @@ from categories.serializers import CategorySerializer
 
 class FeedSerializer(ModelSerializer):
     # comment = CommentSerializer(many=True, read_only=True)
-    user = TinyUserSerializer(read_only=True)
+    # user = TinyUserSerializer(read_only=True)
     # images = MediaSerializer(many=True, read_only=True)
     is_like = SerializerMethodField()
-    group = GroupSerializer(read_only=True)
-    category = CategorySerializer(read_only=True)
-    highest_like_comments = CommentSerializer(many=True, read_only=True)
+    # group = GroupSerializer(read_only=True)
+    # category = CategorySerializer(read_only=True)
+    # highest_like_comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Feed
@@ -31,7 +31,7 @@ class FeedSerializer(ModelSerializer):
             "created_at",
             "like_count",
             "comments_count",
-            "highest_like_comments",
+            # "highest_like_comments",
             "is_like",
             "thumbnail",
         )
@@ -49,10 +49,10 @@ class FeedSerializer(ModelSerializer):
 
 class FeedDetailSerializer(ModelSerializer):
     user = TinyUserSerializer(read_only=True)
-    is_like = SerializerMethodField()
     group = GroupSerializer(read_only=True)
     category = CategorySerializer(read_only=True)
     comment = CommentSerializer(many=True, read_only=True)
+    is_like = SerializerMethodField()
     highest_like_comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:
