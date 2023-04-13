@@ -10,6 +10,6 @@ class Recomment(CommonModel):
     comment = models.ForeignKey(
         "comments.Comment",
         on_delete=models.CASCADE,
-        related_name="feed_recomment",
+        related_name="re_recomment",
     )
     description = models.TextField()
