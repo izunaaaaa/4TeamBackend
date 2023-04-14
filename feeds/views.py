@@ -10,6 +10,7 @@ from .models import Feed
 from . import serializers
 from django.shortcuts import get_object_or_404
 from groups.models import Group
+from categories.models import Category
 
 
 class Feeds(APIView):
@@ -127,7 +128,13 @@ class GroupFeeds(APIView):
         feed = Feed.objects.filter(group=group)
 
         if serializer.is_valid():
-            feed = serializer.save(user=request.user, group=group)
+            category_pk = request.data["category"]
+            category = Category.objects.get(pk=category_pk)
+            feed = serializer.save(
+                user=request.user,
+                group=group,
+                category=category,
+            )
             serializer = serializers.FeedSerializer(
                 feed=feed,
                 many=True,
