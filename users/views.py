@@ -12,6 +12,7 @@ from likes.models import Feedlike, Commentlike
 from feeds.models import Feed
 from likes.serializers import FeedLikeSerializer, CommentLikeSerializer
 import re
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class Me(APIView):
@@ -110,6 +111,18 @@ class LogIn(APIView):
         )
         if user:
             login(request, user)
+            refresh = RefreshToken.for_user(user)
+            response = Response(
+                {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                }
+            )
+            response.set_cookie(
+                key="access_token", value=refresh.access_token, httponly=True
+            )
+            response.set_cookie(key="refresh_token", value=refresh, httponly=True)
+            return response
             return Response({"LogIn": "Success"})
         else:
             return Response({"error": "wrong name or password"}, status=400)
