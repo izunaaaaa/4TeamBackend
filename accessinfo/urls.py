@@ -3,4 +3,5 @@ from . import views
 
 urlpatterns = [
     path("", views.AllAccessInfo.as_view()),
+    path("<str:group>", views.AccessInfoDetail.as_view()),
 ]
