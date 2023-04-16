@@ -74,6 +74,9 @@ class GroupFeeds(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, group):
+        access_token = request.COOKIES.get("access_token")
+        auth_header = request.META.get("HTTP_AUTHORIZATION")
+
         group = get_object_or_404(Group, name=group)
         feed = Feed.objects.filter(group=group)
         feed = feed.order_by("-created_at")

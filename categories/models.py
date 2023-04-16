@@ -2,6 +2,7 @@ from django.db import models
 from common.models import CommonModel
 from groups.models import Group
 
+
 class Category(CommonModel):
     name = models.CharField(max_length=100)
     group = models.ForeignKey(
@@ -16,7 +17,7 @@ class Category(CommonModel):
         verbose_name_plural = "categories"
         constraints = [
             models.UniqueConstraint(
-                fields=["name", "group"], 
+                fields=["name", "group"],
                 name="unique_category_name_group",
             )
         ]
@@ -31,7 +32,7 @@ class Category(CommonModel):
 
     class initial_categroy(Group):
         def save(self, *args, **kwargs):
-            is_new_group = not bool(self.pk) # check if the group is being created
+            is_new_group = not bool(self.pk)  # check if the group is being created
             super().save(*args, **kwargs)
             if is_new_group:
-                Category.objects.create(name='전체글', group=self)
+                Category.objects.create(name="전체글", group=self)

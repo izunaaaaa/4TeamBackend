@@ -4,6 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+import jwt
 from rest_framework.exceptions import NotFound, ParseError
 from . import serializers
 from .models import User
@@ -110,17 +112,15 @@ class LogIn(APIView):
             password=password,
         )
         if user:
-            login(request, user)
+            # login(request, user)
             refresh = RefreshToken.for_user(user)
             response = Response(
                 {
                     "refresh": str(refresh),
-                    "access": str(refresh.access_token),
+                    "access_token": str(refresh.access_token),
                 }
             )
-            response.set_cookie(
-                key="access_token", value=refresh.access_token, httponly=True
-            )
+            response.set_cookie(key="access_token", value=refresh.access_token)
             response.set_cookie(key="refresh_token", value=refresh, httponly=True)
             return response
             return Response({"LogIn": "Success"})
