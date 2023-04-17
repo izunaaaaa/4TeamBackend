@@ -138,7 +138,7 @@ class FeedDetail(APIView):
         request_body=serializers.FeedDetailSerializer(),
     )
     def put(self, request, pk):
-        feed = self.get_object(pk)
+        feed = get_object_or_404(Feed, pk=pk)
         if feed.user != request.user:
             raise PermissionDenied
         serializer = serializers.FeedDetailSerializer(
