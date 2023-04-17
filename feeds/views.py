@@ -159,13 +159,6 @@ class FeedDetail(APIView):
 class GroupFeeds(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-<<<<<<< HEAD
-    def get(self, request, group):
-        access_token = request.COOKIES.get("access_token")
-        auth_header = request.META.get("HTTP_AUTHORIZATION")
-
-        group = get_object_or_404(Group, name=group)
-=======
     @swagger_auto_schema(
         operation_summary="그룹 피드 전체 조회 api",
         responses={
@@ -177,7 +170,6 @@ class GroupFeeds(APIView):
     )
     def get(self, request, group_pk):
         group = get_object_or_404(Group, pk=group_pk)
->>>>>>> d83dc0460bd0d6082c23d70c6fdebac1432a9bcd
         feed = Feed.objects.filter(group=group)
         feed = feed.order_by("-created_at")
         current_page = request.GET.get("page", 1)
@@ -301,17 +293,17 @@ class GroupFeedDetail(APIView):
     def get(self, request, group_pk, category_pk, pk):
         group = get_object_or_404(Group, pk=group_pk)
         category = get_object_or_404(Category, pk=category_pk)
-        feed = self.get_object(pk)
-        # feed = get_object_or_404(Feed, group=group_pk, category=category_pk, pk=pk)
-        try:
-            feed = Feed.objects.filter(
-                feed,
-                group=group,
-                category=category,
-            )
-        except Feed.DoesNotExist:
-            raise NotFound
-
+        feed = get_object_or_404(
+            Feed, group__pk=group_pk, category__pk=category_pk, pk=pk
+        )
+        # try:
+        #     feed = Feed.objects.filter(
+        #         feed,
+        #         group=group,
+        #         category=category,
+        #     )
+        # except Feed.DoesNotExist:
+        #     raise NotFound
         feed.visited += 1
         serializer.save()
         serializer = serializers.FeedDetailSerializer(
