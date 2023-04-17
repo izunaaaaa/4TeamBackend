@@ -17,7 +17,7 @@ class CategorySerializer(ModelSerializer):
         )
 
     def create(self, validated_data):
-        group = get_object_or_404(Group, name=validated_data.get("group"))
+        group = get_object_or_404(Group, pk=validated_data.get("group"))
         validated_data["group"] = group
         category, created = Category.objects.get_or_create(**validated_data)
         if not created:

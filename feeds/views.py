@@ -89,7 +89,7 @@ class Feeds(APIView):
     )
     def post(self, request):
         serializer = serializers.FeedSerializer(data=request.data)
-
+        request.data.get("is_group")
         if serializer.is_valid():
             feed = serializer.save(user=request.user, group=request.user.group)
             serializer = serializers.FeedSerializer(feed)
