@@ -3,11 +3,9 @@ from common.models import CommonModel
 
 
 class Letterlist(CommonModel):
-    letter = models.ForeignKey(
+    letter = models.ManyToManyField(
         "letters.Letter",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        related_name="letterlist",
     )
 
     def __str__(self) -> str:

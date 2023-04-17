@@ -89,7 +89,6 @@ class Feeds(APIView):
     )
     def post(self, request):
         serializer = serializers.FeedSerializer(data=request.data)
-        print(request.user)
 
         if serializer.is_valid():
             feed = serializer.save(user=request.user)
