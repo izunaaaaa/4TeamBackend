@@ -6,7 +6,7 @@ from .models import Letterlist
 class LetterAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
-        "__str__",
-        "sender",
-        "receiver",
+        # "__str__",
+        # "sender",
+        # "receiver",
     )
