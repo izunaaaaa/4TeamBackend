@@ -1,5 +1,6 @@
 from django.db import models
 from common.models import CommonModel
+from categories.models import Category
 
 
 class Group(CommonModel):
@@ -20,3 +21,9 @@ class Group(CommonModel):
 
     def __str__(self) -> str:
         return f"{self.name}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.categories.exists():
+            Category.objects.create(name="전체글", group=self)
+            Category.objects.create(name="인기글", group=self)

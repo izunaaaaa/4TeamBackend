@@ -11,24 +11,20 @@ class Feed(CommonModel):
     group = models.ForeignKey(
         "groups.Group",
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
     )
     category = models.ForeignKey(
         "categories.Category",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
     )
-    title = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
+    # title = models.CharField(max_length=100, null=True)
+    description = models.TextField()
     visited = models.PositiveIntegerField(
         editable=False,
         default=0,
     )
 
     def __str__(self) -> str:
-        return f"{self.title}"
+        return f"{self.user}의 게시글"
 
     @property
     def like_count(self):
