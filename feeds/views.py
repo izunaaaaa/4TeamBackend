@@ -131,7 +131,7 @@ class FeedDetail(APIView):
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        operation_summary="[미완성]공동 커뮤니티 피드 수정 api",
+        operation_summary="공동 커뮤니티 피드 수정 api",
         responses={
             200: openapi.Response(
                 description="Successful response",
@@ -142,7 +142,18 @@ class FeedDetail(APIView):
         request_body=serializers.FeedDetailSerializer(),
     )
     def put(self, request, pk):
-        pass
+        feed_pk = self.get_object(pk)
+        serializer = serializers.FeedDetailSerializer(
+            feed_pk,
+            data=request.data,
+            partial=True,
+        )
+        if serializer.is_valid():
+            feed = serializer.save()
+            serializer = serializers.FeedDetailSerializer(feed)
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=400)
 
 
 class GroupFeeds(APIView):
@@ -153,7 +164,7 @@ class GroupFeeds(APIView):
         responses={
             200: openapi.Response(
                 description="Successful Response",
-                schema=serializers.FeedDetailSerializer(),
+                schema=serializers.FeedSerializer(),
             )
         },
     )
@@ -215,13 +226,16 @@ class GroupFeedCategory(APIView):
         operation_summary="그룹 피드 생성 api",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=["user", "group", "title"],
+            required=["user", "group", "category", "title"],
             properties={
                 "user": openapi.Schema(
                     type=openapi.TYPE_STRING, description="유저정보 자동생성"
                 ),
                 "group": openapi.Schema(
                     type=openapi.TYPE_STRING, description="그룹정보 자동생성"
+                ),
+                "category": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="카테고리정보 자동생성"
                 ),
                 "title": openapi.Schema(type=openapi.TYPE_STRING, description="타이틀"),
             },
@@ -261,28 +275,41 @@ class GroupFeedCategory(APIView):
 class GroupFeedDetail(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
+    def get_object(self, pk):
+        try:
+            return Feed.objects.get(pk=pk)
+        except Feed.DoesNotExist:
+            raise NotFound
+
     @swagger_auto_schema(
         operation_summary="그룹 피드 조회(좋아요순) api",
         responses={
             200: openapi.Response(
                 description="Successful Response",
-                schema=serializers.FeedSerializer(),
+                schema=serializers.FeedDetailSerializer(),
             )
         },
     )
     def get(self, request, group_pk, category_pk, pk):
         group = get_object_or_404(Group, pk=group_pk)
         category = get_object_or_404(Category, pk=category_pk)
-        # feed = get_object_or_404(Feed, group__name=group,category=cateogry, pk=pk)
-        feed = Feed.objects.filter(
-            group=group,
-            category=category,
-            pk=pk,
-        )
+        feed = self.get_object(pk)
+        # feed = get_object_or_404(Feed, group=group_pk, category=category_pk, pk=pk)
+        try:
+            feed = Feed.objects.filter(
+                feed,
+                group=group,
+                category=category,
+            )
+        except Feed.DoesNotExist:
+            raise NotFound
+
+        feed.visited += 1
+        serializer.save()
         serializer = serializers.FeedDetailSerializer(
             feed,
             many=True,
-            # context={"request": request},
+            context={"request": request},
         )
         return Response(serializer.data)
 

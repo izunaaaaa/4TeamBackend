@@ -43,8 +43,8 @@ class GroupCategories(APIView):
             )
         },
     )
-    def get(self, request, group):
-        group = get_object_or_404(Group, name=group)
+    def get(self, request, group_pk):
+        group = get_object_or_404(Group, pk=group_pk)
         category = Category.objects.filter(group=group)
         serializer = serializers.CategorySerializer(
             category,
@@ -67,12 +67,12 @@ class GroupCategories(APIView):
             401: openapi.Response(description="The user is not authenticated"),
         },
     )
-    def post(self, request, group):
+    def post(self, request, group_pk):
         serializer = serializers.CategorySerializer(data=request.data)
         # if request.user.is_coach == False:
         # raise PermissionDenied
         if serializer.is_valid():
-            category = serializer.save(group=group)
+            category = serializer.save(group=group_pk)
             serializer = serializers.CategorySerializer(category)
             return Response(serializer.data, status=201)
         else:
@@ -89,12 +89,12 @@ class GroupCategoryDetail(APIView):
             )
         },
     )
-    def get(self, request, pk, group):
-        category = get_object_or_404(Category, pk=pk, group__name=group)
+    def get(self, request, pk, group_pk):
+        category = get_object_or_404(Category, pk=pk, group__pk=group_pk)
         serializer = serializers.CategorySerializer(category)
         return Response(serializer.data)
 
-    def put(self, request, pk, group):
+    def put(self, request, pk, group_pk):
         serializer = serializers.CategorySerializer(data=request.data, partial=True)
         # category = get_object_or_404(Category, pk=pk, group=group)
         # group = get_object_or_404(Group, name=group)
@@ -103,7 +103,7 @@ class GroupCategoryDetail(APIView):
             raise PermissionDenied
 
         if serializer.is_valid():
-            category = serializer.save(group=group)
+            category = serializer.save(group=group_pk)
             serializer = serializers.CategorySerializer(category)
             return Response(serializer.data)
         else:
@@ -118,10 +118,10 @@ class GroupCategoryDetail(APIView):
             )
         },
     )
-    def delete(self, request, pk, group):
+    def delete(self, request, pk, group_pk):
         if request.user.is_coach == False:
             raise PermissionDenied
-        group = get_object_or_404(Group, name=group)
+        group = get_object_or_404(Group, pk=group_pk)
         category = Category.objects.filter(group=group, pk=pk)
         category.delete()
         return Response({"result": "delete success"})
