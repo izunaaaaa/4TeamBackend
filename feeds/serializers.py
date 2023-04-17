@@ -11,7 +11,7 @@ from categories.serializers import CategorySerializer
 
 class FeedSerializer(ModelSerializer):
     # comment = CommentSerializer(many=True, read_only=True)
-    # user = TinyUserSerializer(read_only=True)
+    user = TinyUserSerializer(read_only=True)
     # images = MediaSerializer(many=True, read_only=True)
     is_like = SerializerMethodField()
     group = GroupSerializer(read_only=True)
@@ -31,7 +31,7 @@ class FeedSerializer(ModelSerializer):
             "created_at",
             "like_count",
             "comments_count",
-            "highest_like_comments",          
+            "highest_like_comments",
             "is_like",
             "thumbnail",
         )
