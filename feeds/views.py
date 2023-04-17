@@ -5,7 +5,7 @@ from django.db.models import Count
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 from .models import Feed
 from . import serializers
 from django.shortcuts import get_object_or_404
@@ -92,13 +92,9 @@ class Feeds(APIView):
         print(request.user)
 
         if serializer.is_valid():
-            feed = serializer.save(user=request.user)
-            serializer = serializers.FeedSerializer(
-                feed,
-                many=True,
-                # context={"request": request},
-            )
-            return Response({"result": "create success"})
+            feed = serializer.save(user=request.user, group=request.user.group)
+            serializer = serializers.FeedSerializer(feed)
+            return Response(serializer.data)
         else:
             return Response(serializer.errors, status=400)
 
@@ -142,9 +138,11 @@ class FeedDetail(APIView):
         request_body=serializers.FeedDetailSerializer(),
     )
     def put(self, request, pk):
-        feed_pk = self.get_object(pk)
+        feed = self.get_object(pk)
+        if feed.user != request.user:
+            raise PermissionDenied
         serializer = serializers.FeedDetailSerializer(
-            feed_pk,
+            feed,
             data=request.data,
             partial=True,
         )
@@ -168,7 +166,8 @@ class GroupFeeds(APIView):
             )
         },
     )
-    def get(self, request, group_pk):
+    def get(self, request):
+        group_pk = request.GET.get("group_id")
         group = get_object_or_404(Group, pk=group_pk)
         feed = Feed.objects.filter(group=group)
         feed = feed.order_by("-created_at")
@@ -209,7 +208,9 @@ class GroupFeedCategory(APIView):
             )
         },
     )
-    def get(self, request, group_pk, category_pk):
+    def get(self, request):
+        group_pk = request.GET.get("group_id")
+        category_pk = request.GET.get("category_id")
         group = get_object_or_404(Group, pk=group_pk)
         category = get_object_or_404(Category, pk=category_pk)
         feed = Feed.objects.filter(
@@ -219,57 +220,52 @@ class GroupFeedCategory(APIView):
         serializer = serializers.FeedSerializer(
             feed,
             many=True,
+            context={"request": request},
         )
         return Response(serializer.data)
 
-    @swagger_auto_schema(
-        operation_summary="그룹 피드 생성 api",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=["user", "group", "category", "title"],
-            properties={
-                "user": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="유저정보 자동생성"
-                ),
-                "group": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="그룹정보 자동생성"
-                ),
-                "category": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="카테고리정보 자동생성"
-                ),
-                "title": openapi.Schema(type=openapi.TYPE_STRING, description="타이틀"),
-            },
-        ),
-        responses={
-            200: openapi.Response(description="OK"),
-            400: openapi.Response(description="Invalid request data"),
-            401: openapi.Response(description="The user is not authenticated"),
-        },
-    )
-    def post(self, request, group_pk, category_pk):
-        serializer = serializers.FeedSerializer(data=request.data)
-        group = get_object_or_404(Group, pk=group_pk)
-        category = get_object_or_404(Category, pk=category_pk)
-        feed = Feed.objects.filter(
-            group=group,
-            category=category,
-        )
+    # @swagger_auto_schema(
+    #     operation_summary="그룹 피드 생성 api",
+    #     request_body=openapi.Schema(
+    #         type=openapi.TYPE_OBJECT,
+    #         required=["user", "group", "category", "title"],
+    #         properties={
+    #             "user": openapi.Schema(
+    #                 type=openapi.TYPE_STRING, description="유저정보 자동생성"
+    #             ),
+    #             "group": openapi.Schema(
+    #                 type=openapi.TYPE_STRING, description="그룹정보 자동생성"
+    #             ),
+    #             "category": openapi.Schema(
+    #                 type=openapi.TYPE_STRING, description="카테고리정보 자동생성"
+    #             ),
+    #             "title": openapi.Schema(type=openapi.TYPE_STRING, description="타이틀"),
+    #         },
+    #     ),
+    #     responses={
+    #         200: openapi.Response(description="OK"),
+    #         400: openapi.Response(description="Invalid request data"),
+    #         401: openapi.Response(description="The user is not authenticated"),
+    #     },
+    # )
+    # def post(self, request):
+    #     serializer = serializers.FeedSerializer(data=request.data)
+    #     group_pk = request.GET.get("group_id")
+    #     category_pk = request.GET.get("category_id")
+    #     group = get_object_or_404(Group, pk=group_pk)
+    #     category = get_object_or_404(Category, pk=category_pk)
 
-        if serializer.is_valid():
-            # category_pk = request.data["category"]
-            # category = Category.objects.get(pk=category_pk)
-            feed = serializer.save(
-                user=request.user,
-                group=group,
-                category=category,
-            )
-            serializer = serializers.FeedSerializer(
-                feed,
-                many=True,
-            )
-            return Response({"result": "create success"})
-        else:
-            return Response(serializer.errors, status=400)
+    #     if serializer.is_valid():
+    #         feed = serializer.save(
+    #             user=request.user,
+    #             group=group,
+    #             category=category,
+    #         )
+    #         serializer = serializers.FeedSerializer(feed)
+
+    #         return Response(serializer.data)
+    #     else:
+    #         return Response(serializer.errors, status=400)
 
 
 class GroupFeedDetail(APIView):
@@ -290,7 +286,10 @@ class GroupFeedDetail(APIView):
             )
         },
     )
-    def get(self, request, group_pk, category_pk, pk):
+    def get(self, request):
+        pk = request.GET.get("detail_id")
+        group_pk = request.GET.get("group_id")
+        category_pk = request.GET.get("category_id")
         group = get_object_or_404(Group, pk=group_pk)
         category = get_object_or_404(Category, pk=category_pk)
         feed = get_object_or_404(
@@ -308,7 +307,6 @@ class GroupFeedDetail(APIView):
         feed.save()
         serializer = serializers.FeedDetailSerializer(
             feed,
-            # many=True,
             context={"request": request},
         )
         return Response(serializer.data)

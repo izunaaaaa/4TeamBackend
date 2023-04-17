@@ -8,7 +8,7 @@ class FeedAdmin(admin.ModelAdmin):
         "id",
         "user",
         "group",
-        "title",
+        # "title",
         "description",
     )
 
@@ -27,7 +27,7 @@ class FeedAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "category",
-                    "title",
+                    # "title",
                     "description",
                 )
             },

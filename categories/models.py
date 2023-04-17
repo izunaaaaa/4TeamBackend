@@ -1,6 +1,5 @@
 from django.db import models
 from common.models import CommonModel
-from groups.models import Group
 
 
 class Category(CommonModel):
@@ -8,6 +7,7 @@ class Category(CommonModel):
     group = models.ForeignKey(
         "groups.Group",
         on_delete=models.CASCADE,
+        related_name="categories",
     )
 
     def __str__(self) -> str:
@@ -30,9 +30,8 @@ class Category(CommonModel):
     #         self.name = "전체글"
     #     super().save()
 
-    class initial_categroy(Group):
-        def save(self, *args, **kwargs):
-            is_new_group = not bool(self.pk)  # check if the group is being created
-            super().save(*args, **kwargs)
-            if is_new_group:
-                Category.objects.create(name="전체글", group=self)
+    # def save(self, *args, **kwargs):
+    #     is_new_group = not bool(self.pk)  # check if the group is being created
+    #     super().save(*args, **kwargs)
+    #     if is_new_group:
+    #         Category.objects.create(name="전체글", group=self)
