@@ -11,6 +11,8 @@ class Feed(CommonModel):
     group = models.ForeignKey(
         "groups.Group",
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     category = models.ForeignKey(
         "categories.Category",
