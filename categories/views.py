@@ -94,6 +94,24 @@ class GroupCategoryDetail(APIView):
         serializer = serializers.CategorySerializer(category)
         return Response(serializer.data)
 
+    # @swagger_auto_schema(
+    #     operation_summary="그룹 카테고리 수정 api",
+    #     request_body=openapi.Schema(
+    #         type=openapi.TYPE_OBJECT,
+    #         required=["name"],
+    #         properties={
+    #             "name": openapi.Schema(type=openapi.TYPE_STRING, description="카테고리명"),
+    #         },
+    #     ),
+    #     responses={
+    #         200: openapi.Response(
+    #             description="Successful response",
+    #             schema=serializers.CategorySerializer(),
+    #         ),
+    #         400: "Bad Request",
+    #     },
+    #     request_body=serializers.CategorySerializer(),
+    # )
     def put(self, request, pk, group_pk):
         serializer = serializers.CategorySerializer(data=request.data, partial=True)
         # category = get_object_or_404(Category, pk=pk, group=group)

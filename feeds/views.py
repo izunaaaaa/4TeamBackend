@@ -89,7 +89,6 @@ class Feeds(APIView):
     )
     def post(self, request):
         serializer = serializers.FeedSerializer(data=request.data)
-        print(request.user)
 
         if serializer.is_valid():
             feed = serializer.save(user=request.user, group=request.user.group)
@@ -102,11 +101,11 @@ class Feeds(APIView):
 class FeedDetail(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def get_object(self, pk):
-        try:
-            return Feed.objects.get(pk=pk)
-        except Feed.DoesNotExist:
-            raise NotFound
+    # def get_object(self, pk):
+    #     try:
+    #         return Feed.objects.get(pk=pk)
+    #     except Feed.DoesNotExist:
+    #         raise NotFound
 
     @swagger_auto_schema(
         operation_summary="공동 커뮤니티 피드 조회 api",
@@ -118,8 +117,8 @@ class FeedDetail(APIView):
         },
     )
     def get(self, request, pk):
-        feed = self.get_object(pk)
-        # feed = get_object_or_404(Feed, pk=pk)
+        # feed = self.get_object(pk)
+        feed = get_object_or_404(Feed, pk=pk)
         feed.visited += 1
         feed.save()
 
