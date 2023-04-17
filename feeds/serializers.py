@@ -54,6 +54,7 @@ class FeedDetailSerializer(ModelSerializer):
     comment = CommentSerializer(many=True, read_only=True)
     is_like = SerializerMethodField()
     highest_like_comments = CommentSerializer(many=True, read_only=True)
+    images = MediaSerializer(many=True, read_only=True)
 
     class Meta:
         model = Feed
