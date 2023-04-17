@@ -309,7 +309,7 @@ class GroupFeedDetail(APIView):
         feed.save()
         serializer = serializers.FeedDetailSerializer(
             feed,
-            many=True,
+            # many=True,
             context={"request": request},
         )
         return Response(serializer.data)
