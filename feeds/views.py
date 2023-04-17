@@ -70,7 +70,7 @@ class Feeds(APIView):
         return Response(data)
 
     @swagger_auto_schema(
-        operation_summary="공동커뮤니티 피드 생성 api",
+        operation_summary="피드 생성 api",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             required=["user", "title"],
@@ -127,7 +127,7 @@ class FeedDetail(APIView):
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        operation_summary="공동 커뮤니티 피드 수정 api",
+        operation_summary="피드 수정 api",
         responses={
             200: openapi.Response(
                 description="Successful response",
