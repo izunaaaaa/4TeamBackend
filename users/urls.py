@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
     path("me/", views.Me.as_view()),
@@ -13,4 +14,5 @@ urlpatterns = [
     path("find/password/", views.FindPassword.as_view()),
     path("changepassword/", views.ChangePassword.as_view()),
     path("new-password/", views.NewPassword.as_view()),
+    path("refresh/", TokenRefreshView.as_view()),
 ]

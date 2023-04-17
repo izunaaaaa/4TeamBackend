@@ -294,17 +294,17 @@ class GroupFeedDetail(APIView):
     def get(self, request, group_pk, category_pk, pk):
         group = get_object_or_404(Group, pk=group_pk)
         category = get_object_or_404(Category, pk=category_pk)
-        feed = self.get_object(pk)
-        # feed = get_object_or_404(Feed, group=group_pk, category=category_pk, pk=pk)
-        try:
-            feed = Feed.objects.filter(
-                feed,
-                group=group,
-                category=category,
-            )
-        except Feed.DoesNotExist:
-            raise NotFound
-
+        feed = get_object_or_404(
+            Feed, group__pk=group_pk, category__pk=category_pk, pk=pk
+        )
+        # try:
+        #     feed = Feed.objects.filter(
+        #         feed,
+        #         group=group,
+        #         category=category,
+        #     )
+        # except Feed.DoesNotExist:
+        #     raise NotFound
         feed.visited += 1
         serializer.save()
         serializer = serializers.FeedDetailSerializer(
