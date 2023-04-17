@@ -306,7 +306,7 @@ class GroupFeedDetail(APIView):
         # except Feed.DoesNotExist:
         #     raise NotFound
         feed.visited += 1
-        serializer.save()
+        feed.save()
         serializer = serializers.FeedDetailSerializer(
             feed,
             many=True,
