@@ -3,9 +3,17 @@ from common.models import CommonModel
 
 
 class Letter(CommonModel):
-    list = models.ForeignKey(
-        "letterlists.Letterlist",
+    sender = models.ForeignKey(
+        "users.User",
         on_delete=models.CASCADE,
-        related_name="letter",
+        related_name="sender",
+    )
+    receiver = models.ForeignKey(
+        "users.User",
+        on_delete=models.CASCADE,
+        related_name="receiver",
     )
     description = models.CharField(max_length=100)
+
+    def __str__(self) -> str:
+        return f"To {self.sender} from {self.receiver}"
