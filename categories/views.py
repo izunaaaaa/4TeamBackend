@@ -73,6 +73,7 @@ class GroupCategories(APIView):
         # raise PermissionDenied
         if serializer.is_valid():
             category = serializer.save(group=group_pk)
+
             serializer = serializers.CategorySerializer(category)
             return Response(serializer.data, status=201)
         else:
