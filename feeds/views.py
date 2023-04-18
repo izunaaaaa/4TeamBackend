@@ -89,7 +89,6 @@ class Feeds(APIView):
     )
     def post(self, request):
         serializer = serializers.FeedSerializer(data=request.data)
-        request.data.get("is_group")
         if serializer.is_valid():
             feed = serializer.save(user=request.user, group=request.user.group)
             serializer = serializers.FeedSerializer(feed)
@@ -168,6 +167,8 @@ class GroupFeeds(APIView):
     def get(self, request):
         group_pk = request.GET.get("group_id")
         group = get_object_or_404(Group, pk=group_pk)
+        if request.user.group != group or not request.user.is_staff:
+            raise PermissionDenied
         feed = Feed.objects.filter(group=group)
         feed = feed.order_by("-created_at")
         current_page = request.GET.get("page", 1)
@@ -211,6 +212,8 @@ class GroupFeedCategory(APIView):
         group_pk = request.GET.get("group_id")
         category_pk = request.GET.get("category_id")
         group = get_object_or_404(Group, pk=group_pk)
+        if request.user.group != group or not request.user.is_staff:
+            raise PermissionDenied
         category = get_object_or_404(Category, pk=category_pk)
         feed = Feed.objects.filter(
             group=group,
@@ -289,8 +292,8 @@ class GroupFeedDetail(APIView):
         pk = request.GET.get("detail_id")
         group_pk = request.GET.get("group_id")
         category_pk = request.GET.get("category_id")
-        group = get_object_or_404(Group, pk=group_pk)
-        category = get_object_or_404(Category, pk=category_pk)
+        # group = get_object_or_404(Group, pk=group_pk)
+        # category = get_object_or_404(Category, pk=category_pk)
         feed = get_object_or_404(
             Feed, group__pk=group_pk, category__pk=category_pk, pk=pk
         )

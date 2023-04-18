@@ -11,7 +11,7 @@ class Category(CommonModel):
     )
 
     def __str__(self) -> str:
-        return f"{self.name}"
+        return f"{self.group}의 {self.name}"
 
     class Meta:
         verbose_name_plural = "categories"

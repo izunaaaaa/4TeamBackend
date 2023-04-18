@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import User
 from rest_framework.exceptions import ParseError
 import re
+from groups.serializers import GroupSerializer
 
 
 class TinyUserSerializer(ModelSerializer):
@@ -23,6 +24,7 @@ class TinyUserSerializer(ModelSerializer):
 class PrivateUserSerializer(ModelSerializer):
     date_joined = serializers.DateTimeField(read_only=True)
     avatar = serializers.URLField(read_only=True)
+    group = GroupSerializer(read_only=True)
 
     class Meta:
         model = User
