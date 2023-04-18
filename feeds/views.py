@@ -39,9 +39,6 @@ class Feeds(APIView):
         # 최신순
         feed = feed.order_by("-created_at")
 
-        # feedlike = Feed.objects.annotate(feed_like_count=Count("feedlike"))
-        # commentlike = Feed.objects.annotate(comment_like_count=Count("commentlike"))
-
         # pagenations
         current_page = request.GET.get("page", 1)
         items_per_page = 10
@@ -214,7 +211,7 @@ class GroupFeedCategory(APIView):
         category_pk = request.GET.get("category_id")
         group = get_object_or_404(Group, pk=group_pk)
         if request.user.group != group:
-            if request.user.is_staff:
+            if not request.user.is_staff:
                 raise PermissionDenied
         category = get_object_or_404(Category, pk=category_pk)
         feed = Feed.objects.filter(
