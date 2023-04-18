@@ -29,6 +29,8 @@ jobs:
           python manage.py test
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          CF_ID: ${{ secrets.CF_ID }}
+          CF_TOKEN: ${{ secrets.CF_TOKEN }}
 
   build-and-push:
     needs: test
