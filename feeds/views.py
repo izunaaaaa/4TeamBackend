@@ -182,7 +182,7 @@ class Feeds(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     @swagger_auto_schema(
-        operation_summary="공동 커뮤니티 피드 전체 조회 api",
+        operation_summary="피드 전체 조회 api",
         manual_parameters=[
             openapi.Parameter(
                 "page",
@@ -253,6 +253,9 @@ class Feeds(APIView):
             required=["title", "category"],
             properties={
                 "title": openapi.Schema(type=openapi.TYPE_STRING, description="타이틀"),
+                "description": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="내용"
+                ),
                 "category": openapi.Schema(
                     type=openapi.TYPE_INTEGER, description="카테고리 pk"
                 ),
@@ -262,14 +265,16 @@ class Feeds(APIView):
             },
         ),
         responses={
-            200: openapi.Response(description="OK"),
+            200: openapi.Response(
+                description="OK", schema=serializers.FeedDetailSerializer
+            ),
             400: openapi.Response(description="잘못된 형식의 데이터"),
             401: openapi.Response(description="비 로그인"),
             404: openapi.Response(description="카테고리 pk가 없거나 유효하지 않은 값"),
         },
     )
     def post(self, request):
-        serializer = serializers.FeedSerializer(data=request.data)
+        serializer = serializers.FeedDetailSerializer(data=request.data)
         if serializer.is_valid():
             category = get_object_or_404(
                 Category, group=request.user.group, pk=request.data.get("category")
@@ -280,7 +285,7 @@ class Feeds(APIView):
                 category=category,
                 image=request.data.get("image"),
             )
-            serializer = serializers.FeedSerializer(feed)
+            serializer = serializers.FeedDetailSerializer(feed)
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=400)
@@ -289,14 +294,8 @@ class Feeds(APIView):
 class FeedDetail(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    # def get_object(self, pk):
-    #     try:
-    #         return Feed.objects.get(pk=pk)
-    #     except Feed.DoesNotExist:
-    #         raise NotFound
-
     @swagger_auto_schema(
-        operation_summary="공동 커뮤니티 피드 조회 api",
+        operation_summary="디테일 피드 조회 api",
         responses={
             200: openapi.Response(
                 description="Successful Response",
@@ -315,14 +314,30 @@ class FeedDetail(APIView):
 
     @swagger_auto_schema(
         operation_summary="피드 수정 api",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "title": openapi.Schema(type=openapi.TYPE_STRING, description="타이틀"),
+                "description": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="내용"
+                ),
+                "category": openapi.Schema(
+                    type=openapi.TYPE_INTEGER, description="카테고리 pk"
+                ),
+                "image": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="이미지 url, 삭제하려면 Image:null"
+                ),
+            },
+        ),
         responses={
             200: openapi.Response(
                 description="Successful response",
                 schema=serializers.FeedDetailSerializer(),
             ),
             400: "Bad Request",
+            403: "PermissionDenied",
+            404: "Not Found",
         },
-        request_body=serializers.FeedDetailSerializer(),
     )
     def put(self, request, pk):
         feed = get_object_or_404(Feed, pk=pk)
@@ -334,7 +349,12 @@ class FeedDetail(APIView):
             partial=True,
         )
         if serializer.is_valid():
-            feed = serializer.save()
+            try:
+                feed = serializer.save(
+                    image=request.data["image"], category=request.data.get("category")
+                )
+            except KeyError:
+                feed = serializer.save(category=request.data.get("category"))
             serializer = serializers.FeedDetailSerializer(feed)
             return Response(serializer.data)
         else:
@@ -418,48 +438,48 @@ class GroupFeedCategory(APIView):
         return Response(serializer.data)
 
 
-class GroupFeedDetail(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+# class GroupFeedDetail(APIView):
+#     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def get_object(self, pk):
-        try:
-            return Feed.objects.get(pk=pk)
-        except Feed.DoesNotExist:
-            raise NotFound
+#     def get_object(self, pk):
+#         try:
+#             return Feed.objects.get(pk=pk)
+#         except Feed.DoesNotExist:
+#             raise NotFound
 
-    @swagger_auto_schema(
-        operation_summary="그룹 피드 조회(좋아요순) api",
-        responses={
-            200: openapi.Response(
-                description="Successful Response",
-                schema=serializers.FeedDetailSerializer(),
-            )
-        },
-    )
-    def get(self, request):
-        pk = request.GET.get("detail_id")
-        group_pk = request.GET.get("group_id")
-        category_pk = request.GET.get("category_id")
-        # group = get_object_or_404(Group, pk=group_pk)
-        # category = get_object_or_404(Category, pk=category_pk)
-        feed = get_object_or_404(
-            Feed, group__pk=group_pk, category__pk=category_pk, pk=pk
-        )
-        # try:
-        #     feed = Feed.objects.filter(
-        #         feed,
-        #         group=group,
-        #         category=category,
-        #     )
-        # except Feed.DoesNotExist:
-        #     raise NotFound
-        feed.visited += 1
-        feed.save()
-        serializer = serializers.FeedDetailSerializer(
-            feed,
-            context={"request": request},
-        )
-        return Response(serializer.data)
+#     @swagger_auto_schema(
+#         operation_summary="그룹 피드 조회(좋아요순) api",
+#         responses={
+#             200: openapi.Response(
+#                 description="Successful Response",
+#                 schema=serializers.FeedDetailSerializer(),
+#             )
+#         },
+#     )
+#     def get(self, request):
+#         pk = request.GET.get("detail_id")
+#         group_pk = request.GET.get("group_id")
+#         category_pk = request.GET.get("category_id")
+#         # group = get_object_or_404(Group, pk=group_pk)
+#         # category = get_object_or_404(Category, pk=category_pk)
+#         feed = get_object_or_404(
+#             Feed, group__pk=group_pk, category__pk=category_pk, pk=pk
+#         )
+#         # try:
+#         #     feed = Feed.objects.filter(
+#         #         feed,
+#         #         group=group,
+#         #         category=category,
+#         #     )
+#         # except Feed.DoesNotExist:
+#         #     raise NotFound
+#         feed.visited += 1
+#         feed.save()
+#         serializer = serializers.FeedDetailSerializer(
+#             feed,
+#             context={"request": request},
+#         )
+#         return Response(serializer.data)
 
 
 class TopLikeView(APIView):
