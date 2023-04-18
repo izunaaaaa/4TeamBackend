@@ -15,7 +15,7 @@ class FeedSerializer(ModelSerializer):
     # images = MediaSerializer(many=True, read_only=True)
     is_like = SerializerMethodField()
     group = GroupSerializer(read_only=True)
-    # category = CategorySerializer(read_only=True)
+    category = CategorySerializer()
     highest_like_comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:

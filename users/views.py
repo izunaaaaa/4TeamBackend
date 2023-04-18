@@ -15,6 +15,12 @@ from feeds.models import Feed
 from likes.serializers import FeedLikeSerializer, CommentLikeSerializer
 import re
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.core.paginator import Paginator
+from feeds.serializers import FeedSerializer
+from comments.models import Comment
+from comments.serializers import CommentSerializer
+from django.db.models import Q
+from likes.models import Feedlike, Commentlike
 
 
 class Me(APIView):
@@ -54,34 +60,31 @@ class Me(APIView):
 
         if serilaizer.is_valid():
             updated_user = serializer.save()
-            if request.data.get("avatar"):
-                updated_user.avatar = request.data.get("avatar")
-            updated_user.save()
             serializer = serializers.PrivateUserSerializer(updated_user)
             return Response(serilaizer.data)
         else:
             return Response(serializer.errors, status=400)
 
     # class UserDetail(APIView):
-    @swagger_auto_schema(
-        operation_summary="특정 유저 조회 api",
-        responses={
-            200: openapi.Response(
-                description="Successful response",
-                schema=serializers.TinyUserSerializer(),
-            ),
-            404: openapi.Response(
-                description="User not found",
-            ),
-        },
-    )
-    def get(self, request, username):
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            raise NotFound
-        serializer = serializers.TinyUserSerializer(user)
-        return Response(serializer.data)
+    # @swagger_auto_schema(
+    #     operation_summary="특정 유저 조회 api",
+    #     responses={
+    #         200: openapi.Response(
+    #             description="Successful response",
+    #             schema=serializers.TinyUserSerializer(),
+    #         ),
+    #         404: openapi.Response(
+    #             description="User not found",
+    #         ),
+    #     },
+    # )
+    # def get(self, request, username):
+    #     try:
+    #         user = User.objects.get(username=username)
+    #     except User.DoesNotExist:
+    #         raise NotFound
+    #     serializer = serializers.TinyUserSerializer(user)
+    #     return Response(serializer.data)
 
 
 class LogIn(APIView):
@@ -453,3 +456,66 @@ class NewPassword(APIView):
         user.set_password(password)
         user.save()
         return Response(status=200)
+
+
+class FeedList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        feed = Feed.objects.filter(user=request.user)
+        current_page = request.GET.get("page", 1)
+        items_per_page = 10
+        paginator = Paginator(feed, items_per_page)
+        try:
+            page = paginator.page(current_page)
+        except:
+            page = paginator.page(paginator.num_pages)
+
+        if int(current_page) > int(paginator.num_pages):
+            raise ParseError("that page is out of range")
+
+        serializer = FeedSerializer(
+            page,
+            many=True,
+            context={"request": request},
+        )
+
+        data = {
+            "total_pages": paginator.num_pages,
+            "now_page": page.number,
+            "count": paginator.count,
+            "results": serializer.data,
+        }
+
+        return Response(data)
+
+
+class CommentList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        comments = (
+            Comment.objects.filter(
+                Q(user=request.user) | Q(recomment__user=request.user)
+            )
+            .distinct()
+            .order_by("created_at")
+        )
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)
+
+
+class LikeList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        comments = Commentlike.objects.filter(user=request.user)
+        comment_serializer = CommentSerializer(comments, many=True)
+        feeds = Feedlike.objects.filter(user=request.user)
+        feed_serializer = FeedSerializer(feeds, many=True)
+        return Response(
+            {
+                "like_comments": comment_serializer.data,
+                "like_feeds": feed_serializer.data,
+            }
+        )

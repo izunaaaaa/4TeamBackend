@@ -73,7 +73,6 @@ class GroupCategories(APIView):
         # raise PermissionDenied
         if serializer.is_valid():
             category = serializer.save(group=group_pk)
-
             serializer = serializers.CategorySerializer(category)
             return Response(serializer.data, status=201)
         else:
@@ -113,12 +112,14 @@ class GroupCategoryDetail(APIView):
     #     },
     #     request_body=serializers.CategorySerializer(),
     # )
-    def put(self, request, pk, group_pk):
+    def put(self, request, group_pk, pk):
         serializer = serializers.CategorySerializer(data=request.data, partial=True)
         # category = get_object_or_404(Category, pk=pk, group=group)
-        # group = get_object_or_404(Group, name=group)
+        group = get_object_or_404(Group, pk=group_pk)
+        if request.user.group != group or not request.user.is_staff:
+            raise PermissionDenied
 
-        if request.user.is_coach == False:
+        if request.user.is_coach == False or not request.user.is_staff:
             raise PermissionDenied
 
         if serializer.is_valid():
@@ -131,16 +132,19 @@ class GroupCategoryDetail(APIView):
     @swagger_auto_schema(
         operation_summary="그룹 카테고리 삭제 api",
         responses={
-            200: openapi.Response(
+            204: openapi.Response(
                 description="Successful response",
-                schema=serializers.CategorySerializer(many=True),
             )
         },
     )
-    def delete(self, request, pk, group_pk):
-        if request.user.is_coach == False:
-            raise PermissionDenied
-        group = get_object_or_404(Group, pk=group_pk)
-        category = Category.objects.filter(group=group, pk=pk)
+    def delete(self, request, group_pk, pk):
+        if request.user.group.pk != group_pk:
+            if not request.user.is_staff:
+                raise PermissionDenied
+        if not request.user.is_coach:
+            if not request.user.is_staff:
+                raise PermissionDenied
+
+        category = get_object_or_404(Category, pk=pk, group__pk=group_pk)
         category.delete()
-        return Response({"result": "delete success"})
+        return Response({"result": "delete success"}, status=204)
