@@ -10,9 +10,6 @@ urlpatterns = [
         "group/category/",
         views.GroupFeedCategory.as_view(),
     ),
-    path(
-        "group/category/detail",
-        views.GroupFeedDetail.as_view(),
-    ),
+    path("group/category/detail", views.GroupFeedDetail.as_view()),
     path("toplike", views.TopLikeView.as_view()),
 ]
