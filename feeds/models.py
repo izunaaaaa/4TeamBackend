@@ -19,8 +19,8 @@ class Feed(CommonModel):
         "categories.Category",
         on_delete=models.CASCADE,
     )
-    # title = models.CharField(max_length=100, null=True)
-    description = models.TextField()
+    title = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
     visited = models.PositiveIntegerField(
         editable=False,
         default=0,

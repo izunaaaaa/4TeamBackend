@@ -12,5 +12,4 @@ class RecommentSerializer(ModelSerializer):
             "user",
             "created_at",
             "description",
-            "comment",
         )
