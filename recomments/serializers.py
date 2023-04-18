@@ -9,6 +9,7 @@ class RecommentSerializer(ModelSerializer):
     class Meta:
         model = Recomment
         fields = (
+            "pk",
             "user",
             "created_at",
             "description",

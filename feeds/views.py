@@ -12,6 +12,9 @@ from django.shortcuts import get_object_or_404
 from groups.models import Group
 from categories.models import Category
 from medias.models import Image
+from comments.serializers import CommentSerializer
+from recomments.serializers import RecommentSerializer
+from comments.models import Comment
 
 user_schema = openapi.Schema(
     type=openapi.TYPE_OBJECT,
@@ -243,7 +246,6 @@ class Feeds(APIView):
             "count": paginator.count,
             "results": serializer.data,
         }
-
         return Response(data)
 
     @swagger_auto_schema(
@@ -309,7 +311,8 @@ class FeedDetail(APIView):
         # feed = self.get_object(pk)
         feed = get_object_or_404(Feed, pk=pk)
         if feed.group != request.user.group:
-            raise PermissionDenied
+            if not request.user.is_staff:
+                raise PermissionDenied
         feed.visited += 1
         feed.save()
 
@@ -561,7 +564,7 @@ class GroupFeedCategory(APIView):
 
 class TopLikeView(APIView):
     @swagger_auto_schema(
-        operation_summary="커뮤니티 피드 전체 조회(좋아요순) api",
+        operation_summary="커뮤니티 피드 전체 조회(좋아요순)",
         manual_parameters=[
             openapi.Parameter(
                 "page",
@@ -623,3 +626,104 @@ class TopLikeView(APIView):
             "results": serializer.data,
         }
         return Response(data)
+
+
+class FeedComment(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="피드 댓글 조회",
+        operation_description="feed 의 id 입력",
+        responses={
+            201: openapi.Response(
+                description="Successful Response",
+                schema=CommentSerializer(many=True),
+            ),
+            403: "그룹이 다른 유저가 요청, 비로그인 유저",
+            404: "존재하지 않는 feed pk",
+        },
+    )
+    def get(self, request, pk):
+        feed = get_object_or_404(Feed, pk=pk)
+        if feed.group != request.user.group:
+            raise PermissionDenied
+        serializer = CommentSerializer(
+            feed.comment.all(),
+            many=True,
+            context={"request": request},
+        )
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="피드 댓글 등록",
+        operation_description="feed 의 id 입력",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["description"],
+            properties={
+                "description": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="댓글 내용"
+                )
+            },
+        ),
+        responses={
+            201: openapi.Response(
+                description="Successful Response", schema=CommentSerializer
+            ),
+            400: "Description 형식 오류",
+            403: "그룹이 다른 유저가 요청, 비로그인 유저",
+            404: "존재하지 않는 feed pk",
+        },
+    )
+    def post(self, request, pk):
+        feed = get_object_or_404(Feed, pk=pk)
+        if feed.group != request.user.group:
+            raise PermissionDenied
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid():
+            comment = serializer.save(feed=feed, user=request.user)
+            serializer = CommentSerializer(comment)
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=400)
+
+
+class FeedRecomment(APIView):
+    @swagger_auto_schema(
+        operation_summary="피드 대댓글 등록",
+        operation_description="feed 의 id와 comment id 입력",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["description"],
+            properties={
+                "description": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="댓글 내용"
+                )
+            },
+        ),
+        responses={
+            201: openapi.Response(
+                description="Successful Response", schema=CommentSerializer
+            ),
+            400: "Description 형식 오류",
+            403: "그룹이 다른 유저가 요청, 비로그인 유저",
+            404: "feed의 id 나 comment 의 id 가 유효하지않을때",
+        },
+    )
+    def post(self, request, pk, comment_pk):
+        feed = get_object_or_404(Feed, pk=pk)
+        if feed.group != request.user.group:
+            raise PermissionDenied
+        comment = get_object_or_404(Comment, pk=comment_pk)
+        if comment.feed != feed:
+            raise PermissionDenied
+        serializer = RecommentSerializer(data=request.data)
+        if serializer.is_valid():
+            recomment = serializer.save(
+                user=request.user,
+                comment=comment,
+            )
+            serializer = RecommentSerializer(recomment)
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=400)
