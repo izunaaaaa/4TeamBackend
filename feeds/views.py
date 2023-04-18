@@ -167,8 +167,9 @@ class GroupFeeds(APIView):
     def get(self, request):
         group_pk = request.GET.get("group_id")
         group = get_object_or_404(Group, pk=group_pk)
-        if request.user.group != group or not request.user.is_staff:
-            raise PermissionDenied
+        if request.user.group != group:
+            if not request.user.is_staff:
+                raise PermissionDenied
         feed = Feed.objects.filter(group=group)
         feed = feed.order_by("-created_at")
         current_page = request.GET.get("page", 1)
@@ -212,8 +213,9 @@ class GroupFeedCategory(APIView):
         group_pk = request.GET.get("group_id")
         category_pk = request.GET.get("category_id")
         group = get_object_or_404(Group, pk=group_pk)
-        if request.user.group != group or not request.user.is_staff:
-            raise PermissionDenied
+        if request.user.group != group:
+            if not request.user.is_staff:
+                raise PermissionDenied
         category = get_object_or_404(Category, pk=category_pk)
         feed = Feed.objects.filter(
             group=group,
