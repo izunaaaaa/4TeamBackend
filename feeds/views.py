@@ -11,6 +11,171 @@ from . import serializers
 from django.shortcuts import get_object_or_404
 from groups.models import Group
 from categories.models import Category
+from medias.models import Image
+
+user_schema = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        "username": openapi.Schema(
+            type=openapi.TYPE_STRING,
+            description="The username of the comment's author",
+        ),
+        "name": openapi.Schema(
+            type=openapi.TYPE_STRING,
+            description="The name of the comment's author",
+        ),
+        "email": openapi.Schema(
+            type=openapi.TYPE_STRING,
+            description="The email address of the comment's author",
+        ),
+        "avatar": openapi.Schema(
+            type=openapi.TYPE_STRING,
+            description="The URL of the comment author's avatar image, if available",
+        ),
+        "is_coach": openapi.Schema(
+            type=openapi.TYPE_BOOLEAN,
+            description="Whether the comment's author is a coach",
+        ),
+    },
+)
+feed_schema = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        "id": openapi.Schema(
+            type=openapi.TYPE_INTEGER,
+            description="The ID of the feed",
+        ),
+        "user": openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "username": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="The username of the feed's owner",
+                ),
+                "name": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="The name of the feed's owner"
+                ),
+                "email": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="The email address of the feed's owner",
+                ),
+                "avatar": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="The URL of the feed owner's avatar image, if available",
+                ),
+                "is_coach": openapi.Schema(
+                    type=openapi.TYPE_BOOLEAN,
+                    description="Whether the feed's owner is a coach",
+                ),
+            },
+            description="The user who created the feed",
+        ),
+        "group": openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "pk": openapi.Schema(
+                    type=openapi.TYPE_INTEGER, description="The ID of the group"
+                ),
+                "name": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="The name of the group"
+                ),
+                "members_count": openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="The number of members in the group",
+                ),
+            },
+            description="The group to which the feed belongs",
+        ),
+        "category": openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "id": openapi.Schema(
+                    type=openapi.TYPE_INTEGER, description="The ID of the category"
+                ),
+                "group": openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "pk": openapi.Schema(
+                            type=openapi.TYPE_INTEGER, description="The ID of the group"
+                        ),
+                        "name": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The name of the group",
+                        ),
+                        "members_count": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="The number of members in the group",
+                        ),
+                    },
+                    description="The group to which the category belongs",
+                ),
+                "name": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="The name of the category"
+                ),
+            },
+            description="The category to which the feed belongs",
+        ),
+        "description": openapi.Schema(
+            type=openapi.TYPE_STRING, description="The description of the feed"
+        ),
+        "visited": openapi.Schema(
+            type=openapi.TYPE_INTEGER,
+            description="The number of times the feed has been visited",
+        ),
+        "created_at": openapi.Schema(
+            type=openapi.TYPE_STRING,
+            description="The date and time at which the feed was created, in ISO 8601 format",
+        ),
+        "like_count": openapi.Schema(
+            type=openapi.TYPE_INTEGER,
+            description="The number of likes the feed has received",
+        ),
+        "comments_count": openapi.Schema(
+            type=openapi.TYPE_INTEGER,
+            description="The number of comments the feed has received",
+        ),
+        "highest_like_comments": openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "id": openapi.Schema(
+                        type=openapi.TYPE_INTEGER, description="The ID of the comment"
+                    ),
+                    "user": user_schema,
+                    "description": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                    ),
+                    "created_at": openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                    ),
+                    "commentlikeCount": openapi.Schema(
+                        type=openapi.TYPE_INTEGER,
+                    ),
+                    "recomment": openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            "user": user_schema,
+                            "created_at": openapi.Schema(
+                                type=openapi.TYPE_STRING,
+                            ),
+                            "description": openapi.Schema(
+                                type=openapi.TYPE_STRING,
+                            ),
+                        },
+                    ),
+                },
+            ),
+            description="The comments with the most likes",
+        ),
+        "is_like": openapi.Schema(
+            type=openapi.TYPE_BOOLEAN,
+        ),
+        "thumnail": openapi.Schema(
+            type=openapi.TYPE_STRING,
+        ),
+    },
+)
 
 
 class Feeds(APIView):
@@ -22,23 +187,38 @@ class Feeds(APIView):
             openapi.Parameter(
                 "page",
                 openapi.IN_QUERY,
-                description="1 페이지당 24개의 데이터 \n - total_pages : 총 페이지수 \n - now_page : 현재 페이지 \n - count : 총 개수 \n - results : 순서",
+                description="1 페이지당 24개의 데이터 (default = 1) \n - total_pages : 총 페이지수 \n - now_page : 현재 페이지 \n - count : 총 개수 \n - results : 순서",
                 type=openapi.TYPE_INTEGER,
             ),
         ],
         responses={
             200: openapi.Response(
                 description="Successful Response",
-                schema=serializers.FeedSerializer(),
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "total_pages": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="The total number of pages",
+                        ),
+                        "now_page": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="The current page number",
+                        ),
+                        "count": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="The total number of objects",
+                        ),
+                        "results": feed_schema,
+                    },
+                ),
             )
         },
     )
     def get(self, request):
         feed = Feed.objects.all()
-
         # 최신순
         feed = feed.order_by("-created_at")
-
         # pagenations
         current_page = request.GET.get("page", 1)
         items_per_page = 10
@@ -70,24 +250,36 @@ class Feeds(APIView):
         operation_summary="피드 생성 api",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=["user", "title"],
+            required=["title", "category"],
             properties={
-                "user": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="유저정보 자동생성"
-                ),
                 "title": openapi.Schema(type=openapi.TYPE_STRING, description="타이틀"),
+                "category": openapi.Schema(
+                    type=openapi.TYPE_INTEGER, description="카테고리 pk"
+                ),
+                "image": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="이미지 url"
+                ),
             },
         ),
         responses={
             200: openapi.Response(description="OK"),
-            400: openapi.Response(description="Invalid request data"),
-            401: openapi.Response(description="The user is not authenticated"),
+            400: openapi.Response(description="잘못된 형식의 데이터"),
+            401: openapi.Response(description="비 로그인"),
+            404: openapi.Response(description="카테고리 pk가 없거나 유효하지 않은 값"),
         },
     )
     def post(self, request):
         serializer = serializers.FeedSerializer(data=request.data)
         if serializer.is_valid():
-            feed = serializer.save(user=request.user, group=request.user.group)
+            category = get_object_or_404(
+                Category, group=request.user.group, pk=request.data.get("category")
+            )
+            feed = serializer.save(
+                user=request.user,
+                group=request.user.group,
+                category=category,
+                image=request.data.get("image"),
+            )
             serializer = serializers.FeedSerializer(feed)
             return Response(serializer.data)
         else:
@@ -224,49 +416,6 @@ class GroupFeedCategory(APIView):
             context={"request": request},
         )
         return Response(serializer.data)
-
-    # @swagger_auto_schema(
-    #     operation_summary="그룹 피드 생성 api",
-    #     request_body=openapi.Schema(
-    #         type=openapi.TYPE_OBJECT,
-    #         required=["user", "group", "category", "title"],
-    #         properties={
-    #             "user": openapi.Schema(
-    #                 type=openapi.TYPE_STRING, description="유저정보 자동생성"
-    #             ),
-    #             "group": openapi.Schema(
-    #                 type=openapi.TYPE_STRING, description="그룹정보 자동생성"
-    #             ),
-    #             "category": openapi.Schema(
-    #                 type=openapi.TYPE_STRING, description="카테고리정보 자동생성"
-    #             ),
-    #             "title": openapi.Schema(type=openapi.TYPE_STRING, description="타이틀"),
-    #         },
-    #     ),
-    #     responses={
-    #         200: openapi.Response(description="OK"),
-    #         400: openapi.Response(description="Invalid request data"),
-    #         401: openapi.Response(description="The user is not authenticated"),
-    #     },
-    # )
-    # def post(self, request):
-    #     serializer = serializers.FeedSerializer(data=request.data)
-    #     group_pk = request.GET.get("group_id")
-    #     category_pk = request.GET.get("category_id")
-    #     group = get_object_or_404(Group, pk=group_pk)
-    #     category = get_object_or_404(Category, pk=category_pk)
-
-    #     if serializer.is_valid():
-    #         feed = serializer.save(
-    #             user=request.user,
-    #             group=group,
-    #             category=category,
-    #         )
-    #         serializer = serializers.FeedSerializer(feed)
-
-    #         return Response(serializer.data)
-    #     else:
-    #         return Response(serializer.errors, status=400)
 
 
 class GroupFeedDetail(APIView):

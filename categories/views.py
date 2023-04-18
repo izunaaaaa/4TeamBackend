@@ -113,14 +113,20 @@ class GroupCategoryDetail(APIView):
     #     request_body=serializers.CategorySerializer(),
     # )
     def put(self, request, group_pk, pk):
-        serializer = serializers.CategorySerializer(data=request.data, partial=True)
-        # category = get_object_or_404(Category, pk=pk, group=group)
         group = get_object_or_404(Group, pk=group_pk)
-        if request.user.group != group or not request.user.is_staff:
-            raise PermissionDenied
+        category = get_object_or_404(Category, pk=pk, group=group)
+        serializer = serializers.CategorySerializer(
+            category,
+            data=request.data,
+            partial=True,
+        )
+        if request.user.group != group:
+            if not request.user.is_staff:
+                raise PermissionDenied
 
-        if request.user.is_coach == False or not request.user.is_staff:
-            raise PermissionDenied
+        if request.user.is_coach == False:
+            if not request.user.is_staff:
+                raise PermissionDenied
 
         if serializer.is_valid():
             category = serializer.save(group=group_pk)
