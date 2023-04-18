@@ -7,13 +7,12 @@ from rest_framework.exceptions import ValidationError
 
 
 class CategorySerializer(ModelSerializer):
-    group = GroupSerializer(read_only=True)
-
     class Meta:
         model = Category
         exclude = (
             "created_at",
             "updated_at",
+            "group",
         )
 
     def create(self, validated_data):

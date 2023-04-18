@@ -51,7 +51,9 @@ jobs:
           --build-arg POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
           --build-arg POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
           --build-arg POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} \
-          --build-arg POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} .
+          --build-arg POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} \
+          --build-arg CF_ID=${{ secrets.CF_ID }} \
+          --build-arg CF_TOKEN=${{ secrets.CF_TOKEN }} .
 
       - name: Push Docker image
         run: |

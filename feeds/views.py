@@ -92,23 +92,23 @@ feed_schema = openapi.Schema(
                 "id": openapi.Schema(
                     type=openapi.TYPE_INTEGER, description="The ID of the category"
                 ),
-                "group": openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "pk": openapi.Schema(
-                            type=openapi.TYPE_INTEGER, description="The ID of the group"
-                        ),
-                        "name": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="The name of the group",
-                        ),
-                        "members_count": openapi.Schema(
-                            type=openapi.TYPE_INTEGER,
-                            description="The number of members in the group",
-                        ),
-                    },
-                    description="The group to which the category belongs",
-                ),
+                # "group": openapi.Schema(
+                #     type=openapi.TYPE_OBJECT,
+                #     properties={
+                #         "pk": openapi.Schema(
+                #             type=openapi.TYPE_INTEGER, description="The ID of the group"
+                #         ),
+                #         "name": openapi.Schema(
+                #             type=openapi.TYPE_STRING,
+                #             description="The name of the group",
+                #         ),
+                #         "members_count": openapi.Schema(
+                #             type=openapi.TYPE_INTEGER,
+                #             description="The number of members in the group",
+                #         ),
+                #     },
+                #     description="The group to which the category belongs",
+                # ),
                 "name": openapi.Schema(
                     type=openapi.TYPE_STRING, description="The name of the category"
                 ),
@@ -182,7 +182,7 @@ class Feeds(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     @swagger_auto_schema(
-        operation_summary="피드 전체 조회 api",
+        operation_summary="피드 전체 조회",
         manual_parameters=[
             openapi.Parameter(
                 "page",
@@ -221,7 +221,7 @@ class Feeds(APIView):
         feed = feed.order_by("-created_at")
         # pagenations
         current_page = request.GET.get("page", 1)
-        items_per_page = 10
+        items_per_page = 24
         paginator = Paginator(feed, items_per_page)
         try:
             page = paginator.page(current_page)
@@ -247,7 +247,7 @@ class Feeds(APIView):
         return Response(data)
 
     @swagger_auto_schema(
-        operation_summary="피드 생성 api",
+        operation_summary="피드 생성",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             required=["title", "category"],
@@ -260,7 +260,8 @@ class Feeds(APIView):
                     type=openapi.TYPE_INTEGER, description="카테고리 pk"
                 ),
                 "image": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="이미지 url"
+                    type=openapi.TYPE_STRING,
+                    description="이미지 url, image:null -> 이미지 삭제",
                 ),
             },
         ),
@@ -295,17 +296,20 @@ class FeedDetail(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     @swagger_auto_schema(
-        operation_summary="디테일 피드 조회 api",
+        operation_summary="피드 조회",
         responses={
             200: openapi.Response(
                 description="Successful Response",
                 schema=serializers.FeedDetailSerializer(),
-            )
+            ),
+            403: "요청한 피드가 속한 그룹과 유저의 그룹이 다를 경우",
         },
     )
     def get(self, request, pk):
         # feed = self.get_object(pk)
         feed = get_object_or_404(Feed, pk=pk)
+        if feed.group != request.user.group:
+            raise PermissionDenied
         feed.visited += 1
         feed.save()
 
@@ -313,7 +317,7 @@ class FeedDetail(APIView):
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        operation_summary="피드 수정 api",
+        operation_summary="피드 수정",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
@@ -360,12 +364,26 @@ class FeedDetail(APIView):
         else:
             return Response(serializer.errors, status=400)
 
+    @swagger_auto_schema(
+        operation_summary="피드 삭제",
+        responses={
+            204: openapi.Response(description="Successful response"),
+            403: "PermissionDenied",
+        },
+    )
+    def delete(self, request, pk):
+        feed = get_object_or_404(Feed, pk=pk)
+        if feed.user != request.user:
+            raise PermissionDenied
+        feed.delete()
+        return Response(status=204)
+
 
 class GroupFeeds(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     @swagger_auto_schema(
-        operation_summary="그룹 피드 전체 조회 api",
+        operation_summary="그룹 피드 전체 조회",
         responses={
             200: openapi.Response(
                 description="Successful Response",
@@ -410,12 +428,54 @@ class GroupFeedCategory(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     @swagger_auto_schema(
-        operation_summary="그룹 피드 카테고리별 조회 api",
+        operation_summary="그룹 피드 카테고리별 조회",
+        manual_parameters=[
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="1 페이지당 24개의 데이터 \n - num_pages : 총 페이지수 \n - current_page : 현재 페이지 \n - count : 총 개수 \n - results : 순서",
+                type=openapi.TYPE_INTEGER,
+            ),
+            openapi.Parameter(
+                "group_id",
+                openapi.IN_QUERY,
+                description="그룹의 pk 값",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            ),
+            openapi.Parameter(
+                "category_id",
+                openapi.IN_QUERY,
+                description="해당 그룹 내 카테고리의 pk 값",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            ),
+        ],
         responses={
             200: openapi.Response(
                 description="Successful Response",
-                schema=serializers.FeedDetailSerializer(),
-            )
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "total_pages": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="전체 페이지",
+                        ),
+                        "now_page": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="현재 페이지",
+                        ),
+                        "count": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="피드의 갯수",
+                        ),
+                        "results": feed_schema,
+                    },
+                ),
+            ),
+            400: "범위를 벗어난 페이지 요청",
+            403: "유저가 속한 그룹이 아닌 데이터를 요청",
+            404: "그룹과 카테고리의 pk가 유효하지 않거나, 카테고리의 그룹과 요청한 그룹이 다를 때",
         },
     )
     def get(self, request):
@@ -429,13 +489,30 @@ class GroupFeedCategory(APIView):
         feed = Feed.objects.filter(
             group=group,
             category=category,
-        )
+        ).order_by("-created_at")
+        items_per_page = 24
+        current_page = request.GET.get("page", 1)
+        paginator = Paginator(feed, items_per_page)
+        try:
+            page = paginator.page(current_page)
+        except:
+            page = paginator.page(paginator.num_pages)
+
+        if int(current_page) > int(paginator.num_pages):
+            raise ParseError("that page is out of range")
+
         serializer = serializers.FeedSerializer(
-            feed,
+            page,
             many=True,
             context={"request": request},
         )
-        return Response(serializer.data)
+        data = {
+            "total_pages": paginator.num_pages,
+            "now_page": page.number,
+            "count": paginator.count,
+            "results": serializer.data,
+        }
+        return Response(data)
 
 
 # class GroupFeedDetail(APIView):
@@ -484,17 +561,65 @@ class GroupFeedCategory(APIView):
 
 class TopLikeView(APIView):
     @swagger_auto_schema(
-        operation_summary="공동 커뮤니티 피드 전체 조회(좋아요순) api",
+        operation_summary="커뮤니티 피드 전체 조회(좋아요순) api",
+        manual_parameters=[
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="1 페이지당 24개의 데이터 \n - num_pages : 총 페이지수 \n - current_page : 현재 페이지 \n - count : 총 개수 \n - results : 순서",
+                type=openapi.TYPE_INTEGER,
+            ),
+        ],
         responses={
             200: openapi.Response(
                 description="Successful Response",
-                schema=serializers.FeedSerializer(),
-            )
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "total_pages": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="전체 페이지",
+                        ),
+                        "now_page": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="현재 페이지",
+                        ),
+                        "count": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="피드의 갯수",
+                        ),
+                        "results": feed_schema,
+                    },
+                ),
+            ),
         },
     )
     def get(self, request):
-        feed = Feed.objects.annotate(like_count=Count("feedlike")).order_by(
-            "-like_count"
+        feed = (
+            Feed.objects.annotate(like_count=Count("feedlike"))
+            .order_by("-like_count")
+            .order_by(-"created_at")
         )
-        serializer = serializers.FeedSerializer(feed, many=True)
-        return Response(serializer.data)
+        items_per_page = 24
+        current_page = request.GET.get("page", 1)
+        paginator = Paginator(feed, items_per_page)
+        try:
+            page = paginator.page(current_page)
+        except:
+            page = paginator.page(paginator.num_pages)
+
+        if int(current_page) > int(paginator.num_pages):
+            raise ParseError("that page is out of range")
+
+        serializer = serializers.FeedSerializer(
+            page,
+            many=True,
+            context={"request": request},
+        )
+        data = {
+            "total_pages": paginator.num_pages,
+            "now_page": page.number,
+            "count": paginator.count,
+            "results": serializer.data,
+        }
+        return Response(data)
