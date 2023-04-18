@@ -3,7 +3,7 @@ from drf_yasg import openapi
 from django.core.paginator import Paginator
 from django.db.models import Count
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 from .models import Feed
@@ -293,7 +293,7 @@ class Feeds(APIView):
 
 
 class FeedDetail(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_summary="피드 조회",
@@ -380,7 +380,7 @@ class FeedDetail(APIView):
 
 
 class GroupFeeds(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_summary="그룹 피드 전체 조회",
@@ -425,7 +425,7 @@ class GroupFeeds(APIView):
 
 
 class GroupFeedCategory(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_summary="그룹 피드 카테고리별 조회",
