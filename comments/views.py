@@ -30,29 +30,6 @@ class Comments(APIView):
         )
         return Response(serializer.data)
 
-    @swagger_auto_schema(
-        operation_summary="[미완성]댓글 생성 api",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=["user", "feed", "description"],
-            properties={
-                "user": openapi.Schema(type=openapi.TYPE_STRING, description="유저정보"),
-                "feed": openapi.Schema(type=openapi.TYPE_STRING, description="피드 정보"),
-                "description": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="내용"
-                ),
-            },
-        ),
-        responses={
-            200: openapi.Response(description="OK"),
-            400: openapi.Response(description="Invalid request data"),
-            401: openapi.Response(description="The user is not authenticated"),
-        },
-    )
-    def post(self, request):
-        pass
-        # serializer = serializers.CommentSerializer(data=request.data)
-
 
 class CommentDetail(APIView):
     def get_object(self, pk):
@@ -75,21 +52,7 @@ class CommentDetail(APIView):
         serializer = serializers.CommentSerializer(comment)
         return Response(serializer.data)
 
-    @swagger_auto_schema(
-        operation_summary="[미완성]댓글 수정 api",
-        responses={
-            200: openapi.Response(
-                description="Successful response",
-                schema=serializers.CommentSerializer(),
-            ),
-            400: "Bad Request",
-        },
-        request_body=serializers.CommentSerializer(),
-    )
-    def put(serl, request, pk):
-        pass
-    
-    
+
 class TopLikeView(APIView):
     @swagger_auto_schema(
         operation_summary="베스트 댓글 api",
@@ -102,8 +65,9 @@ class TopLikeView(APIView):
     )
     def get(self, request):
         feed = (
-        Comment.objects.annotate(like_count=Count("commentlike"))
-            .order_by("-like_count").first()
+            Comment.objects.annotate(like_count=Count("commentlike"))
+            .order_by("-like_count")
+            .first()
         )
         serializer = serializers.CommentSerializer(feed, many=True)
         return Response(serializer.data)

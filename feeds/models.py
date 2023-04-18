@@ -2,6 +2,7 @@ from django.db import models
 from common.models import CommonModel
 from django.db.models import Count
 from django.core.exceptions import ValidationError
+from recomments.models import Recomment
 
 
 class Feed(CommonModel):
@@ -35,7 +36,11 @@ class Feed(CommonModel):
 
     @property
     def comments_count(self):
-        return self.comment.count()
+        recomment = 0
+        for i in self.comment.all():
+            recomment += i.recomment.count()
+        # print(Recomment.objects.filter(comment=self.comment).count())
+        return self.comment.count() + recomment
 
     @property
     def highest_like_comments(self):
