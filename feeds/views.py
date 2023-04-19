@@ -13,7 +13,7 @@ from groups.models import Group
 from categories.models import Category
 from medias.models import Image
 from comments.serializers import CommentSerializer
-from recomments.serializers import RecommentSerializer
+from comments.serializers import RecommentSerializer
 from comments.models import Comment
 
 user_schema = openapi.Schema(
