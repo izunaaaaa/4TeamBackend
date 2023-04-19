@@ -115,7 +115,7 @@ class LogIn(APIView):
             password=password,
         )
         if user:
-            # login(request, user)
+            login(request, user)
             refresh = RefreshToken.for_user(user)
             response = Response(
                 {
