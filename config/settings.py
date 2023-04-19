@@ -50,7 +50,7 @@ CUSTOM_APPS = [
     "users.apps.UsersConfig",
     "feeds.apps.FeedsConfig",
     "groups.apps.GroupsConfig",
-    "recomments.apps.RecommentsConfig",
+    # "recomments.apps.RecommentsConfig",
     "categories.apps.CategoriesConfig",
     "comments.apps.CommentsConfig",
     "likes.apps.LikesConfig",
