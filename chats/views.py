@@ -1,3 +1,5 @@
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.views import APIView
@@ -7,7 +9,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied, ParseError
 from rest_framework.permissions import IsAuthenticated
 from .models import Chatroom, Message
 from . import serializers
-from django.shortcuts import get_object_or_404
+from users.models import User
 
 
 class ChattingRoomList(APIView):
@@ -18,15 +20,22 @@ class ChattingRoomList(APIView):
         responses={
             200: openapi.Response(
                 description="Succfull Response",
-                schema=serializers.ChatroomListSerializer(many=True),
+                schema=serializers.ChatroomSerialzier(many=True),
             )
         },
     )
     def get(self, request):
-        chatlist = Chatroom.objects.filter(user__in=request.user).order_by(
-            "-created_at"
-        )
-        serializer = serializers.ChatroomListSerializer(
+        # chatlist = Chatroom.intersection(Message)
+        # for chat in chatlist:
+        #     chatlists = Chatlist.objects.filter(user=request.user)
+
+        # chatlist = Chatroom.objects.filter(
+        #     Q(user=request.user)
+        #     | Q(pk=(Message.objects.filter(sender=request.user).pk))
+        # )
+        # chatlist = Chatroom.objects.all().order_by("-created_at")
+        chatlist = Chatroom.objects.filter(user=request.user).order_by("-created_at")
+        serializer = serializers.ChatroomSerialzier(
             chatlist,
             many=True,
             # context={"request": request},
@@ -38,18 +47,18 @@ class ChattingRoom(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_summary="채팅방 조회 api",
+        operation_summary="채팅 조회 api",
         responses={
             200: openapi.Response(
                 description="Successful Response",
-                schema=serializers.ChatroomListSerializer(),
+                schema=serializers.ChatroomSerialzier(),
             ),
             400: openapi.Response(description="Not Found Pk"),
         },
     )
     def get(self, request, pk):
         chatroom = get_object_or_404(Chatroom, pk=pk)
-        serializer = serializers.ChatroomListSerializer(
+        serializer = serializers.ChatroomSerialzier(
             chatroom,
             context={"request": request},
         )
@@ -64,7 +73,7 @@ class ChattingRoom(APIView):
         responses={
             200: openapi.Response(
                 description="Successful Response",
-                schema=serializers.ChatroomListSerializer(),
+                schema=serializers.ChatroomSerialzier(),
             ),
             400: openapi.Response(description="Not Found Pk"),
         },
@@ -72,9 +81,16 @@ class ChattingRoom(APIView):
     def post(self, request, pk):
         serializer = serializers.ChatroomSerialzier(data=request.data)
         if serializer.is_valid():
-            receiver = request.data.get("receiver")
-            if receiver == request.user.pk:
-                raise ParseError("자신에게 보낼수 없습니다.")
+            receiver_id = request.data.get("receiver")
+            receiver = get_object_or_404(User, pk=receiver_id)
+            if receiver:
+                # if not receiver == int:
+                #     raise ParseError("required integer")
+                if receiver == request.user.pk:
+                    raise ParseError("can't send to yourself")
+            else:
+                raise ParseError("required receiver")
+
             if (
                 Chatroom.objects.filter(user__in=[request.user])
                 .filter(user__in=[receiver])
@@ -109,28 +125,28 @@ class ChattingRoom(APIView):
         return Response("Ok", status=200)
 
 
-class ChattingList(APIView):
-    permission_classes = [IsAuthenticated]
+# class ChattingList(APIView):
+#     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_summary="채팅 내역 조회 api",
-        responses={
-            200: openapi.Response(
-                description="Successful Response",
-                schema=serializers.ChatListSerializer(many=True),
-            ),
-            400: openapi.Response(description="Not Found Pk"),
-        },
-    )
-    def get(self, request, pk):
-        room = get_object_or_404(Chatroom, pk=pk)
-        if request.user in room.user.all():
-            msg = Message.objects.filter(room=room).reverse()
-            msg.exclude(sender=request.user).update(is_read=True)
-            serializer = serializers.ChatListSerializer(
-                msg,
-                many=True,
-            )
-            return Response(serializer.data)
-        else:
-            raise PermissionDenied
+#     @swagger_auto_schema(
+#         operation_summary="채팅 내역 조회 api",
+#         responses={
+#             200: openapi.Response(
+#                 description="Successful Response",
+#                 schema=serializers.ChatroomSerialzier(many=True),
+#             ),
+#             400: openapi.Response(description="Not Found Pk"),
+#         },
+#     )
+#     def get(self, request, pk):
+#         room = get_object_or_404(Chatroom, pk=pk)
+#         if request.user in room.user.all():
+#             msg = Message.objects.filter(room=room).reverse()
+#             msg.exclude(sender=request.user).update(is_read=True)
+#             serializer = serializers.ChatroomSerialzier(
+#                 msg,
+#                 many=True,
+#             )
+#             return Response(serializer.data)
+#         else:
+#             raise PermissionDenied

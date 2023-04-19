@@ -1,27 +1,29 @@
 from rest_framework.serializers import ModelSerializer
 from .models import Chatroom, Message
 from users.serializers import TinyUserSerializer
+from . import serializers
 
 
-class ChatroomListSerializer(ModelSerializer):
-    user = TinyUserSerializer(read_only=True, many=True)
+class MessageSerialzier(ModelSerializer):
+    sender = TinyUserSerializer(read_only=True)
 
     class Meta:
-        model = Chatroom
-        fields = "__all__"
+        model = Message
+        fields = (
+            "sender",
+            "room",
+            "text",
+        )
 
 
 class ChatroomSerialzier(ModelSerializer):
     user = TinyUserSerializer(read_only=True, many=True)
+    messages = serializers.MessageSerialzier(read_only=True, many=True)
 
     class Meta:
         model = Chatroom
-        fields = "__all__"
-
-
-class ChatListSerializer(ModelSerializer):
-    sender = TinyUserSerializer()
-
-    class Meta:
-        model = Message
-        fields = "__all__"
+        fields = (
+            "user",
+            "created_at",
+            "messages",
+        )

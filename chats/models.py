@@ -8,8 +8,8 @@ class Chatroom(CommonModel):
         related_name="chatroom",
     )
 
-    def __str__(self):
-        return f"{self.user}"
+    def __str__(self) -> str:
+        return str(self.pk) + "'st "
 
 
 class Message(CommonModel):
