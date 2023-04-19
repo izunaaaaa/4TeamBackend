@@ -21,7 +21,7 @@ class Message(CommonModel):
         related_name="send_messages",
     )
     room = models.ForeignKey(
-        "chats.Chatroom",
+        "chattings.Chatroom",
         on_delete=models.CASCADE,
         related_name="messages",
     )
