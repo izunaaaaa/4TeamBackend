@@ -2,7 +2,7 @@ from django.db import models
 from common.models import CommonModel
 from django.db.models import Count
 from django.core.exceptions import ValidationError
-from recomments.models import Recomment
+from comments.models import Recomment
 
 
 class Feed(CommonModel):
