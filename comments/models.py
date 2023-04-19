@@ -36,3 +36,10 @@ class Recomment(CommonModel):
         related_name="recomment",
     )
     description = models.TextField()
+
+    @property
+    def commentlikeCount(self):
+        return self.recommentlike.count()
+
+    def __str__(self) -> str:
+        return f"{self.description}"
