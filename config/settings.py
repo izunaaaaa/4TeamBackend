@@ -59,6 +59,7 @@ CUSTOM_APPS = [
     "letterlists.apps.LetterlistsConfig",
     "accessinfo.apps.AccessinfoConfig",
     "chats.apps.ChatsConfig",
+    "chattings.apps.ChattingsConfig",
 ]
 
 SYSTEM_APPS = [
