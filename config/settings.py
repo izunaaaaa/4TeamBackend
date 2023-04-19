@@ -47,18 +47,14 @@ THIRD_PARTY_APPS = [
 ]
 
 CUSTOM_APPS = [
+    "accessinfo.apps.AccessinfoConfig",
     "users.apps.UsersConfig",
     "feeds.apps.FeedsConfig",
     "groups.apps.GroupsConfig",
-    "recomments.apps.RecommentsConfig",
     "categories.apps.CategoriesConfig",
     "comments.apps.CommentsConfig",
     "likes.apps.LikesConfig",
     "medias.apps.MediasConfig",
-    "letters.apps.LettersConfig",
-    "letterlists.apps.LetterlistsConfig",
-    "accessinfo.apps.AccessinfoConfig",
-    "chats.apps.ChatsConfig",
     "chattings.apps.ChattingsConfig",
 ]
 

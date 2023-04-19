@@ -1,15 +1,13 @@
 from django.contrib import admin
-from .models import Chat, Chattingroom
+from .models import Chatroom, Message
 
 
-@admin.register(Chattingroom)
-class ChattingroomAdmin(admin.ModelAdmin):
+# Register your models here.
+@admin.register(Chatroom)
+class Chatting_RoomAdmin(admin.ModelAdmin):
     list_display = ("pk",)
 
 
-@admin.register(Chat)
-class ChatAdmin(admin.ModelAdmin):
-    list_display = (
-        "pk",
-        "chattingroom",
-    )
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ("sender",)
