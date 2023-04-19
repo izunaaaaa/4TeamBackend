@@ -39,7 +39,7 @@ urlpatterns = [
     path("api/v1/letters/", include("letters.urls")),
     path("api/v1/categories/", include("categories.urls")),
     path("api/v1/comments/", include("comments.urls")),
-    path("api/v1/recomments/", include("recomments.urls")),
+    # path("api/v1/recomments/", include("recomments.urls")),
     path("api/v1/likes/", include("likes.urls")),
     path("api/v1/letterlists/", include("letterlists.urls")),
     path("api/v1/access/", include("accessinfo.urls")),

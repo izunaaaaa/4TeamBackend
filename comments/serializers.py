@@ -1,14 +1,27 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Comment
+from .models import Comment, Recomment
 from users.serializers import TinyUserSerializer
-from recomments.serializers import RecommentSerializer
 from rest_framework.serializers import SerializerMethodField
 from likes.models import Commentlike
+from . import serializers
+
+
+class RecommentSerializer(ModelSerializer):
+    user = TinyUserSerializer(read_only=True)
+
+    class Meta:
+        model = Recomment
+        fields = (
+            "pk",
+            "user",
+            "created_at",
+            "description",
+        )
 
 
 class CommentSerializer(ModelSerializer):
     user = TinyUserSerializer(read_only=True)
-    recomment = RecommentSerializer(read_only=True, many=True)
+    recomment = serializers.RecommentSerializer(read_only=True, many=True)
     is_like = SerializerMethodField()
 
     class Meta:

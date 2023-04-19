@@ -23,3 +23,16 @@ class Comment(CommonModel):
     @property
     def commentlikeCount(self):
         return self.commentlike.count()
+
+
+class Recomment(CommonModel):
+    user = models.ForeignKey(
+        "users.User",
+        on_delete=models.CASCADE,
+    )
+    comment = models.ForeignKey(
+        "comments.Comment",
+        on_delete=models.CASCADE,
+        related_name="recomment",
+    )
+    description = models.TextField()
