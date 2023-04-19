@@ -44,6 +44,7 @@ urlpatterns = [
     path("api/v1/letterlists/", include("letterlists.urls")),
     path("api/v1/access/", include("accessinfo.urls")),
     path("api/v1/media/", include("medias.urls")),
+    path("api/v1/chats/", include("chats.urls")),
     path(
         "swagger/",
         schema_view.with_ui("swagger", cache_timeout=0),
