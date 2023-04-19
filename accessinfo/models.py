@@ -11,5 +11,6 @@ class AccessInfo(CommonModel):
     group = models.ForeignKey(
         Group,
         on_delete=models.CASCADE,
+        related_name="accessinfo",
     )
     is_signup = models.BooleanField(default=False)

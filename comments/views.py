@@ -4,32 +4,32 @@ from drf_yasg import openapi
 from django.db.models import Count
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import Comment, Recomment
 from . import serializers
 
 
-class Comments(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+# class Comments(APIView):
+#     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    @swagger_auto_schema(
-        operation_summary="전체 댓글 조회 api",
-        responses={
-            200: openapi.Response(
-                description="Successful Response",
-                schema=serializers.CommentSerializer(),
-            )
-        },
-    )
-    def get(self, request):
-        comment = Comment.objects.all()
-        comment = comment.order_by("-created_at")
-        serializer = serializers.CommentSerializer(
-            comment,
-            many=True,
-        )
-        return Response(serializer.data)
+#     @swagger_auto_schema(
+#         operation_summary="전체 댓글 조회 api",
+#         responses={
+#             200: openapi.Response(
+#                 description="Successful Response",
+#                 schema=serializers.CommentSerializer(),
+#             )
+#         },
+#     )
+#     def get(self, request):
+#         comment = Comment.objects.all()
+#         comment = comment.order_by("-created_at")
+#         serializer = serializers.CommentSerializer(
+#             comment,
+#             many=True,
+#         )
+#         return Response(serializer.data)
 
 
 class CommentDetail(APIView):
@@ -40,7 +40,7 @@ class CommentDetail(APIView):
             raise NotFound
 
     @swagger_auto_schema(
-        operation_summary="댓글 조회 api",
+        operation_summary="댓글 조회 api (본인만 가능)",
         responses={
             200: openapi.Response(
                 description="Successful Response",
@@ -50,8 +50,20 @@ class CommentDetail(APIView):
     )
     def get(self, request, pk):
         comment = self.get_object(pk)
+        if comment.user != request.user:
+            raise PermissionDenied
         serializer = serializers.CommentSerializer(comment)
         return Response(serializer.data)
+
+    def put(self, request, pk):
+        comment = self.get_object(pk)
+        if comment.user != request.user:
+            raise PermissionDenied
+        serializer = serializers.CommentSerializer(data=comment)
+        if serializer.is_valid():
+            comment = serializer.save()
+            serializer = serializers.CommentSerializer(comment)
+            return Response(serializer.data)
 
 
 class TopLikeView(APIView):

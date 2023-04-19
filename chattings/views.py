@@ -25,21 +25,8 @@ class ChattingRoomList(APIView):
         },
     )
     def get(self, request):
-        # chatlist = Chatroom.intersection(Message)
-        # for chat in chatlist:
-        #     chatlists = Chatlist.objects.filter(user=request.user)
-
-        # chatlist = Chatroom.objects.filter(
-        #     Q(user=request.user)
-        #     | Q(pk=(Message.objects.filter(sender=request.user).pk))
-        # )
-        # chatlist = Chatroom.objects.all().order_by("-created_at")
         chatlist = Chatroom.objects.filter(user=request.user).order_by("-created_at")
-        serializer = serializers.ChatroomSerialzier(
-            chatlist,
-            many=True,
-            # context={"request": request},
-        )
+        serializer = serializers.ChatroomSerialzier(chatlist, many=True)
         return Response(serializer.data)
 
 
@@ -125,28 +112,13 @@ class ChattingRoom(APIView):
         return Response("Ok", status=200)
 
 
-# class ChattingList(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     @swagger_auto_schema(
-#         operation_summary="채팅 내역 조회 api",
-#         responses={
-#             200: openapi.Response(
-#                 description="Successful Response",
-#                 schema=serializers.ChatroomSerialzier(many=True),
-#             ),
-#             400: openapi.Response(description="Not Found Pk"),
-#         },
-#     )
-#     def get(self, request, pk):
-#         room = get_object_or_404(Chatroom, pk=pk)
-#         if request.user in room.user.all():
-#             msg = Message.objects.filter(room=room).reverse()
-#             msg.exclude(sender=request.user).update(is_read=True)
-#             serializer = serializers.ChatroomSerialzier(
-#                 msg,
-#                 many=True,
-#             )
-#             return Response(serializer.data)
-#         else:
-#             raise PermissionDenied
+class MessageSend(APIView):
+    def post(self, request):
+        serializer = serializers.MessageSerialzier(data=request.data)
+        if serializer.is_valid():
+            if not request.data.get("receiver"):
+                return Response(2)
+            return Response(1)
+        else:
+            return Response(serializer.errors, status=400)
+        # if not request.data.get("receiver"):

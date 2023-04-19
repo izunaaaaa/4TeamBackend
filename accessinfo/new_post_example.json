@@ -1,0 +1,46 @@
+{
+  "group": "안녕하세요",
+  "members": [
+    {
+      "name": "최현우",
+      "email": "art972@naver.com",
+      "phone_number": "010-6114-8167"
+    },
+    {
+      "name": "김현수",
+      "email": "art971@naver.com",
+
+      "phone_number": "010-3421-1352"
+    },
+    {
+      "name": "이재빈",
+      "email": "art973@naver.com",
+
+      "phone_number": "010-1254-1523"
+    },
+    {
+      "name": "김수빈",
+      "email": "art974@naver.com",
+
+      "phone_number": "010-2134-6454"
+    },
+    {
+      "name": "김민송",
+      "email": "art975@naver.com",
+
+      "phone_number": "010-2234-6454"
+    },
+    {
+      "name": "김두홍",
+      "email": "art976@naver.com",
+
+      "phone_number": "010-2334-6254"
+    },
+    {
+      "name": "송가연",
+      "email": "art977@naver.com",
+
+      "phone_number": "010-7897-5346"
+    }
+  ]
+}
