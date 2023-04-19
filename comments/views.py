@@ -89,6 +89,7 @@ class Recomments(APIView):
     def get(self, request, pk):
         comment = get_object_or_404(Comment, pk=pk)
         recomment = Recomment.objects.filter(comment=comment)
+
         serializer = serializers.RecommentSerializer(
             recomment,
             many=True,
