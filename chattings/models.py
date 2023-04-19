@@ -2,23 +2,30 @@ from django.db import models
 from common.models import CommonModel
 
 
-class Chattingroom(CommonModel):
+class Chatroom(CommonModel):
     user = models.ManyToManyField(
         "users.User",
-        related_name="chattingroom_users",
+        related_name="chatroom",
     )
 
     def __str__(self) -> str:
-        return f"{self.pk}"
+        return str(self.pk) + "'st "
 
 
-class Chat(CommonModel):
-    chattingroom = models.ForeignKey(
-        "chattings.Chattingroom",
+class Message(CommonModel):
+    sender = models.ForeignKey(
+        "users.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="send_messages",
+    )
+    room = models.ForeignKey(
+        "chats.Chatroom",
         on_delete=models.CASCADE,
-        related_name="chattingroom",
+        related_name="messages",
     )
-    message = models.TextField()
+    text = models.TextField()
 
-    def __str__(self) -> str:
-        return f"{self.pk}"
+    def __str__(self):
+        return f"{self.text}"
