@@ -44,11 +44,9 @@ class Feed(CommonModel):
 
     @property
     def highest_like_comments(self):
-        return (
-            self.comment.annotate(like_count=Count("commentlike"))
-            .order_by("-like_count")
-            .first()
-        )
+        return self.comment.annotate(like_count=Count("commentlike")).order_by(
+            "-like_count"
+        )[:1]
 
     @property
     def thumbnail(self):
