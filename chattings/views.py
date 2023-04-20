@@ -7,16 +7,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, PermissionDenied, ParseError
 from rest_framework.permissions import IsAuthenticated
-from .models import Chatroom, Message
+from .models import Chattingroom, Message
 from . import serializers
 from users.models import User
 
 
-class ChattingRoomList(APIView):
+class ChattingList(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_summary="채팅 리스트 조회 api",
+        operation_summary="채팅 목록 조회 api",
         responses={
             200: openapi.Response(
                 description="Succfull Response",
@@ -25,7 +25,9 @@ class ChattingRoomList(APIView):
         },
     )
     def get(self, request):
-        chatlist = Chatroom.objects.filter(user=request.user).order_by("-created_at")
+        chatlist = Chattingroom.objects.filter(user=request.user).order_by(
+            "-created_at"
+        )
         serializer = serializers.ChatroomSerialzier(chatlist, many=True)
         return Response(serializer.data)
 
@@ -44,13 +46,29 @@ class ChattingRoom(APIView):
         },
     )
     def get(self, request, pk):
-        chatroom = get_object_or_404(Chatroom, pk=pk)
+        chatroom = get_object_or_404(Chattingroom, pk=pk)
         serializer = serializers.ChatroomSerialzier(
             chatroom,
             context={"request": request},
         )
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_summary="채팅방 삭제 api",
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+            ),
+            400: openapi.Response(description="Not Found Pk"),
+        },
+    )
+    def delete(self, request, pk):
+        chatroom = get_object_or_404(Chattingroom, pk=pk)
+        chatroom.delete()
+        return Response("Ok", status=200)
+
+
+class MessageSend(APIView):
     @swagger_auto_schema(
         operation_summary="채팅방 생성 api",
         request_body=openapi.Schema(
@@ -65,60 +83,47 @@ class ChattingRoom(APIView):
             400: openapi.Response(description="Not Found Pk"),
         },
     )
-    def post(self, request, pk):
-        serializer = serializers.ChatroomSerialzier(data=request.data)
-        if serializer.is_valid():
-            receiver_id = request.data.get("receiver")
-            receiver = get_object_or_404(User, pk=receiver_id)
-            if receiver:
-                # if not receiver == int:
-                #     raise ParseError("required integer")
-                if receiver == request.user.pk:
-                    raise ParseError("can't send to yourself")
-            else:
-                raise ParseError("required receiver")
-
-            if (
-                Chatroom.objects.filter(user__in=[request.user])
-                .filter(user__in=[receiver])
-                .exists()
-            ):
-                chat_room = (
-                    Chatroom.objects.filter(user__in=[request.user]).filter(
-                        user__in=[receiver]
-                    )
-                )[0]
-            else:
-                chat_room = serializer.save()
-                chat_room.user.add(request.user)
-                chat_room.user.add(receiver)
-            serializer = serializers.ChatroomSerialzier(chat_room)
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors, status=400)
-
-    @swagger_auto_schema(
-        operation_summary="채팅방 삭제 api",
-        responses={
-            200: openapi.Response(
-                description="Successful Response",
-            ),
-            400: openapi.Response(description="Not Found Pk"),
-        },
-    )
-    def delete(self, request, pk):
-        chatroom = get_object_or_404(Chatroom, pk=pk)
-        chatroom.delete()
-        return Response("Ok", status=200)
-
-
-class MessageSend(APIView):
     def post(self, request):
         serializer = serializers.MessageSerialzier(data=request.data)
         if serializer.is_valid():
-            if not request.data.get("receiver"):
-                return Response(2)
-            return Response(1)
+            receiver = request.data.get("receiver")
+            if not receiver:
+                raise ParseError("required receiver")
+            if receiver == request.user.pk:
+                raise ParseError("can't send to yourself")
+            message = serializer.save(sender=request.user, receiver=receiver)
+            serializer = serializers.MessageSerialzier(message)
+            return Response({"result": "create success"})
         else:
             return Response(serializer.errors, status=400)
-        # if not request.data.get("receiver"):
+
+    # def post(self, request, pk):
+    #     serializer = serializers.ChatroomSerialzier(data=request.data)
+    #     if serializer.is_valid():
+    #         receiver_pk = request.data.get("receiver_id")
+    #         if not receiver_pk:
+    #             raise ParseError("required receiver")
+    #         if not receiver_pk == int:
+    #             raise ParseError("required integer")
+    #         if receiver_pk == request.user.pk:
+    #             raise ParseError("can't send to yourself")
+    #         receiver = get_object_or_404(User, pk=receiver_pk)
+
+    #         if (
+    #             Chatroom.objects.filter(user__in=[request.user])
+    #             .filter(user__in=[receiver])
+    #             .exists()
+    #         ):
+    #             chat_room = (
+    #                 Chatroom.objects.filter(user__in=[request.user]).filter(
+    #                     user__in=[receiver]
+    #                 )
+    #             )[0]
+    #         else:
+    #             chat_room = serializer.save()
+    #             chat_room.user.add(request.user)
+    #             chat_room.user.add(receiver)
+    #         serializer = serializers.ChatroomSerialzier(chat_room)
+    #         return Response(serializer.data)
+    #     else:
+    #         return Response(serializer.errors, status=400)

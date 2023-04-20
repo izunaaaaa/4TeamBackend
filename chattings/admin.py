@@ -1,11 +1,11 @@
 from django.contrib import admin
-from .models import Chatroom, Message
+from .models import Chattingroom, Message
 
 
 # Register your models here.
-@admin.register(Chatroom)
+@admin.register(Chattingroom)
 class Chatting_RoomAdmin(admin.ModelAdmin):
-    list_display = ("pk",)
+    list_display = ("pk", "users_list")
 
 
 @admin.register(Message)
