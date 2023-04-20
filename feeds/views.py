@@ -221,7 +221,7 @@ class Feeds(APIView):
     )
     def get(self, request):
         feed = (
-            Feed.objects.prefetch_related("user", "group", "comment")
+            Feed.objects.prefetch_related("user", "group", "comment", "images")
             .all()
             .order_by("-created_at")
         )
