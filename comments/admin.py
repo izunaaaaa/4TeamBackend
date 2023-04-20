@@ -7,6 +7,8 @@ class CommentAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "feed",
+        "description",
+        "commentlikeCount",
     )
 
 
@@ -16,4 +18,5 @@ class RecommentAdmin(admin.ModelAdmin):
         "pk",
         "user",
         "comment",
+        "commentlikeCount",
     )

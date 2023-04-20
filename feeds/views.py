@@ -15,6 +15,7 @@ from medias.models import Image
 from comments.serializers import CommentSerializer
 from comments.serializers import RecommentSerializer
 from comments.models import Comment
+from django.db.models import F
 
 user_schema = openapi.Schema(
     type=openapi.TYPE_OBJECT,
@@ -219,9 +220,14 @@ class Feeds(APIView):
         },
     )
     def get(self, request):
-        feed = Feed.objects.all()
+        feed = (
+            Feed.objects.prefetch_related("user", "group", "comment", "images")
+            .all()
+            .order_by("-created_at")
+        )
+        # feed = Feed.objects.all().order_by("-created_at")
+
         # 최신순
-        feed = feed.order_by("-created_at")
         # pagenations
         current_page = request.GET.get("page", 1)
         items_per_page = 24
@@ -288,7 +294,7 @@ class Feeds(APIView):
                 category=category,
                 image=request.data.get("image"),
             )
-            serializer = serializers.FeedDetailSerializer(feed)
+            serializer = serializers.FeedDetailSerializer()
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=400)
@@ -308,15 +314,16 @@ class FeedDetail(APIView):
         },
     )
     def get(self, request, pk):
-        # feed = self.get_object(pk)
         feed = get_object_or_404(Feed, pk=pk)
         if feed.group != request.user.group:
             if not request.user.is_staff:
                 raise PermissionDenied
-        feed.visited += 1
-        feed.save()
 
-        serializer = serializers.FeedDetailSerializer(feed)
+        Feed.objects.filter(pk=pk).update(visited=F("visited") + 1)
+
+        serializer = serializers.FeedDetailSerializer(
+            feed, context={"request": request}
+        )
         return Response(serializer.data)
 
     @swagger_auto_schema(

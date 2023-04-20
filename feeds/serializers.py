@@ -13,6 +13,7 @@ import re
 from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
 from categories.models import Category
+from comments.models import Comment
 
 
 class FeedSerializer(ModelSerializer):
@@ -77,10 +78,9 @@ class FeedSerializer(ModelSerializer):
 class FeedDetailSerializer(ModelSerializer):
     user = TinyUserSerializer(read_only=True)
     group = GroupSerializer(read_only=True)
-    # category = CategorySerializer(read_only=True)
     comment = CommentSerializer(many=True, read_only=True)
     is_like = SerializerMethodField()
-    highest_like_comments = CommentSerializer(many=True, read_only=True)
+    highest_like_comments = CommentSerializer(read_only=True)
     images = MediaSerializer(many=True, read_only=True)
 
     class Meta:

@@ -8,4 +8,5 @@ class GroupAdmin(admin.ModelAdmin):
         "pk",
         "name",
         "members_count",
+        "stand_by_members_count",
     )

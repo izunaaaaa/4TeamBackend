@@ -69,8 +69,9 @@ class GroupCategories(APIView):
     )
     def post(self, request, group_pk):
         serializer = serializers.CategorySerializer(data=request.data)
-        # if request.user.is_coach == False:
-        # raise PermissionDenied
+        if not request.user.is_coach:
+            if not request.user.is_staff:
+                raise PermissionDenied
         if serializer.is_valid():
             category = serializer.save(group=group_pk)
             serializer = serializers.CategorySerializer(category)
@@ -94,24 +95,17 @@ class GroupCategoryDetail(APIView):
         serializer = serializers.CategorySerializer(category)
         return Response(serializer.data)
 
-    # @swagger_auto_schema(
-    #     operation_summary="그룹 카테고리 수정 api",
-    #     request_body=openapi.Schema(
-    #         type=openapi.TYPE_OBJECT,
-    #         required=["name"],
-    #         properties={
-    #             "name": openapi.Schema(type=openapi.TYPE_STRING, description="카테고리명"),
-    #         },
-    #     ),
-    #     responses={
-    #         200: openapi.Response(
-    #             description="Successful response",
-    #             schema=serializers.CategorySerializer(),
-    #         ),
-    #         400: "Bad Request",
-    #     },
-    #     request_body=serializers.CategorySerializer(),
-    # )
+    @swagger_auto_schema(
+        operation_summary="그룹 카테고리 수정 api",
+        request_body=serializers.CategorySerializer(),
+        responses={
+            200: openapi.Response(
+                description="Successful response",
+                schema=serializers.CategorySerializer(),
+            ),
+            400: "Bad Request",
+        },
+    )
     def put(self, request, group_pk, pk):
         group = get_object_or_404(Group, pk=group_pk)
         category = get_object_or_404(Category, pk=pk, group=group)

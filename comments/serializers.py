@@ -8,15 +8,29 @@ from . import serializers
 
 class RecommentSerializer(ModelSerializer):
     user = TinyUserSerializer(read_only=True)
+    is_like = SerializerMethodField()
 
     class Meta:
         model = Recomment
+
         fields = (
             "pk",
             "user",
             "created_at",
+            "commentlikeCount",
             "description",
+            "is_like",
         )
+
+    def get_is_like(self, data):
+        request = self.context.get("request")
+        if request:
+            if request.user.is_authenticated:
+                return Commentlike.objects.filter(
+                    user=request.user,
+                    recomment__pk=data.pk,
+                ).exists()
+        return False
 
 
 class CommentSerializer(ModelSerializer):

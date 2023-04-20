@@ -8,48 +8,16 @@ from . import serializers
 from .models import Feedlike, Commentlike
 from feeds.models import Feed
 from django.shortcuts import get_object_or_404
-from comments.models import Comment
+from comments.models import Comment, Recomment
 
 
 class FeedLikes(APIView):
     permission_classes = [IsAuthenticated]
 
-    # def get_object(self, pk):
-    #     try:
-    #         return Feed.objects.get(pk=pk)
-    #     except Feed.DoesNotExist:
-    #         raise NotFound
-
-    # @swagger_auto_schema(
-    #     operation_summary="피드 좋아요 조회 api",
-    #     responses={
-    #         200: openapi.Response(
-    #             description="Successful Response",
-    #             schema=serializers.FeedLikeSerializer(),
-    #         )
-    #     },
-    # )
-    # def get(self, request, pk):
-    #     feedlike = Feedlike.objects.filter(user=request.user)
-    #     serializer = serializers.FeedLikeSerializer(
-    #         feedlike,
-    #         many=True,
-    #     )
-    #     return Response(serializer.data)
-
     @swagger_auto_schema(
-        operation_summary="피드 좋아요 생성 api",
-        # request_body=openapi.Schema(
-        #     type=openapi.TYPE_OBJECT,
-        #     required=["feed"],
-        #     properties={
-        #         "feed": openapi.Schema(
-        #             type=openapi.TYPE_INTEGER, description="피드 id 값"
-        #         ),
-        #     },
-        # ),
+        operation_summary="피드 좋아요 생성 / 삭제",
         responses={
-            200: openapi.Response(description="OK"),
+            200: openapi.Response(description="created / deleted"),
             401: openapi.Response(description="The user is not authenticated"),
             404: openapi.Response(description="Not exist Pk"),
         },
@@ -65,9 +33,9 @@ class CommentLikes(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_summary="댓글 좋아요 생성 api",
+        operation_summary="댓글 좋아요 생성 / 삭제",
         responses={
-            200: openapi.Response(description="OK"),
+            200: openapi.Response(description="created / deleted"),
             401: openapi.Response(description="The user is not authenticated"),
             404: openapi.Response(description="Not exist Pk"),
         },
@@ -76,6 +44,26 @@ class CommentLikes(APIView):
         comment = get_object_or_404(Comment, pk=pk)
         like, created = Commentlike.objects.get_or_create(
             user=request.user, comment=comment
+        )
+        like.delete() if not created else None
+        return Response({"created" if created else "deleted"})
+
+
+class ReCommentLikes(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="대댓글 좋아요 생성 / 삭제",
+        responses={
+            200: openapi.Response(description="created / deleted"),
+            401: openapi.Response(description="The user is not authenticated"),
+            404: openapi.Response(description="Not exist Pk"),
+        },
+    )
+    def post(self, request, pk):
+        recomment = get_object_or_404(Recomment, pk=pk)
+        like, created = Commentlike.objects.get_or_create(
+            user=request.user, recomment=recomment
         )
         like.delete() if not created else None
         return Response({"created" if created else "deleted"})

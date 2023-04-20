@@ -17,4 +17,5 @@ class CommonlikeAdmin(admin.ModelAdmin):
         "pk",
         "user",
         "comment",
+        "recomment",
     )
