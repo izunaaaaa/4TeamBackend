@@ -2,7 +2,7 @@ from django.db import models
 from common.models import CommonModel
 
 
-class Chatroom(CommonModel):
+class Chattingroom(CommonModel):
     user = models.ManyToManyField(
         "users.User",
         related_name="chatroom",
@@ -10,6 +10,9 @@ class Chatroom(CommonModel):
 
     def __str__(self) -> str:
         return str(self.pk) + "'st "
+
+    def users_list(self):
+        return ", ".join([f"{user} / {user.pk}" for user in self.user.all()])
 
 
 class Message(CommonModel):
@@ -21,7 +24,7 @@ class Message(CommonModel):
         related_name="send_messages",
     )
     room = models.ForeignKey(
-        "chattings.Chatroom",
+        "chattings.Chattingroom",
         on_delete=models.CASCADE,
         related_name="messages",
     )
