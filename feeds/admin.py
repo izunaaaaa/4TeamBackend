@@ -10,6 +10,7 @@ class FeedAdmin(admin.ModelAdmin):
         "id",
         "user",
         "group",
+        "title",
         "description",
         "comments_count",
     )
@@ -28,6 +29,7 @@ class FeedAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "group",
+                    "title",
                     "category",
                     "description",
                 )

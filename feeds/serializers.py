@@ -24,6 +24,7 @@ class FeedSerializer(ModelSerializer):
     group = GroupSerializer(read_only=True)
     category = CategorySerializer(read_only=True)
     highest_like_comments = CommentSerializer(many=True, read_only=True)
+    is_writer = SerializerMethodField()
 
     class Meta:
         model = Feed
@@ -40,6 +41,7 @@ class FeedSerializer(ModelSerializer):
             "highest_like_comments",
             "is_like",
             "thumbnail",
+            "is_writer",
             # "images",
         )
 
@@ -52,6 +54,9 @@ class FeedSerializer(ModelSerializer):
                     feed__pk=data.pk,
                 ).exists()
         return False
+
+    def get_is_writer(self, data):
+        return self.context.get("request").user == data.user
 
     def validate_url(self, value):
         # Define a regular expression for valid URLs
@@ -82,6 +87,7 @@ class FeedDetailSerializer(ModelSerializer):
     is_like = SerializerMethodField()
     highest_like_comments = CommentSerializer(many=True, read_only=True)
     images = MediaSerializer(many=True, read_only=True)
+    is_writer = SerializerMethodField()
 
     class Meta:
         model = Feed
@@ -98,9 +104,10 @@ class FeedDetailSerializer(ModelSerializer):
             "like_count",
             "comments_count",
             "highest_like_comments",
-            "is_like",
             "comment",
             "images",
+            "is_like",
+            "is_writer",
         )
 
     def get_is_like(self, data):
@@ -112,6 +119,9 @@ class FeedDetailSerializer(ModelSerializer):
                     feed__pk=data.pk,
                 ).exists()
         return False
+
+    def get_is_writer(self, data):
+        return self.context.get("request").user == data.user
 
     def validate_url(self, value):
         # Define a regular expression for valid URLs

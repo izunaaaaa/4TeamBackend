@@ -16,29 +16,40 @@ from comments.serializers import CommentSerializer
 from comments.serializers import RecommentSerializer
 from comments.models import Comment
 from django.db.models import F
+from rest_framework import permissions
+
+
+class IsCoachOrStaff(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_coach or request.user.is_staff
+
 
 user_schema = openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
-        "username": openapi.Schema(
-            type=openapi.TYPE_STRING,
-            description="The username of the comment's author",
-        ),
-        "name": openapi.Schema(
-            type=openapi.TYPE_STRING,
-            description="The name of the comment's author",
-        ),
-        "email": openapi.Schema(
-            type=openapi.TYPE_STRING,
-            description="The email address of the comment's author",
-        ),
-        "avatar": openapi.Schema(
-            type=openapi.TYPE_STRING,
-            description="The URL of the comment author's avatar image, if available",
+        # "username": openapi.Schema(
+        #     type=openapi.TYPE_STRING,
+        #     description="The username of the comment's author",
+        # ),
+        # "name": openapi.Schema(
+        #     type=openapi.TYPE_STRING,
+        #     description="The name of the comment's author",
+        # ),
+        # "email": openapi.Schema(
+        #     type=openapi.TYPE_STRING,
+        #     description="The email address of the comment's author",
+        # ),
+        # "avatar": openapi.Schema(
+        #     type=openapi.TYPE_STRING,
+        #     description="The URL of the comment author's avatar image, if available",
+        # ),
+        "pk": openapi.Schema(
+            type=openapi.TYPE_INTEGER,
+            description="유저의 식별 pk값",
         ),
         "is_coach": openapi.Schema(
             type=openapi.TYPE_BOOLEAN,
-            description="Whether the comment's author is a coach",
+            description="코치 여부",
         ),
     },
 )
@@ -177,6 +188,9 @@ feed_schema = openapi.Schema(
         ),
         "thumnail": openapi.Schema(
             type=openapi.TYPE_STRING,
+        ),
+        "is_like": openapi.Schema(
+            type=openapi.TYPE_BOOLEAN,
         ),
     },
 )
@@ -734,3 +748,54 @@ class FeedRecomment(APIView):
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=400)
+
+
+class GroupFeedSearch(APIView):
+    permission_classes = [IsAuthenticated, IsCoachOrStaff]
+
+    @swagger_auto_schema(
+        operation_summary="그룹 피드 검색",
+        manual_parameters=[
+            openapi.Parameter(
+                "group_id",
+                openapi.IN_QUERY,
+                description="그룹의 pk 값",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            ),
+            openapi.Parameter(
+                "keyword",
+                openapi.IN_QUERY,
+                description="검색하는 키워드",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="성공",
+                examples={
+                    "application/json": {
+                        "result": [
+                            [1, "Feed 1 title"],
+                            [2, "Feed 2 title"],
+                            [3, "Feed 3 title"],
+                            [4, "Feed 4 title"],
+                            [5, "Feed 5 title"],
+                        ]
+                    }
+                },
+            ),
+            403: "유저가 속한 그룹이 아닌 데이터를 요청",
+        },
+    )
+    def get(self, request):
+        group_id = request.GET.get("group_id")
+        keyword = request.GET.get("keyword")
+        if keyword:
+            feeds = Feed.objects.order_by("-created_at").filter(
+                group__pk=group_id, title__icontains=keyword
+            )[:5]
+            data = {"result": [[feed.pk, feed.title] for feed in feeds]}
+            return Response(data)
+        else:
+            return Response(status=200)

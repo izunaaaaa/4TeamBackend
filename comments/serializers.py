@@ -9,6 +9,8 @@ from . import serializers
 class RecommentSerializer(ModelSerializer):
     user = TinyUserSerializer(read_only=True)
     is_like = SerializerMethodField()
+    is_writer = SerializerMethodField()
+    # anonymous_number = SerializerMethodField()
 
     class Meta:
         model = Recomment
@@ -19,7 +21,9 @@ class RecommentSerializer(ModelSerializer):
             "created_at",
             "commentlikeCount",
             "description",
+            # "anonymous_number",
             "is_like",
+            "is_writer",
         )
 
     def get_is_like(self, data):
@@ -32,11 +36,24 @@ class RecommentSerializer(ModelSerializer):
                 ).exists()
         return False
 
+    def get_is_writer(self, data):
+        return self.context.get("request").user == data.user
+
+    # def get_anonymous_number(self, obj):
+    #     comments = Comment.objects.filter(feed=obj.comment.feed)
+    #     recomments = Recomment.objects.filter(comment__in=comments)
+    #     queryset = list(obj.comment for obj in recomments) + list(comments)
+    #     queryset.sort(key=lambda obj: obj.created_at)
+    #     for i in queryset:
+    #         print(i.user)
+    #     return False
+
 
 class CommentSerializer(ModelSerializer):
     user = TinyUserSerializer(read_only=True)
     recomment = serializers.RecommentSerializer(read_only=True, many=True)
     is_like = SerializerMethodField()
+    is_writer = SerializerMethodField()
 
     class Meta:
         model = Comment
@@ -49,6 +66,7 @@ class CommentSerializer(ModelSerializer):
             "commentlikeCount",
             "recomment",
             "is_like",
+            "is_writer",
         )
 
     def get_is_like(self, data):
@@ -60,3 +78,6 @@ class CommentSerializer(ModelSerializer):
                     comment__pk=data.pk,
                 ).exists()
         return False
+
+    def get_is_writer(self, data):
+        return self.context.get("request").user == data.user
