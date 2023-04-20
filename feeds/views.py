@@ -185,6 +185,9 @@ feed_schema = openapi.Schema(
         "thumnail": openapi.Schema(
             type=openapi.TYPE_STRING,
         ),
+        "is_like": openapi.Schema(
+            type=openapi.TYPE_BOOLEAN,
+        ),
     },
 )
 

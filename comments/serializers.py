@@ -9,6 +9,7 @@ from . import serializers
 class RecommentSerializer(ModelSerializer):
     user = TinyUserSerializer(read_only=True)
     is_like = SerializerMethodField()
+    is_writer = SerializerMethodField()
 
     class Meta:
         model = Recomment
@@ -20,6 +21,7 @@ class RecommentSerializer(ModelSerializer):
             "commentlikeCount",
             "description",
             "is_like",
+            "is_writer",
         )
 
     def get_is_like(self, data):
@@ -32,11 +34,15 @@ class RecommentSerializer(ModelSerializer):
                 ).exists()
         return False
 
+    def get_is_writer(self, data):
+        return self.context.get("request").user == data.user
+
 
 class CommentSerializer(ModelSerializer):
     user = TinyUserSerializer(read_only=True)
     recomment = serializers.RecommentSerializer(read_only=True, many=True)
     is_like = SerializerMethodField()
+    is_writer = SerializerMethodField()
 
     class Meta:
         model = Comment
@@ -49,6 +55,7 @@ class CommentSerializer(ModelSerializer):
             "commentlikeCount",
             "recomment",
             "is_like",
+            "is_writer",
         )
 
     def get_is_like(self, data):
@@ -60,3 +67,6 @@ class CommentSerializer(ModelSerializer):
                     comment__pk=data.pk,
                 ).exists()
         return False
+
+    def get_is_writer(self, data):
+        return self.context.get("request").user == data.user
