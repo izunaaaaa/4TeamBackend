@@ -37,7 +37,11 @@ class RecommentSerializer(ModelSerializer):
         return False
 
     def get_is_writer(self, data):
-        return self.context.get("request").user == data.user
+        request = self.context.get("request")
+        if request:
+            if request.user.is_authenticated:
+                return request.user == data.user
+        return False
 
     # def get_anonymous_number(self, obj):
     #     comments = Comment.objects.filter(feed=obj.comment.feed)
