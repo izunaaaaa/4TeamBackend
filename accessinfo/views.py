@@ -75,7 +75,16 @@ class AllAccessInfo(APIView):
                             type=openapi.TYPE_BOOLEAN,
                             default=False,
                         ),
-                        "group": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "group": openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                                "name": openapi.Schema(type=openapi.TYPE_STRING),
+                                "members_count": openapi.Schema(
+                                    type=openapi.TYPE_INTEGER
+                                ),
+                            },
+                        ),
                     },
                 ),
             ),
