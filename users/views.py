@@ -321,7 +321,7 @@ class SignUp(APIView):
             )
 
     @swagger_auto_schema(
-        operation_summary="회원가입 api",
+        operation_summary="일반 유저 회원가입",
         responses={
             201: "Created",
             400: "bad request",
@@ -342,10 +342,56 @@ class SignUp(APIView):
             user.set_password(password)
             # user.password = password 시에는 raw password로 저장
             user.save()
+            login(request, user)
             # set_password 후 다시 저장
             serializer = serializers.PrivateUserSerializer(user)
-            login(request, user)
+            refresh = RefreshToken.for_user(user)
+            return Response(
+                {
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh),
+                    "data": serializer.data,
+                },
+                status=201,
+            )
+        else:
+            return Response(serializer.errors, status=400)
 
+
+class CoachSignUp(APIView):
+    def validate_password(self, password):
+        REGEX_PASSWORD = "^(?=.*[\d])(?=.*[a-z])(?=.*[!@#$%^&*()])[\w\d!@#$%^&*()]{8,}$"
+        if not re.fullmatch(REGEX_PASSWORD, password):
+            raise ParseError(
+                "비밀번호를 확인하세요. 최소 1개 이상의 소문자, 숫자, 특수문자로 구성되어야 하며 길이는 8자리 이상이어야 합니다."
+            )
+
+    @swagger_auto_schema(
+        operation_summary="코치 회원가입",
+        responses={
+            201: "Created",
+            400: "bad request",
+        },
+        request_body=serializers.PrivateUserSerializer(),
+    )
+    def post(self, request):
+        password = str(request.data.get("password"))
+        if not password:
+            raise ParseError("password 가 입력되지 않았습니다.")
+
+        serializer = serializers.PrivateUserSerializer(data=request.data)
+        if serializer.is_valid():
+            self.validate_password(password)
+            user = serializer.save()
+            if request.data.get("avatar"):
+                user.avatar = request.data.get("avatar")
+            user.set_password(password)
+            user.is_coach = True
+            # user.password = password 시에는 raw password로 저장
+            user.save()
+            login(request, user)
+            # set_password 후 다시 저장
+            serializer = serializers.PrivateUserSerializer(user)
             refresh = RefreshToken.for_user(user)
             return Response(
                 {
