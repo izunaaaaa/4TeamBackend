@@ -91,39 +91,15 @@ class MessageSend(APIView):
                 raise ParseError("required receiver")
             if receiver == request.user.pk:
                 raise ParseError("can't send to yourself")
-            message = serializer.save(sender=request.user, receiver=receiver)
+            text = request.data.get("text")
+            if not text:
+                raise ParseError("required text")
+            message = serializer.save(
+                sender=request.user,
+                receiver=receiver,
+                text=text,
+            )
             serializer = serializers.MessageSerialzier(message)
             return Response({"result": "create success"})
         else:
             return Response(serializer.errors, status=400)
-
-    # def post(self, request, pk):
-    #     serializer = serializers.ChatroomSerialzier(data=request.data)
-    #     if serializer.is_valid():
-    #         receiver_pk = request.data.get("receiver_id")
-    #         if not receiver_pk:
-    #             raise ParseError("required receiver")
-    #         if not receiver_pk == int:
-    #             raise ParseError("required integer")
-    #         if receiver_pk == request.user.pk:
-    #             raise ParseError("can't send to yourself")
-    #         receiver = get_object_or_404(User, pk=receiver_pk)
-
-    #         if (
-    #             Chatroom.objects.filter(user__in=[request.user])
-    #             .filter(user__in=[receiver])
-    #             .exists()
-    #         ):
-    #             chat_room = (
-    #                 Chatroom.objects.filter(user__in=[request.user]).filter(
-    #                     user__in=[receiver]
-    #                 )
-    #             )[0]
-    #         else:
-    #             chat_room = serializer.save()
-    #             chat_room.user.add(request.user)
-    #             chat_room.user.add(receiver)
-    #         serializer = serializers.ChatroomSerialzier(chat_room)
-    #         return Response(serializer.data)
-    #     else:
-    #         return Response(serializer.errors, status=400)
