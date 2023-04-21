@@ -324,6 +324,7 @@ class SignUp(APIView):
                 user.avatar = request.data.get("avatar")
             user.set_password(password)
             # user.password = password 시에는 raw password로 저장
+            user.is_coach = True
             user.save()
             # set_password 후 다시 저장
             serializer = serializers.PrivateUserSerializer(user)
