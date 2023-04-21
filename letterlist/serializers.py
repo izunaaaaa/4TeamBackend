@@ -47,4 +47,8 @@ class MessageSerialzier(ModelSerializer):
             chatroom.user.add(validated_data.get("sender"))
             chatroom.user.add(validated_data.get("receiver"))
 
-        return Letter.objects.create(room=chatroom, sender=validated_data.get("sender"))
+        return Letter.objects.create(
+            room=chatroom,
+            sender=validated_data.get("sender"),
+            text=validated_data.get("text"),
+        )
