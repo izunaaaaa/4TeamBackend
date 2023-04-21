@@ -35,7 +35,6 @@ class MessageSerialzier(ModelSerializer):
         validated_data["receiver"] = get_object_or_404(
             User, pk=validated_data.get("receiver")
         )
-        print(validated_data)
 
         chatroom = (
             Letterlist.objects.filter(user__in=[validated_data.get("sender")])
@@ -48,6 +47,4 @@ class MessageSerialzier(ModelSerializer):
             chatroom.user.add(validated_data.get("sender"))
             chatroom.user.add(validated_data.get("receiver"))
 
-        return Letterlist.objects.create(
-            room=chatroom, sender=validated_data.get("sender")
-        )
+        return Letter.objects.create(room=chatroom, sender=validated_data.get("sender"))
