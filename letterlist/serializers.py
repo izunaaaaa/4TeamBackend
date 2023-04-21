@@ -41,7 +41,6 @@ class MessageSerialzier(ModelSerializer):
             .filter(user__in=[validated_data.get("receiver")])
             .first()
         )
-        print(chatroom)
 
         if not chatroom:
             chatroom = Letterlist.objects.create()
