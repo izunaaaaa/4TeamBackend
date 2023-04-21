@@ -710,6 +710,8 @@ class FeedComment(APIView):
 
 
 class FeedRecomment(APIView):
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         operation_summary="피드 대댓글 등록",
         operation_description="feed 의 id와 comment id 입력",
@@ -744,7 +746,10 @@ class FeedRecomment(APIView):
                 user=request.user,
                 comment=comment,
             )
-            serializer = RecommentSerializer(recomment)
+            serializer = RecommentSerializer(
+                recomment,
+                context={"request": request},
+            )
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=400)
