@@ -479,7 +479,7 @@ class FeedList(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        feed = Feed.objects.filter(user=request.user)
+        feed = Feed.objects.filter(user=request.user).order_by(-"created_at")
         current_page = request.GET.get("page", 1)
         items_per_page = 12
         paginator = Paginator(feed, items_per_page)
