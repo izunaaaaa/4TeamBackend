@@ -16,6 +16,17 @@ from categories.models import Category
 from comments.models import Comment
 
 
+class TinyFeedSerializer(ModelSerializer):
+    class Meta:
+        model = Feed
+        fields = (
+            "title",
+            "thumbnail",
+            "like_count",
+            "comments_count",
+        )
+
+
 class FeedSerializer(ModelSerializer):
     # comment = CommentSerializer(many=True, read_only=True)
     user = TinyUserSerializer(read_only=True)

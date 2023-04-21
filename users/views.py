@@ -151,11 +151,28 @@ class FeedLikes(APIView):
     )
     def get(self, request):
         feedlike = Feedlike.objects.filter(user=request.user)
+        current_page = request.GET.get("page", 1)
+        items_per_page = 12
+        paginator = Paginator(feedlike, items_per_page)
+        try:
+            page = paginator.page(current_page)
+        except:
+            page = paginator.page(paginator.num_pages)
+
+        if int(current_page) > int(paginator.num_pages):
+            raise ParseError("that page is out of range")
+
         serializer = FeedLikeSerializer(
             feedlike,
             many=True,
         )
-        return Response(serializer.data)
+        data = {
+            "total_pages": paginator.num_pages,
+            "now_page": page.number,
+            "count": paginator.count,
+            "results": serializer.data,
+        }
+        return Response(data)
 
     @swagger_auto_schema(
         operation_summary="피드 좋아요 생성 api",
@@ -464,7 +481,7 @@ class FeedList(APIView):
     def get(self, request):
         feed = Feed.objects.filter(user=request.user)
         current_page = request.GET.get("page", 1)
-        items_per_page = 1
+        items_per_page = 12
         paginator = Paginator(feed, items_per_page)
         try:
             page = paginator.page(current_page)
