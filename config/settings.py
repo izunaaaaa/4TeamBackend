@@ -56,7 +56,8 @@ CUSTOM_APPS = [
     "comments.apps.CommentsConfig",
     "likes.apps.LikesConfig",
     "medias.apps.MediasConfig",
-    "chattings.apps.ChattingsConfig",
+    # "chattings.apps.ChattingsConfig",
+    "letterlist.apps.LetterlistConfig",
 ]
 
 SYSTEM_APPS = [

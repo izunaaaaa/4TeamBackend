@@ -464,7 +464,7 @@ class FeedList(APIView):
     def get(self, request):
         feed = Feed.objects.filter(user=request.user)
         current_page = request.GET.get("page", 1)
-        items_per_page = 10
+        items_per_page = 1
         paginator = Paginator(feed, items_per_page)
         try:
             page = paginator.page(current_page)
