@@ -16,4 +16,7 @@ class LetterListAdmin(admin.ModelAdmin):
 
 @admin.register(Letter)
 class LetterAdmin(admin.ModelAdmin):
-    list_display = ("sender",)
+    list_display = (
+        "pk",
+        "sender",
+    )
