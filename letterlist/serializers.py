@@ -3,24 +3,24 @@ from .models import Letter, Letterlist
 from users.serializers import TinyUserSerializer
 from users.models import User
 from django.shortcuts import get_object_or_404
+from rest_framework.serializers import SerializerMethodField
 
 
 class ChatroomSerialzier(ModelSerializer):
     user = TinyUserSerializer(read_only=True, many=True)
-    # messages = serializers.MessageSerialzier(read_only=True, many=True)
 
     class Meta:
         model = Letterlist
         fields = (
             "user",
             "created_at",
-            # "messages",
         )
 
 
 class MessageSerialzier(ModelSerializer):
     sender = TinyUserSerializer(read_only=True)
     room = ChatroomSerialzier(read_only=True)
+    is_sender = SerializerMethodField()
 
     class Meta:
         model = Letter
@@ -28,7 +28,15 @@ class MessageSerialzier(ModelSerializer):
             "sender",
             "room",
             "text",
+            "is_sender",
         )
+
+    def get_is_sender(self, data):
+        request = self.context.get("request")
+        if request:
+            if request.user.is_authenticated:
+                return request.user == data.sender
+        return False
 
     def create(self, validated_data):
         # 유저가 유효한지 확인
@@ -41,7 +49,6 @@ class MessageSerialzier(ModelSerializer):
             .filter(user__in=[validated_data.get("receiver")])
             .first()
         )
-        print(chatroom)
 
         if not chatroom:
             chatroom = Letterlist.objects.create()
