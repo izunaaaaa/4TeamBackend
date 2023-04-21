@@ -8,12 +8,12 @@ from .models import Letterlist, Letter
 # Register your models here.
 @admin.register(Letterlist)
 class LetterListAdmin(admin.ModelAdmin):
-    list_display = ("pk", "users_list")
+    list_display = (
+        "pk",
+        "users_list",
+    )
 
 
 @admin.register(Letter)
 class LetterAdmin(admin.ModelAdmin):
-    list_display = (
-        "pk",
-        "sender",
-    )
+    list_display = ("sender",)
