@@ -4,17 +4,27 @@ from users.serializers import TinyUserSerializer
 from users.models import User
 from django.shortcuts import get_object_or_404
 from rest_framework.serializers import SerializerMethodField
+from rest_framework.exceptions import ParseError
 
 
 class ChatroomSerialzier(ModelSerializer):
-    user = TinyUserSerializer(read_only=True, many=True)
+    receiver = SerializerMethodField()
 
     class Meta:
         model = Letterlist
         fields = (
-            "user",
+            # "user",
+            "receiver",
             "created_at",
         )
+
+    def get_receiver(self, obj):
+        print(obj.user.all())
+        request = self.context.get("request")
+        for i in obj.user.all():
+            if i != request.user:
+                return f"{i.username}님과의 쪽지내역"
+        raise ParseError("Error")
 
 
 class MessageSerialzier(ModelSerializer):

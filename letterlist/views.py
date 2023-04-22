@@ -27,7 +27,11 @@ class ChattingList(APIView):
     )
     def get(self, request):
         chatlist = Letterlist.objects.filter(user=request.user).order_by("-updated_at")
-        serializer = serializers.ChatroomSerialzier(chatlist, many=True)
+        serializer = serializers.ChatroomSerialzier(
+            chatlist,
+            many=True,
+            context={"request": request},
+        )
         return Response(serializer.data)
 
 
