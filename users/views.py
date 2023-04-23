@@ -16,7 +16,7 @@ from likes.serializers import FeedLikeSerializer, CommentLikeSerializer
 import re
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.paginator import Paginator
-from feeds.serializers import FeedSerializer
+from feeds.serializers import FeedSerializer, TinyFeedSerializer
 from comments.models import Comment
 from comments.serializers import CommentSerializer
 from django.db.models import Q
@@ -151,6 +151,9 @@ class FeedLikes(APIView):
     )
     def get(self, request):
         feedlike = Feedlike.objects.filter(user=request.user)
+        if not feedlike:
+            return Response("Does not exist Likelist")
+        feedlike = [i.feed for i in feedlike]
         current_page = request.GET.get("page", 1)
         items_per_page = 12
         paginator = Paginator(feedlike, items_per_page)
@@ -161,8 +164,7 @@ class FeedLikes(APIView):
 
         if int(current_page) > int(paginator.num_pages):
             raise ParseError("that page is out of range")
-
-        serializer = FeedLikeSerializer(
+        serializer = TinyFeedSerializer(
             feedlike,
             many=True,
         )
@@ -525,7 +527,7 @@ class FeedList(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        feed = Feed.objects.filter(user=request.user).order_by(-"created_at")
+        feed = Feed.objects.filter(user=request.user).order_by("-created_at")
         current_page = request.GET.get("page", 1)
         items_per_page = 12
         paginator = Paginator(feed, items_per_page)
