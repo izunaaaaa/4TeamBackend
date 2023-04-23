@@ -20,7 +20,7 @@ class TinyFeedSerializer(ModelSerializer):
     class Meta:
         model = Feed
         fields = (
-            "pk",
+            "id",
             "title",
             "thumbnail",
             "like_count",
