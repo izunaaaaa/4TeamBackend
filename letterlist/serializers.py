@@ -14,6 +14,7 @@ class ChatroomSerialzier(ModelSerializer):
         model = Letterlist
         fields = (
             # "user",
+            "pk",
             "receiver",
             "created_at",
         )
