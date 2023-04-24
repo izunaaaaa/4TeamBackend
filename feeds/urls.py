@@ -9,6 +9,7 @@ urlpatterns = [
         "<int:pk>/comment/<int:comment_pk>/recomment/", views.FeedRecomment.as_view()
     ),  # 대댓글 등록
     path("group/search/", views.GroupFeedSearch.as_view()),
+    path("group/search/result", views.GroupFeedSearchResult.as_view()),
     path("group/category/", views.GroupFeedCategory.as_view()),
     path("toplike/", views.TopLikeView.as_view()),
     # path("group/", views.GroupFeeds.as_view()),

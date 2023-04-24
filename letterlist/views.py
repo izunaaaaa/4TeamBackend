@@ -52,11 +52,13 @@ class ChattingRoom(APIView):
     def get(self, request, pk):
         chat = Letter.objects.filter(room__pk=pk)
         if chat:
+            chat = [i for i in chat if request.user not in i.delete_by.all()]
             serializer = serializers.MessageSerialzier(
                 chat,
                 many=True,
                 context={"request": request},
             )
+
             return Response(serializer.data)
         raise NotFound
 
@@ -116,8 +118,12 @@ class MessageDelete(APIView):
     )
     def delete(self, request, pk):
         letter = get_object_or_404(Letter, pk=pk)
-        if letter.sender == request.user:
-            letter.delete()
-            return Response("Ok", status=204)
+        user = [i for i in letter.room.user.all()]
+        if request.user in user:
+            letter.delete_by.add(request.user)
+            letter.save()
+        # if letter.sender == request.user:
+        #     # letter.delete()
+        #     return Response("Ok", status=204)
         else:
             raise PermissionDenied

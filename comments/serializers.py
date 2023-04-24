@@ -4,7 +4,6 @@ from users.serializers import TinyUserSerializer
 from rest_framework.serializers import SerializerMethodField
 from likes.models import Commentlike
 from . import serializers
-from feeds.serializers import TinyFeedSerializer
 
 
 class RecommentSerializer(ModelSerializer):
@@ -59,14 +58,12 @@ class CommentSerializer(ModelSerializer):
     recomment = serializers.RecommentSerializer(read_only=True, many=True)
     is_like = SerializerMethodField()
     is_writer = SerializerMethodField()
-    feed = TinyFeedSerializer(read_only=True)
 
     class Meta:
         model = Comment
         fields = (
             "id",
             "user",
-            "feed",
             "description",
             "created_at",
             "commentlikeCount",
@@ -84,6 +81,37 @@ class CommentSerializer(ModelSerializer):
                     comment__pk=data.pk,
                 ).exists()
         return False
+
+    def get_is_writer(self, data):
+        request = self.context.get("request")
+        if request:
+            if request.user.is_authenticated:
+                return request.user == data.user
+        return False
+
+
+class TinyCommentSerializer(ModelSerializer):
+    recomment = serializers.RecommentSerializer(read_only=True, many=True)
+    is_writer = SerializerMethodField()
+    feed = SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = (
+            "id",
+            "description",
+            "created_at",
+            "commentlikeCount",
+            "recomment",
+            "feed",
+            "is_writer",
+        )
+
+    def get_feed(self, obj):
+        from feeds.serializers import TinyFeedSerializer
+
+        feed = TinyFeedSerializer(obj.feed).data
+        return feed
 
     def get_is_writer(self, data):
         request = self.context.get("request")
