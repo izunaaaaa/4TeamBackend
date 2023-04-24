@@ -3,7 +3,6 @@ from rest_framework.serializers import SerializerMethodField
 from .models import Feed
 from users.serializers import TinyUserSerializer
 from comments.serializers import CommentSerializer
-from medias.serializers import MediaSerializer
 from likes.models import Feedlike
 from groups.serializers import GroupSerializer
 from categories.serializers import CategorySerializer
@@ -13,7 +12,6 @@ import re
 from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
 from categories.models import Category
-from comments.models import Comment
 
 
 class TinyFeedSerializer(ModelSerializer):

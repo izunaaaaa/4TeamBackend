@@ -18,7 +18,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.paginator import Paginator
 from feeds.serializers import FeedSerializer, TinyFeedSerializer
 from comments.models import Comment
-from comments.serializers import CommentSerializer
+from comments.serializers import CommentSerializer, TinyCommentSerializer
 from django.db.models import Q
 from likes.models import Feedlike, Commentlike
 
@@ -579,7 +579,7 @@ class CommentList(APIView):
             .distinct()
             .order_by("created_at")
         )
-        serializer = CommentSerializer(comments, many=True)
+        serializer = TinyCommentSerializer(comments, many=True, context={"request":request})
         return Response(serializer.data)
 
 

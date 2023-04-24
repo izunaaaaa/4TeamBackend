@@ -106,7 +106,9 @@ class AllAccessInfo(APIView):
                             AccessListSerializer(serializer, many=True).data
                         )
 
-                return Response(serializer.errors, status=400)
+                    return Response(serializer.errors, status=400)
+                else:
+                    raise ParseError("Does not exist group")
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
