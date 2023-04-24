@@ -13,7 +13,7 @@ class Letterlist(CommonModel):
         return str(self.pk) + "'st "
 
     def users_list(self):
-        return ", ".join([f"{user} / {user.pk}" for user in self.user.all()])
+        return ", ".join([f"{user} / {user.pk} " for user in self.user.all()])
 
     @property
     def letter_count(self):
