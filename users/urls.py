@@ -11,6 +11,7 @@ urlpatterns = [
     # path("me/likelist/", views.LikeList.as_view()),
     # path("@<str:username>/", views.UserDetail.as_view()),
     path("login/", views.LogIn.as_view()),
+    path("logout/", views.LogOut.as_view()),
     path("checkID/", views.CheckID.as_view()),
     path("signup/", views.SignUp.as_view()),
     path("signup/coach", views.CoachSignUp.as_view()),

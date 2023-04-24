@@ -4,6 +4,7 @@ from users.serializers import TinyUserSerializer
 from rest_framework.serializers import SerializerMethodField
 from likes.models import Commentlike
 from . import serializers
+from feeds.serializers import TinyFeedSerializer
 
 
 class RecommentSerializer(ModelSerializer):
@@ -58,13 +59,14 @@ class CommentSerializer(ModelSerializer):
     recomment = serializers.RecommentSerializer(read_only=True, many=True)
     is_like = SerializerMethodField()
     is_writer = SerializerMethodField()
+    feed = TinyFeedSerializer(read_only=True)
 
     class Meta:
         model = Comment
         fields = (
             "id",
             "user",
-            # "feed"
+            "feed",
             "description",
             "created_at",
             "commentlikeCount",

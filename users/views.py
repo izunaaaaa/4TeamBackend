@@ -131,6 +131,19 @@ class LogIn(APIView):
             return Response({"error": "wrong name or password"}, status=400)
 
 
+class LogOut(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="로그아웃 api",
+        operation_description="로그아웃",
+        responses={200: "OK", 403: "Forbidden"},
+    )
+    def post(self, request):
+        logout(request)
+        return Response({"LogOut": True})
+
+
 class FeedLikes(APIView):
     permission_classes = [IsAuthenticated]
 

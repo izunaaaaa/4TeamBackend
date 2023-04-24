@@ -45,7 +45,7 @@ class GroupCategories(APIView):
     )
     def get(self, request, group_pk):
         group = get_object_or_404(Group, pk=group_pk)
-        category = Category.objects.filter(group=group)
+        category = Category.objects.filter(group=group).order_by("-created_at")
         serializer = serializers.CategorySerializer(
             category,
             many=True,
