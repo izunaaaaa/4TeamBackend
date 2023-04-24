@@ -143,6 +143,8 @@ class Recomments(APIView):
 
 
 class DeleteRecomment(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     @swagger_auto_schema(
         operation_summary="대댓글 삭제",
         responses={
@@ -152,10 +154,8 @@ class DeleteRecomment(APIView):
             403: "Permission Denied",
         },
     )
-    def delete(self, request, comment_pk, recomment_pk):
-        recomment = get_object_or_404(
-            Recomment, comment__pk=comment_pk, pk=recomment_pk
-        )
+    def delete(self, request, recomment_pk):
+        recomment = get_object_or_404(Recomment, pk=recomment_pk)
         if recomment.user == request.user:
             recomment.delete()
             return Response(status=204)
