@@ -207,22 +207,22 @@ if os.environ.get("SERVER") == "NAVER":
     #     }
     # }
 else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
     # DATABASES = {
     #     "default": {
-    #         "ENGINE": "django.db.backends.postgresql",
-    #         "NAME": env("POSTGRES_NAME"),
-    #         "USER": env("POSTGRES_USER"),
-    #         "PASSWORD": env("POSTGRES_PASSWORD"),
-    #         "HOST": env("POSTGRES_HOST"),
-    #         "PORT": env("POSTGRES_PORT"),
+    #         "ENGINE": "django.db.backends.sqlite3",
+    #         "NAME": BASE_DIR / "db.sqlite3",
     #     }
     # }
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env("POSTGRES_NAME"),
+            "USER": env("POSTGRES_USER"),
+            "PASSWORD": env("POSTGRES_PASSWORD"),
+            "HOST": env("POSTGRES_HOST"),
+            "PORT": env("POSTGRES_PORT"),
+        }
+    }
 
 
 from datetime import timedelta
@@ -253,3 +253,23 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://localhost:6379",
+        "TIMEOUT": 60 * 60,
+        "OPTIONS": {
+            "DB": 1,
+        },
+    }
+}
+
+
+SESSION_CACHE_ALIAS = "default"
+
+SESSION_ENGINE = "redis_sessions.session"
+
+SESSION_REDIS_HOST = "localhost"
+SESSION_REDIS_PORT = 6379
+SESSION_REDIS_DB = 0

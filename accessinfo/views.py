@@ -22,19 +22,19 @@ class IsCoachOrStaff(permissions.BasePermission):
 class AllAccessInfo(APIView):
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_summary="엑세스 가능한 리스트 (임시 테스트용)",
-        responses={
-            200: openapi.Response(
-                schema=AccessListSerializer(many=True),
-                description="Successful Response",
-            ),
-        },
-    )
-    def get(self, request):
-        all_access_info = AccessInfo.objects.all()
-        serializer = AccessListSerializer(all_access_info, many=True)
-        return Response(serializer.data)
+    # @swagger_auto_schema(
+    #     operation_summary="엑세스 가능한 리스트 (임시 테스트용)",
+    #     responses={
+    #         200: openapi.Response(
+    #             schema=AccessListSerializer(many=True),
+    #             description="Successful Response",
+    #         ),
+    #     },
+    # )
+    # def get(self, request):
+    #     all_access_info = AccessInfo.objects.all()
+    #     serializer = AccessListSerializer(all_access_info, many=True)
+    #     return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_summary="그룹과 엑세스 가능한 유저 생성",
