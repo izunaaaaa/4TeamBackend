@@ -353,11 +353,13 @@ class SignUp(APIView):
         phone_number = request.data.get("phone_number")
         email = request.data.get("email")
         group = get_object_or_404(Group, pk=request.data.get("group"))
-        is_access = AccessInfo.objects.filter(
-            name=name, phone_number=phone_number, email=email, group=group
-        ).exists()
-        if not is_access:
+        try:
+            access_user = AccessInfo.objects.get(
+                name=name, phone_number=phone_number, email=email, group=group
+            )
+        except AccessInfo.DoesNotExist:
             raise PermissionDenied
+
         serializer = serializers.PrivateUserSerializer(data=request.data)
         if serializer.is_valid():
             self.validate_password(password)
@@ -368,6 +370,8 @@ class SignUp(APIView):
             user.group = group
             # user.password = password 시에는 raw password로 저장
             user.save()
+            access_user.is_signup = True
+            access_user.save()
             login(request, user)
             # set_password 후 다시 저장
             serializer = serializers.PrivateUserSerializer(user)
