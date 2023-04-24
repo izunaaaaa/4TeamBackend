@@ -102,6 +102,8 @@ class MessageSend(APIView):
 
 
 class MessageDelete(APIView):
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         operation_summary="쪽지 삭제",
         responses={
@@ -113,9 +115,9 @@ class MessageDelete(APIView):
         },
     )
     def delete(self, request, pk):
-        Letter = get_object_or_404(Letter, pk=pk)
-        if Letter.sender == request.user:
-            Letter.delete()
+        letter = get_object_or_404(Letter, pk=pk)
+        if letter.sender == request.user:
+            letter.delete()
             return Response("Ok", status=204)
         else:
             raise PermissionDenied
