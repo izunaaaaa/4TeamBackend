@@ -1,5 +1,6 @@
 from django.db import models
 from common.models import CommonModel
+from django.core.exceptions import ValidationError
 
 
 class Letterlist(CommonModel):
@@ -13,6 +14,17 @@ class Letterlist(CommonModel):
 
     def users_list(self):
         return ", ".join([f"{user} / {user.pk}" for user in self.user.all()])
+
+    @property
+    def letter_count(self):
+        return self.letter.count()
+
+    @property
+    def last_letter(self):
+        if self.letter.exists():
+            return self.letter.order_by("-created_at").first().text
+        else:
+            return "메세지가 없습니다."
 
 
 class Letter(CommonModel):
@@ -30,5 +42,19 @@ class Letter(CommonModel):
     )
     text = models.TextField()
 
+    delete_by = models.ManyToManyField(
+        "users.User",
+        related_name="deleted_letters",
+        null=True,
+        blank=True,
+    )
+
     def __str__(self):
         return f"{self.text}"
+
+    @property
+    def delete_user(self):
+        if self.delete_by.exists():
+            return "".join([i.username for i in self.delete_by.all()])
+        else:
+            return None

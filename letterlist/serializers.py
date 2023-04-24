@@ -17,6 +17,8 @@ class ChatroomSerialzier(ModelSerializer):
             "pk",
             "receiver",
             "created_at",
+            "letter_count",
+            "last_letter",
         )
 
     def get_receiver(self, obj):
@@ -29,15 +31,16 @@ class ChatroomSerialzier(ModelSerializer):
 
 
 class MessageSerialzier(ModelSerializer):
-    sender = TinyUserSerializer(read_only=True)
-    room = ChatroomSerialzier(read_only=True)
+    # sender = TinyUserSerializer(read_only=True)
+    # room = ChatroomSerialzier(read_only=True)
     is_sender = SerializerMethodField()
 
     class Meta:
         model = Letter
         fields = (
-            "sender",
-            "room",
+            # "sender",
+            # "room",
+            "id",
             "text",
             "is_sender",
         )

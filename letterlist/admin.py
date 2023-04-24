@@ -19,4 +19,5 @@ class LetterAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
         "sender",
+        "delete_user",
     )
