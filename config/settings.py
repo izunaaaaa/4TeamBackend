@@ -258,7 +258,7 @@ if os.environ.get("SERVER") == "NAVER":
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": "redis://localhost:6379",
+            "LOCATION": "redis://0.0.0.0:6379",
             "TIMEOUT": 60 * 60,
             "OPTIONS": {
                 "DB": 1,
