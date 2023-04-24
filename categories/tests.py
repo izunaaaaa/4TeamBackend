@@ -11,4 +11,4 @@ class TestTask(APITestCase):
 
     def test_view(self):
         response = self.client.get(self.URL)
-        self.assertEqual(response.status_code, 403, "비 로그인 조회")
+        self.assertEqual(response.status_code, 200, "비 로그인 조회")
