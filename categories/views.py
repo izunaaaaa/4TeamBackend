@@ -8,6 +8,7 @@ from .models import Category
 from . import serializers
 from django.shortcuts import get_object_or_404
 from groups.models import Group
+from django.core.cache import cache
 
 
 class Categories(APIView):
@@ -44,12 +45,24 @@ class GroupCategories(APIView):
         },
     )
     def get(self, request, group_pk):
-        group = get_object_or_404(Group, pk=group_pk)
-        category = Category.objects.filter(group=group).order_by("-created_at")
+        # import time
+        # start = time.time()
+        category = cache.get(f"category_of_{group_pk}")
+        if category:
+            # end = time.time()
+            # print("Cached Time")
+            # print(end - start)
+            return Response(category)
+        category = Category.objects.filter(group__pk=group_pk).order_by("-created_at")
         serializer = serializers.CategorySerializer(
             category,
             many=True,
         )
+        cache.set(f"category_of_{group_pk}", serializer.data)
+
+        # end = time.time()
+        # print("Not cached Time")
+        # print(end - start)
         return Response(serializer.data)
 
     @swagger_auto_schema(
@@ -75,6 +88,7 @@ class GroupCategories(APIView):
         if serializer.is_valid():
             category = serializer.save(group=group_pk)
             serializer = serializers.CategorySerializer(category)
+            cache.delete(f"category_of_{group_pk}")
             return Response(serializer.data, status=201)
         else:
             return Response(serializer.errors, status=400)
@@ -82,7 +96,7 @@ class GroupCategories(APIView):
 
 class GroupCategoryDetail(APIView):
     @swagger_auto_schema(
-        operation_summary="그룹 카테고리 조회 api",
+        operation_summary="그룹 카테고리 디테일 조회",
         responses={
             200: openapi.Response(
                 description="Successful Response",
@@ -125,6 +139,7 @@ class GroupCategoryDetail(APIView):
         if serializer.is_valid():
             category = serializer.save(group=group_pk)
             serializer = serializers.CategorySerializer(category)
+            cache.delete(f"category_of_{group_pk}")
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=400)
@@ -147,4 +162,5 @@ class GroupCategoryDetail(APIView):
 
         category = get_object_or_404(Category, pk=pk, group__pk=group_pk)
         category.delete()
+        cache.delete(f"category_of_{group_pk}")
         return Response({"result": "delete success"}, status=204)

@@ -17,6 +17,7 @@ from comments.serializers import RecommentSerializer
 from comments.models import Comment
 from django.db.models import F, Q
 from rest_framework import permissions
+from django.core.cache import cache
 
 
 class IsCoachOrStaff(permissions.BasePermission):
@@ -239,6 +240,9 @@ class Feeds(APIView):
             .all()
             .order_by("-created_at")
         )
+
+        # feeds = cache.get_or_set("feed", feed)
+        # print(feeds)
         # feed = Feed.objects.all().order_by("-created_at")
 
         # 최신순
@@ -329,6 +333,7 @@ class FeedDetail(APIView):
     )
     def get(self, request, pk):
         feed = get_object_or_404(Feed, pk=pk)
+
         if feed.group != request.user.group:
             if not request.user.is_staff:
                 raise PermissionDenied

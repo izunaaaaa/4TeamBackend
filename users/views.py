@@ -342,8 +342,33 @@ class SignUp(APIView):
         responses={
             201: "Created",
             400: "bad request",
+            403: "Does not exist Access User List",
+            404: "Does not exist group",
         },
-        request_body=serializers.PrivateUserSerializer(),
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=[
+                "username",
+                "phone_number",
+                "password",
+                "name",
+                "email",
+                "gender",
+                "group",
+            ],
+            properties={
+                "username": openapi.Schema(type=openapi.TYPE_STRING),
+                "password": openapi.Schema(type=openapi.TYPE_STRING),
+                "name": openapi.Schema(type=openapi.TYPE_STRING),
+                "phone_number": openapi.Schema(type=openapi.TYPE_STRING),
+                "email": openapi.Schema(type=openapi.TYPE_STRING),
+                "gender": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    enum=User.GenderChoices.values,
+                ),
+                "group": openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+        ),
     )
     def post(self, request):
         password = str(request.data.get("password"))
@@ -401,8 +426,33 @@ class CoachSignUp(APIView):
         responses={
             201: "Created",
             400: "bad request",
+            403: "Does not exist Access User List",
+            404: "Does not exist group",
         },
-        request_body=serializers.PrivateUserSerializer(),
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=[
+                "username",
+                "phone_number",
+                "password",
+                "name",
+                "email",
+                "gender",
+                "group",
+            ],
+            properties={
+                "username": openapi.Schema(type=openapi.TYPE_STRING),
+                "password": openapi.Schema(type=openapi.TYPE_STRING),
+                "name": openapi.Schema(type=openapi.TYPE_STRING),
+                "phone_number": openapi.Schema(type=openapi.TYPE_STRING),
+                "email": openapi.Schema(type=openapi.TYPE_STRING),
+                "gender": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    enum=User.GenderChoices.values,
+                ),
+                "group": openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+        ),
     )
     def post(self, request):
         password = str(request.data.get("password"))
