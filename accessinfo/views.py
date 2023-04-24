@@ -156,7 +156,10 @@ class AccessInfoDetail(APIView):
     )
     def post(self, request, group_pk):
         group = get_object_or_404(Group, pk=group_pk)
-        serializer = AccessListSerializer(data=request.data, many=True)
+        if isinstance(request.data, dict):
+            serializer = AccessListSerializer(data=request.data)
+        elif isinstance(request.data, list):
+            serializer = AccessListSerializer(data=request.data, many=True)
         if serializer.is_valid():
             serializer.save(group=group)
             return Response("success response")
