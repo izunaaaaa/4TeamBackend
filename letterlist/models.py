@@ -45,7 +45,6 @@ class Letter(CommonModel):
     delete_by = models.ManyToManyField(
         "users.User",
         related_name="deleted_letters",
-        null=True,
         blank=True,
     )
 

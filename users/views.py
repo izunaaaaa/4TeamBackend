@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import jwt
-from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 from . import serializers
 from .models import User
 from django.contrib.auth import authenticate, login, logout
@@ -21,6 +21,10 @@ from comments.models import Comment
 from comments.serializers import CommentSerializer, TinyCommentSerializer
 from django.db.models import Q
 from likes.models import Feedlike, Commentlike
+from feeds.views import feed_schema
+from django.shortcuts import get_object_or_404
+from groups.models import Group
+from accessinfo.models import AccessInfo
 
 
 class Me(APIView):
@@ -57,7 +61,6 @@ class Me(APIView):
             data=request.data,
             partial=True,
         )
-
         if serilaizer.is_valid():
             updated_user = serializer.save()
             serializer = serializers.PrivateUserSerializer(updated_user)
@@ -89,7 +92,7 @@ class Me(APIView):
 
 class LogIn(APIView):
     @swagger_auto_schema(
-        operation_summary="[미완성]유저 로그인 api",
+        operation_summary="유저 로그인 api",
         responses={200: "OK", 400: "name or password error"},
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -126,7 +129,6 @@ class LogIn(APIView):
             response.set_cookie(key="access_token", value=refresh.access_token)
             response.set_cookie(key="refresh_token", value=refresh, httponly=True)
             return response
-            return Response({"LogIn": "Success"})
         else:
             return Response({"error": "wrong name or password"}, status=400)
 
@@ -347,7 +349,15 @@ class SignUp(APIView):
         password = str(request.data.get("password"))
         if not password:
             raise ParseError("password 가 입력되지 않았습니다.")
-
+        name = request.data.get("name")
+        phone_number = request.data.get("phone_number")
+        email = request.data.get("email")
+        group = get_object_or_404(Group, pk=request.data.get("group"))
+        is_access = AccessInfo.objects.filter(
+            name=name, phone_number=phone_number, email=email, group=group
+        ).exists()
+        if not is_access:
+            raise PermissionDenied
         serializer = serializers.PrivateUserSerializer(data=request.data)
         if serializer.is_valid():
             self.validate_password(password)
@@ -355,6 +365,7 @@ class SignUp(APIView):
             if request.data.get("avatar"):
                 user.avatar = request.data.get("avatar")
             user.set_password(password)
+            user.group = group
             # user.password = password 시에는 raw password로 저장
             user.save()
             login(request, user)
@@ -466,6 +477,39 @@ class ChangePassword(APIView):
 
 
 class FindId(APIView):
+    @swagger_auto_schema(
+        operation_summary="아이디 찾기",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["name", "email", "phone_number"],
+            properties={
+                "name": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이름",
+                ),
+                "email": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이메일",
+                ),
+                "phone_number": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 전화번호",
+                ),
+            },
+        ),
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                examples={
+                    "application/json": {
+                        "id": "kimduhong",
+                    }
+                },
+            ),
+            400: openapi.Response(description="Invalid Value"),
+            404: openapi.Response(description="Not Found User"),
+        },
+    )
     def post(self, request):
         name = request.data.get("name")
         email = request.data.get("email")
@@ -485,8 +529,45 @@ class FindId(APIView):
 
 
 class FindPassword(APIView):
+    @swagger_auto_schema(
+        operation_summary="비밀번호 찾기 (인증만) 이후 new-password",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["username", "name", "email", "phone_number"],
+            properties={
+                "username": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이름",
+                ),
+                "name": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이름",
+                ),
+                "email": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이메일",
+                ),
+                "phone_number": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 전화번호",
+                ),
+            },
+        ),
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                examples={
+                    "application/json": {
+                        "id": "kimduhong",
+                    }
+                },
+            ),
+            400: openapi.Response(description="Invalid Value"),
+            404: openapi.Response(description="Not Found User"),
+        },
+    )
     def post(self, request):
-        username = request.data.get("id")
+        username = request.data.get("username")
         name = request.data.get("name")
         email = request.data.get("email")
         phone_number = request.data.get("phone_number")
@@ -512,6 +593,47 @@ class NewPassword(APIView):
                 "비밀번호를 확인하세요. 최소 1개 이상의 소문자, 숫자, 특수문자로 구성되어야 하며 길이는 8자리 이상이어야 합니다."
             )
 
+    @swagger_auto_schema(
+        operation_summary="비밀번호 재 설정",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["username", "name", "email", "phone_number", "password"],
+            properties={
+                "username": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이름",
+                ),
+                "name": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이름",
+                ),
+                "email": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이메일",
+                ),
+                "phone_number": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 전화번호",
+                ),
+                "password": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="새로운 비밀번호",
+                ),
+            },
+        ),
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                examples={
+                    "application/json": {
+                        "id": "kimduhong",
+                    }
+                },
+            ),
+            400: openapi.Response(description="Invalid Value"),
+            404: openapi.Response(description="Not Found User"),
+        },
+    )
     def put(self, request):
         username = request.data.get("id")
         name = request.data.get("name")
@@ -536,9 +658,44 @@ class NewPassword(APIView):
         return Response(status=200)
 
 
+#    path("me/feedlist/", views.FeedList.as_view()),
 class FeedList(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="유저의 피드 리스트",
+        manual_parameters=[
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="1 페이지당 24개의 데이터 \n - num_pages : 총 페이지수 \n - current_page : 현재 페이지 \n - count : 총 개수 \n - results : 순서",
+                type=openapi.TYPE_INTEGER,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "total_pages": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="전체 페이지",
+                        ),
+                        "now_page": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="현재 페이지",
+                        ),
+                        "count": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="피드의 갯수",
+                        ),
+                        "results": feed_schema,
+                    },
+                ),
+            ),
+        },
+    )
     def get(self, request):
         feed = Feed.objects.filter(user=request.user).order_by("-created_at")
         current_page = request.GET.get("page", 1)
@@ -571,6 +728,15 @@ class FeedList(APIView):
 class CommentList(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="유저의 댓글 리스트",
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                schema=TinyCommentSerializer(many=True),
+            ),
+        },
+    )
     def get(self, request):
         comments = (
             Comment.objects.filter(
@@ -579,7 +745,9 @@ class CommentList(APIView):
             .distinct()
             .order_by("created_at")
         )
-        serializer = TinyCommentSerializer(comments, many=True, context={"request":request})
+        serializer = TinyCommentSerializer(
+            comments, many=True, context={"request": request}
+        )
         return Response(serializer.data)
 
 

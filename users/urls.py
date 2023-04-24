@@ -19,5 +19,5 @@ urlpatterns = [
     path("find/password/", views.FindPassword.as_view()),
     path("changepassword/", views.ChangePassword.as_view()),
     path("new-password/", views.NewPassword.as_view()),
-    path("refresh/", TokenRefreshView.as_view()),
+    # path("refresh/", TokenRefreshView.as_view()),
 ]
