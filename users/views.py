@@ -25,6 +25,7 @@ from feeds.views import feed_schema
 from django.shortcuts import get_object_or_404
 from groups.models import Group
 from accessinfo.models import AccessInfo
+from django.core.cache import cache
 
 
 class Me(APIView):
