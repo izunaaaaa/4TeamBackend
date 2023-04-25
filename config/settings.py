@@ -82,7 +82,11 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
-INTERNAL_IPS = ["127.0.0.1", "django"]
+INTERNAL_IPS = ["127.0.0.1"]
+import socket
+
+hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+INTERNAL_IPS += [ip[:-1] + "1" for ip in ips]
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
@@ -280,7 +284,12 @@ else:
 
 SESSION_CACHE_ALIAS = "default"
 
-# SESSION_ENGINE = "redis_sessions.session"
-# SESSION_REDIS_HOST = "115.85.181.9"
-# SESSION_REDIS_PORT = 6379
-# SESSION_REDIS_DB = 0
+SESSION_ENGINE = "redis_sessions.session"
+SESSION_REDIS = {
+    "host": "115.85.181.9",
+    "port": 6379,
+    "db": 0,
+    "prefix": "session",
+    "socket_timeout": 1,
+    "retry_on_timeout": False,
+}
