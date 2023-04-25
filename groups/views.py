@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import Group
 from . import serializers
 from django.shortcuts import get_object_or_404
+from django.core.cache import cache
 
 
 class Groups(APIView):
@@ -20,8 +21,12 @@ class Groups(APIView):
         },
     )
     def get(self, request):
+        group = cache.get("group")
+        if group:
+            return Response(group)
         group = Group.objects.all()
         serializer = serializers.GroupSerializer(group, many=True)
+        cache.set("group", serializer.data)
         return Response(serializer.data)
 
     # @swagger_auto_schema(
@@ -63,8 +68,12 @@ class GroupDetail(APIView):
         },
     )
     def get(self, request, pk):
+        group = cache.get(f"group:{pk}")
+        if group:
+            return Response(group)
         group = self.get_object(pk)
         serializer = serializers.GroupDetailSerializer(group)
+        cache.set(f"group:{pk}", serializer.data)
         return Response(serializer.data)
 
     @swagger_auto_schema(
@@ -88,6 +97,8 @@ class GroupDetail(APIView):
         )
         if serializer.is_valid():
             group = serializer.save()
+            cache.delete("group")
+            cache.delete(f"group:{pk}")
             return Response(serializers.GroupDetailSerializer(group).data)
         else:
             return Response(serializer.errors, status=400)
@@ -110,4 +121,6 @@ class GroupDetail(APIView):
                 if not request.user.is_staff:
                     raise PermissionDenied
         group.delete()
+        cache.delete(f"group:{pk}")
+        cache.delete("group")
         return Response("Successful delete", status=204)

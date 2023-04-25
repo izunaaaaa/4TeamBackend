@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import jwt
-from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 from . import serializers
 from .models import User
 from django.contrib.auth import authenticate, login, logout
@@ -16,11 +16,15 @@ from likes.serializers import FeedLikeSerializer, CommentLikeSerializer
 import re
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.paginator import Paginator
-from feeds.serializers import FeedSerializer
+from feeds.serializers import FeedSerializer, TinyFeedSerializer
 from comments.models import Comment
-from comments.serializers import CommentSerializer
+from comments.serializers import CommentSerializer, TinyCommentSerializer
 from django.db.models import Q
 from likes.models import Feedlike, Commentlike
+from feeds.views import feed_schema
+from django.shortcuts import get_object_or_404
+from groups.models import Group
+from accessinfo.models import AccessInfo
 
 
 class Me(APIView):
@@ -57,7 +61,6 @@ class Me(APIView):
             data=request.data,
             partial=True,
         )
-
         if serilaizer.is_valid():
             updated_user = serializer.save()
             serializer = serializers.PrivateUserSerializer(updated_user)
@@ -89,7 +92,7 @@ class Me(APIView):
 
 class LogIn(APIView):
     @swagger_auto_schema(
-        operation_summary="[미완성]유저 로그인 api",
+        operation_summary="유저 로그인 api",
         responses={200: "OK", 400: "name or password error"},
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -117,18 +120,31 @@ class LogIn(APIView):
         if user:
             login(request, user)
             refresh = RefreshToken.for_user(user)
-            response = Response(
-                {
-                    "refresh": str(refresh),
-                    "access_token": str(refresh.access_token),
-                }
-            )
-            response.set_cookie(key="access_token", value=refresh.access_token)
-            response.set_cookie(key="refresh_token", value=refresh, httponly=True)
-            return response
-            return Response({"LogIn": "Success"})
+            # response = Response(
+            #     {
+            #         "refresh": str(refresh),
+            #         "access_token": str(refresh.access_token),
+            #     }
+            # )
+            # response.set_cookie(key="access_token", value=refresh.access_token)
+            # response.set_cookie(key="refresh_token", value=refresh, httponly=True)
+            # return response
+            return Response("OK")
         else:
             return Response({"error": "wrong name or password"}, status=400)
+
+
+class LogOut(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="로그아웃 api",
+        operation_description="로그아웃",
+        responses={200: "OK", 403: "Forbidden"},
+    )
+    def post(self, request):
+        logout(request)
+        return Response({"LogOut": True})
 
 
 class FeedLikes(APIView):
@@ -151,6 +167,9 @@ class FeedLikes(APIView):
     )
     def get(self, request):
         feedlike = Feedlike.objects.filter(user=request.user)
+        if not feedlike:
+            return Response("Does not exist Likelist")
+        feedlike = [i.feed for i in feedlike]
         current_page = request.GET.get("page", 1)
         items_per_page = 12
         paginator = Paginator(feedlike, items_per_page)
@@ -161,8 +180,7 @@ class FeedLikes(APIView):
 
         if int(current_page) > int(paginator.num_pages):
             raise ParseError("that page is out of range")
-
-        serializer = FeedLikeSerializer(
+        serializer = TinyFeedSerializer(
             feedlike,
             many=True,
         )
@@ -321,12 +339,121 @@ class SignUp(APIView):
             )
 
     @swagger_auto_schema(
-        operation_summary="회원가입 api",
+        operation_summary="일반 유저 회원가입",
         responses={
             201: "Created",
             400: "bad request",
+            403: "Does not exist Access User List",
+            404: "Does not exist group",
         },
-        request_body=serializers.PrivateUserSerializer(),
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=[
+                "username",
+                "phone_number",
+                "password",
+                "name",
+                "email",
+                "gender",
+                "group",
+            ],
+            properties={
+                "username": openapi.Schema(type=openapi.TYPE_STRING),
+                "password": openapi.Schema(type=openapi.TYPE_STRING),
+                "name": openapi.Schema(type=openapi.TYPE_STRING),
+                "phone_number": openapi.Schema(type=openapi.TYPE_STRING),
+                "email": openapi.Schema(type=openapi.TYPE_STRING),
+                "gender": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    enum=User.GenderChoices.values,
+                ),
+                "group": openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+        ),
+    )
+    def post(self, request):
+        password = str(request.data.get("password"))
+        if not password:
+            raise ParseError("password 가 입력되지 않았습니다.")
+        name = request.data.get("name")
+        phone_number = request.data.get("phone_number")
+        email = request.data.get("email")
+        group = get_object_or_404(Group, pk=request.data.get("group"))
+        try:
+            access_user = AccessInfo.objects.get(
+                name=name, phone_number=phone_number, email=email, group=group
+            )
+        except AccessInfo.DoesNotExist:
+            raise PermissionDenied
+
+        serializer = serializers.PrivateUserSerializer(data=request.data)
+        if serializer.is_valid():
+            self.validate_password(password)
+            user = serializer.save()
+            if request.data.get("avatar"):
+                user.avatar = request.data.get("avatar")
+            user.set_password(password)
+            user.group = group
+            # user.password = password 시에는 raw password로 저장
+            user.save()
+            access_user.is_signup = True
+            access_user.save()
+            login(request, user)
+            # set_password 후 다시 저장
+            serializer = serializers.PrivateUserSerializer(user)
+            refresh = RefreshToken.for_user(user)
+            return Response(
+                {
+                    # "access": str(refresh.access_token),
+                    # "refresh": str(refresh),
+                    "data": serializer.data,
+                },
+                status=201,
+            )
+        else:
+            return Response(serializer.errors, status=400)
+
+
+class CoachSignUp(APIView):
+    def validate_password(self, password):
+        REGEX_PASSWORD = "^(?=.*[\d])(?=.*[a-z])(?=.*[!@#$%^&*()])[\w\d!@#$%^&*()]{8,}$"
+        if not re.fullmatch(REGEX_PASSWORD, password):
+            raise ParseError(
+                "비밀번호를 확인하세요. 최소 1개 이상의 소문자, 숫자, 특수문자로 구성되어야 하며 길이는 8자리 이상이어야 합니다."
+            )
+
+    @swagger_auto_schema(
+        operation_summary="코치 회원가입",
+        responses={
+            201: "Created",
+            400: "bad request",
+            403: "Does not exist Access User List",
+            404: "Does not exist group",
+        },
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=[
+                "username",
+                "phone_number",
+                "password",
+                "name",
+                "email",
+                "gender",
+                "group",
+            ],
+            properties={
+                "username": openapi.Schema(type=openapi.TYPE_STRING),
+                "password": openapi.Schema(type=openapi.TYPE_STRING),
+                "name": openapi.Schema(type=openapi.TYPE_STRING),
+                "phone_number": openapi.Schema(type=openapi.TYPE_STRING),
+                "email": openapi.Schema(type=openapi.TYPE_STRING),
+                "gender": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    enum=User.GenderChoices.values,
+                ),
+                "group": openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+        ),
     )
     def post(self, request):
         password = str(request.data.get("password"))
@@ -340,12 +467,12 @@ class SignUp(APIView):
             if request.data.get("avatar"):
                 user.avatar = request.data.get("avatar")
             user.set_password(password)
+            user.is_coach = True
             # user.password = password 시에는 raw password로 저장
             user.save()
+            login(request, user)
             # set_password 후 다시 저장
             serializer = serializers.PrivateUserSerializer(user)
-            login(request, user)
-
             refresh = RefreshToken.for_user(user)
             return Response(
                 {
@@ -405,6 +532,39 @@ class ChangePassword(APIView):
 
 
 class FindId(APIView):
+    @swagger_auto_schema(
+        operation_summary="아이디 찾기",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["name", "email", "phone_number"],
+            properties={
+                "name": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이름",
+                ),
+                "email": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이메일",
+                ),
+                "phone_number": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 전화번호",
+                ),
+            },
+        ),
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                examples={
+                    "application/json": {
+                        "id": "kimduhong",
+                    }
+                },
+            ),
+            400: openapi.Response(description="Invalid Value"),
+            404: openapi.Response(description="Not Found User"),
+        },
+    )
     def post(self, request):
         name = request.data.get("name")
         email = request.data.get("email")
@@ -424,8 +584,45 @@ class FindId(APIView):
 
 
 class FindPassword(APIView):
+    @swagger_auto_schema(
+        operation_summary="비밀번호 찾기 (인증만) 이후 new-password",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["username", "name", "email", "phone_number"],
+            properties={
+                "username": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이름",
+                ),
+                "name": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이름",
+                ),
+                "email": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이메일",
+                ),
+                "phone_number": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 전화번호",
+                ),
+            },
+        ),
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                examples={
+                    "application/json": {
+                        "id": "kimduhong",
+                    }
+                },
+            ),
+            400: openapi.Response(description="Invalid Value"),
+            404: openapi.Response(description="Not Found User"),
+        },
+    )
     def post(self, request):
-        username = request.data.get("id")
+        username = request.data.get("username")
         name = request.data.get("name")
         email = request.data.get("email")
         phone_number = request.data.get("phone_number")
@@ -451,6 +648,47 @@ class NewPassword(APIView):
                 "비밀번호를 확인하세요. 최소 1개 이상의 소문자, 숫자, 특수문자로 구성되어야 하며 길이는 8자리 이상이어야 합니다."
             )
 
+    @swagger_auto_schema(
+        operation_summary="비밀번호 재 설정",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["username", "name", "email", "phone_number", "password"],
+            properties={
+                "username": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이름",
+                ),
+                "name": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이름",
+                ),
+                "email": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 이메일",
+                ),
+                "phone_number": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="유저의 전화번호",
+                ),
+                "password": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="새로운 비밀번호",
+                ),
+            },
+        ),
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                examples={
+                    "application/json": {
+                        "id": "kimduhong",
+                    }
+                },
+            ),
+            400: openapi.Response(description="Invalid Value"),
+            404: openapi.Response(description="Not Found User"),
+        },
+    )
     def put(self, request):
         username = request.data.get("id")
         name = request.data.get("name")
@@ -475,11 +713,46 @@ class NewPassword(APIView):
         return Response(status=200)
 
 
+#    path("me/feedlist/", views.FeedList.as_view()),
 class FeedList(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="유저의 피드 리스트",
+        manual_parameters=[
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="1 페이지당 24개의 데이터 \n - num_pages : 총 페이지수 \n - current_page : 현재 페이지 \n - count : 총 개수 \n - results : 순서",
+                type=openapi.TYPE_INTEGER,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "total_pages": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="전체 페이지",
+                        ),
+                        "now_page": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="현재 페이지",
+                        ),
+                        "count": openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="피드의 갯수",
+                        ),
+                        "results": feed_schema,
+                    },
+                ),
+            ),
+        },
+    )
     def get(self, request):
-        feed = Feed.objects.filter(user=request.user)
+        feed = Feed.objects.filter(user=request.user).order_by("-created_at")
         current_page = request.GET.get("page", 1)
         items_per_page = 12
         paginator = Paginator(feed, items_per_page)
@@ -510,6 +783,15 @@ class FeedList(APIView):
 class CommentList(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_summary="유저의 댓글 리스트",
+        responses={
+            200: openapi.Response(
+                description="Successful Response",
+                schema=TinyCommentSerializer(many=True),
+            ),
+        },
+    )
     def get(self, request):
         comments = (
             Comment.objects.filter(
@@ -518,7 +800,9 @@ class CommentList(APIView):
             .distinct()
             .order_by("created_at")
         )
-        serializer = CommentSerializer(comments, many=True)
+        serializer = TinyCommentSerializer(
+            comments, many=True, context={"request": request}
+        )
         return Response(serializer.data)
 
 

@@ -82,7 +82,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
-INTERNAL_IPS = ["127.0.0.1", "115.85.181.9"]
+import socket
+
+hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
@@ -252,4 +255,40 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
     "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
+}
+
+if os.environ.get("SERVER") == "NAVER":
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": "redis://redis:6379",
+            "TIMEOUT": 60 * 60,
+            "OPTIONS": {
+                "DB": 1,
+            },
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": "redis://115.85.181.9:6379",
+            "TIMEOUT": 60 * 60,
+            "OPTIONS": {
+                "DB": 1,
+            },
+        }
+    }
+
+
+SESSION_CACHE_ALIAS = "default"
+
+SESSION_ENGINE = "redis_sessions.session"
+SESSION_REDIS = {
+    "host": "115.85.181.9",
+    "port": 6379,
+    "db": 0,
+    "prefix": "session",
+    "socket_timeout": 1,
+    "retry_on_timeout": False,
 }
