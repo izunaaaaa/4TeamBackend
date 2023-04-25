@@ -120,15 +120,16 @@ class LogIn(APIView):
         if user:
             login(request, user)
             refresh = RefreshToken.for_user(user)
-            response = Response(
-                {
-                    "refresh": str(refresh),
-                    "access_token": str(refresh.access_token),
-                }
-            )
-            response.set_cookie(key="access_token", value=refresh.access_token)
-            response.set_cookie(key="refresh_token", value=refresh, httponly=True)
-            return response
+            # response = Response(
+            #     {
+            #         "refresh": str(refresh),
+            #         "access_token": str(refresh.access_token),
+            #     }
+            # )
+            # response.set_cookie(key="access_token", value=refresh.access_token)
+            # response.set_cookie(key="refresh_token", value=refresh, httponly=True)
+            # return response
+            return Response("OK")
         else:
             return Response({"error": "wrong name or password"}, status=400)
 
@@ -403,8 +404,8 @@ class SignUp(APIView):
             refresh = RefreshToken.for_user(user)
             return Response(
                 {
-                    "access": str(refresh.access_token),
-                    "refresh": str(refresh),
+                    # "access": str(refresh.access_token),
+                    # "refresh": str(refresh),
                     "data": serializer.data,
                 },
                 status=201,
