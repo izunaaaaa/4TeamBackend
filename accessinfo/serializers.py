@@ -6,12 +6,12 @@ from rest_framework import serializers
 
 
 class AccessListSerializer(ModelSerializer):
-    group = GroupSerializer(read_only=True)
     is_signup = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = AccessInfo
         exclude = (
+            "group",
             "created_at",
             "updated_at",
         )
