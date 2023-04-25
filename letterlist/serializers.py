@@ -17,6 +17,7 @@ class ChatroomSerialzier(ModelSerializer):
             # "user",
             "pk",
             "receiver",
+            "receiver_pk",
             "created_at",
             "letter_count",
             "last_letter",
