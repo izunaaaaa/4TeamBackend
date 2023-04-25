@@ -122,8 +122,8 @@ class MessageDelete(APIView):
         if request.user in user:
             letter.delete_by.add(request.user)
             letter.save()
-        # if letter.sender == request.user:
-        #     # letter.delete()
-        #     return Response("Ok", status=204)
+            # if letter.sender == request.user:
+            #     # letter.delete()
+            return Response("Ok", status=204)
         else:
             raise PermissionDenied

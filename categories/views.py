@@ -95,6 +95,8 @@ class GroupCategories(APIView):
 
 
 class GroupCategoryDetail(APIView):
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         operation_summary="그룹 카테고리 디테일 조회",
         responses={
@@ -153,8 +155,8 @@ class GroupCategoryDetail(APIView):
         },
     )
     def delete(self, request, group_pk, pk):
-        if request.user.group.pk != group_pk:
-            if not request.user.is_staff:
+        if not request.user.is_staff:
+            if request.user.group.pk != group_pk:
                 raise PermissionDenied
         if not request.user.is_coach:
             if not request.user.is_staff:

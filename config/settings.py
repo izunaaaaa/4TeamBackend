@@ -82,7 +82,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
-INTERNAL_IPS = ["127.0.0.1", "115.85.181.9"]
+INTERNAL_IPS = ["127.0.0.1", "django"]
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
@@ -258,7 +258,7 @@ if os.environ.get("SERVER") == "NAVER":
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": "redis://115.85.181.9:6379",
+            "LOCATION": "redis://redis:6379",
             "TIMEOUT": 60 * 60,
             "OPTIONS": {
                 "DB": 1,
@@ -281,7 +281,6 @@ else:
 SESSION_CACHE_ALIAS = "default"
 
 # SESSION_ENGINE = "redis_sessions.session"
-
 # SESSION_REDIS_HOST = "115.85.181.9"
 # SESSION_REDIS_PORT = 6379
 # SESSION_REDIS_DB = 0
