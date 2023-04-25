@@ -30,7 +30,7 @@ class ChatroomSerialzier(ModelSerializer):
                 return f"{i.username}님과의 쪽지내역"
         raise ParseError("Error")
 
-    def get_receiver_pl(self, obj):
+    def get_receiver_pk(self, obj):
         request = self.context.get("request")
         for i in obj.user.all():
             if i != request.user:
