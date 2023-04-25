@@ -1,14 +1,26 @@
-# from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase
+from .models import Category
+from groups.models import Group
 
 
-# class TestTask(APITestCase):
-#     URL = "/api/v1/categories/"
+# path("api/v1/categories/", include("categories.urls")),
+class CategoriesTests(APITestCase):
+    URL = "/api/v1/categories/"
+    NAME = "Category Test"
 
-#     @classmethod
-#     def setUpTestData(cls):
-#         cls.TITLE = "Categories Test"
-#         cls.CONTENT = "Categories Test"
+    def setUp(self):
+        self.GROUP = Group.objects.create(name="oz")
+        Category.objects.create(
+            name=self.NAME,
+            group=self.GROUP,
+        )
 
-#     def test_view(self):
-#         response = self.client.get(self.URL)
-#         self.assertEqual(response.status_code, 403, "비 로그인 조회")
+    def test_all_category(self):
+        response = self.client.get(self.URL)
+        # data = response.json()
+        self.assertEqual(
+            response.status_code,
+            200,
+            "status isn't 200",
+        )
+
