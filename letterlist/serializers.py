@@ -9,6 +9,7 @@ from rest_framework.exceptions import ParseError
 
 class ChatroomSerialzier(ModelSerializer):
     receiver = SerializerMethodField()
+    receiver_pk = SerializerMethodField()
 
     class Meta:
         model = Letterlist
@@ -22,11 +23,17 @@ class ChatroomSerialzier(ModelSerializer):
         )
 
     def get_receiver(self, obj):
-        print(obj.user.all())
         request = self.context.get("request")
         for i in obj.user.all():
             if i != request.user:
                 return f"{i.username}님과의 쪽지내역"
+        raise ParseError("Error")
+
+    def get_receiver_pl(self, obj):
+        request = self.context.get("request")
+        for i in obj.user.all():
+            if i != request.user:
+                return i.pk
         raise ParseError("Error")
 
 
@@ -57,6 +64,7 @@ class MessageSerialzier(ModelSerializer):
         validated_data["receiver"] = get_object_or_404(
             User, pk=validated_data.get("receiver")
         )
+        print(1)
 
         chatroom = (
             Letterlist.objects.filter(user__in=[validated_data.get("sender")])
