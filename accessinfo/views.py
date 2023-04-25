@@ -21,7 +21,7 @@ class IsCoachOrStaff(permissions.BasePermission):
 
 
 class AllAccessInfo(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsCoachOrStaff]
 
     # @swagger_auto_schema(
     #     operation_summary="엑세스 가능한 리스트 (임시 테스트용)",
@@ -106,8 +106,8 @@ class AllAccessInfo(APIView):
                         return Response(
                             AccessListSerializer(serializer, many=True).data
                         )
-
-                    return Response(serializer.errors, status=400)
+                    else:
+                        return Response(serializer.errors, status=400)
                 else:
                     raise ParseError("Does not exist group")
         except Exception as e:
