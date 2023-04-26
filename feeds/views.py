@@ -519,7 +519,7 @@ class GroupFeedCategory(APIView):
             group=group,
             category=category,
         ).order_by("-created_at")
-        items_per_page = 24
+        items_per_page = 12
         current_page = request.GET.get("page", 1)
         paginator = Paginator(feed, items_per_page)
         try:

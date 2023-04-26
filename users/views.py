@@ -169,7 +169,7 @@ class FeedLikes(APIView):
     def get(self, request):
         feedlike = Feedlike.objects.filter(user=request.user)
         if not feedlike:
-            return Response("Does not exist Likelist")
+            return Response([])
         feedlike = [i.feed for i in feedlike]
         current_page = request.GET.get("page", 1)
         items_per_page = 12
@@ -182,7 +182,7 @@ class FeedLikes(APIView):
         if int(current_page) > int(paginator.num_pages):
             raise ParseError("that page is out of range")
         serializer = TinyFeedSerializer(
-            feedlike,
+            page,
             many=True,
         )
         data = {
