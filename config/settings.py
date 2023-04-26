@@ -262,6 +262,7 @@ if os.environ.get("SERVER") == "NAVER":
             "LOCATION": "redis://redis:6379",
             "TIMEOUT": 60 * 60,
             "OPTIONS": {
+                "PASSWORD": env("REDIS_PASSWORD"),  # Update the password
                 "DB": 2,
             },
         }
