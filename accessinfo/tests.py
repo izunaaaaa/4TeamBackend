@@ -5,7 +5,6 @@ from .models import AccessInfo
 import json
 
 
-# path("", views.AllAccessInfo.as_view()) / POST,
 class AccessInfoAll(APITestCase):
     URL = "/api/v1/access/"
 
@@ -43,6 +42,7 @@ class AccessInfoAll(APITestCase):
             data,
             content_type="application/json",
         )
+
         self.assertEqual(response.status_code, 200, "Add data")
 
         group = Group.objects.count()
@@ -140,7 +140,7 @@ class AccessInfoGroup(APITestCase):
     @classmethod
     def setUpTestData(self):
         print("")
-        print("Access Detail Info GET / POST")
+        print("Access Group Info GET / POST")
         self.group = Group.objects.create(name="TestGroup")
         self.other_group = Group.objects.create(name="TestGroup2")
         self.test_user = User.objects.create(
@@ -170,6 +170,12 @@ class AccessInfoGroup(APITestCase):
                 phone_number=i.get("phone_number"),
                 group=self.group,
             )
+        AccessInfo.objects.create(
+            name="test",
+            email="test@test.com",
+            phone_number="01088848077",
+            group=self.other_group,
+        )
 
     def test_view_access_info_non_login_user(self):
         response = self.client.get(self.URL)
@@ -191,4 +197,151 @@ class AccessInfoGroup(APITestCase):
         self.client.force_login(self.test_user_group_coach)
         response = self.client.get(self.URL)
         self.assertEqual(response.status_code, 200, "login coach user")
+        self.assertNotEqual(
+            len(response.data), AccessInfo.objects.count(), "Don't show all data"
+        )
+        self.client.logout()
+
+    def test_view_access_info_login_other_coach_user(self):
+        self.client.force_login(self.test_user_other_coach)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 403, "login other coach user")
+        self.client.logout()
+
+    def test_add_access_info_non_login_user(self):
+        response = self.client.post(self.URL)
+        self.assertEqual(response.status_code, 403, "Non login user")
+        self.client.logout()
+
+    def test_add_access_info_login_normal_user(self):
+        self.client.force_login(self.test_user)
+        response = self.client.post(self.URL)
+        self.assertEqual(response.status_code, 403, "Not Coach user")
+        self.client.logout()
+
+    def test_add_access_info_login_other_coach_user(self):
+        self.client.force_login(self.test_user_other_coach)
+        response = self.client.post(self.URL)
+        self.assertEqual(response.status_code, 403, "Other Group Coach user")
+        self.client.logout()
+
+    def test_add_access_info_login_coach_user(self):
+        self.client.force_login(self.test_user_group_coach)
+        check_count = AccessInfo.objects.count()
+        with open(
+            "./post_test/access/add_post_example.json", "r", encoding="UTF-8"
+        ) as json_data:
+            data = json.load(json_data)
+        data = json.dumps(data)
+        response = self.client.post(
+            self.URL,
+            data,
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, "Group Coach user")
+        self.assertNotEqual(AccessInfo.objects.count(), check_count, "Add check")
+        self.client.logout()
+
+    def test_add_access_info_login_coach_user_duplicated_value(self):
+        self.client.force_login(self.test_user_group_coach)
+        check_count = AccessInfo.objects.count()
+        with open(
+            "./post_test/access/error/add_post_example.json", "r", encoding="UTF-8"
+        ) as json_data:
+            data = json.load(json_data)
+        data = json.dumps(data)
+        response = self.client.post(
+            self.URL,
+            data,
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400, "Add duplicated access info")
+        self.client.logout()
+
+
+class AccessInfoGroupDetail(APITestCase):
+    URL = "/api/v1/access/group/1/1"
+
+    @classmethod
+    def setUpTestData(self):
+        print("")
+        print("Access Group Detail Info GET / PUT / DELETE")
+        self.group = Group.objects.create(name="TestGroup")
+        self.other_group = Group.objects.create(name="TestGroup2")
+        self.test_user = User.objects.create(
+            username="testuser",
+            email="art970@naver.com",
+        )
+        self.test_user_group_coach = User.objects.create(
+            username="testCoach",
+            email="kdh97048@gmail.com",
+            is_coach=True,
+            group=self.group,
+        )
+        self.test_user_other_coach = User.objects.create(
+            username="testOtherCoach",
+            email="kdh97049@gmail.com",
+            is_coach=True,
+            group=self.other_group,
+        )
+        with open(
+            "./post_test/access/new_post_example.json", "r", encoding="UTF-8"
+        ) as json_data:
+            data = json.load(json_data)
+        for i in data.get("members"):
+            AccessInfo.objects.create(
+                name=i.get("name"),
+                email=i.get("email"),
+                phone_number=i.get("phone_number"),
+                group=self.group,
+            )
+        self.other_access_info = AccessInfo.objects.create(
+            name="test",
+            email="test@test.com",
+            phone_number="01088848077",
+            group=self.other_group,
+        )
+
+    def test_view_access_info_group_detail_non_login_user(self):
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 403, "Non login user")
+
+    def test_view_access_info_group_detail_login_normal_user(self):
+        self.client.force_login(self.test_user)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 403, "login normal user")
+        self.client.logout()
+
+    def test_view_access_info_group_detail_login_coach_user(self):
+        self.client.force_login(self.test_user_group_coach)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 200, "login coach user")
+        self.client.logout()
+
+    def test_view_access_info_group_detail_login_other_coach_user(self):
+        self.client.force_login(self.test_user_other_coach)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 403, "login other coach user")
+        self.client.logout()
+
+    def test_view_access_info_group_detail_other_group_pk_access(self):
+        self.client.force_login(self.test_user_group_coach)
+        response = self.client.get(
+            f"/api/v1/access/group/1/{self.other_access_info.pk}"
+        )
+        self.assertEqual(
+            response.status_code,
+            404,
+            "login group access info pk access",
+        )
+        self.client.logout()
+
+    def test_edit_access_info_group_detail_non_login_user(self):
+        response = self.client.put(self.URL)
+        self.assertEqual(response.status_code, 403, "Non login user")
+
+    def test_edit_access_info_group_detail_login_normal_user(self):
+        self.client.force_login(self.test_user)
+        response = self.client.put(self.URL)
+        self.assertEqual(response.status_code, 403, "Non login user")
         self.client.logout()

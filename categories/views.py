@@ -53,7 +53,7 @@ class GroupCategories(APIView):
             # print("Cached Time")
             # print(end - start)
             return Response(category)
-        category = Category.objects.filter(group__pk=group_pk).order_by("-created_at")
+        category = Category.objects.filter(group__pk=group_pk).order_by("created_at")
         serializer = serializers.CategorySerializer(
             category,
             many=True,

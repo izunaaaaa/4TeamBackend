@@ -23,6 +23,11 @@ class IsCoachOrStaff(permissions.BasePermission):
 class AllAccessInfo(APIView):
     permission_classes = [IsAuthenticated, IsCoachOrStaff]
 
+    def check_duplicate(self, check_list):
+        set_check_list = set(check_list)
+        if len(set_check_list) != len(check_list):
+            raise ParseError("중복된 값이 있습니다.")
+
     # @swagger_auto_schema(
     #     operation_summary="엑세스 가능한 리스트 (임시 테스트용)",
     #     responses={
@@ -101,6 +106,10 @@ class AllAccessInfo(APIView):
                     serializer = AccessListSerializer(data=members, many=True)
                     if serializer.is_valid():
                         group, created = Group.objects.get_or_create(name=group)
+                        phone_numbers = [i.get("phone_number") for i in members]
+                        emails = [i.get("email") for i in members]
+                        self.check_duplicate(phone_numbers)
+                        self.check_duplicate(emails)
                         serializer = serializer.save(group=group)
                         return Response(
                             AccessListSerializer(serializer, many=True).data
@@ -115,6 +124,11 @@ class AllAccessInfo(APIView):
 
 class AccessInfoDetail(APIView):
     permission_classes = [IsAuthenticated, IsCoachOrStaff]
+
+    def check_duplicate(self, check_list):
+        set_check_list = set(check_list)
+        if len(set_check_list) != len(check_list):
+            raise ParseError("중복된 값이 있습니다.")
 
     @swagger_auto_schema(
         operation_summary="그룹에 엑세스 가능한 유저 리스트",
@@ -171,6 +185,10 @@ class AccessInfoDetail(APIView):
         elif isinstance(request.data, list):
             serializer = AccessListSerializer(data=request.data, many=True)
         if serializer.is_valid():
+            phone_numbers = [i.get("phone_number") for i in request.data]
+            emails = [i.get("email") for i in request.data]
+            self.check_duplicate(phone_numbers)
+            self.check_duplicate(emails)
             serializer.save(group=group)
             cache.delete(f"group_{group_pk}_access_list")
             return Response("success response")
@@ -191,6 +209,9 @@ class AccessInfoDetailUser(APIView):
         },
     )
     def get(self, request, group_pk, user_pk):
+        if not request.user.is_staff:
+            if not request.user.group.pk == group_pk:
+                raise PermissionDenied
         try:
             user = AccessInfo.objects.get(group__pk=group_pk, pk=user_pk)
         except AccessInfo.DoesNotExist:
@@ -235,5 +256,6 @@ class AccessInfoDetailUser(APIView):
             raise NotFound
 
         user.delete()
+
         cache.delete(f"group_{group_pk}_access_list")
         return Response(status=204)

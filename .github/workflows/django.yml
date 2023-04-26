@@ -31,6 +31,7 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           CF_ID: ${{ secrets.CF_ID }}
           CF_TOKEN: ${{ secrets.CF_TOKEN }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
 
   build-and-push:
     needs: test
@@ -55,6 +56,7 @@ jobs:
           --build-arg POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} \
           --build-arg POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} \
           --build-arg CF_ID=${{ secrets.CF_ID }} \
+          --build-arg REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
           --build-arg CF_TOKEN=${{ secrets.CF_TOKEN }} .
 
       - name: Push Docker image

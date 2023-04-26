@@ -262,7 +262,7 @@ if os.environ.get("SERVER") == "NAVER":
             "LOCATION": "redis://redis:6379",
             "TIMEOUT": 60 * 60,
             "OPTIONS": {
-                "DB": 1,
+                "DB": 2,
             },
         }
     }
@@ -273,6 +273,7 @@ else:
             "LOCATION": "redis://115.85.181.9:6379",
             "TIMEOUT": 60 * 60,
             "OPTIONS": {
+                "PASSWORD": env("REDIS_PASSWORD"),  # Update the password
                 "DB": 1,
             },
         }
@@ -286,7 +287,8 @@ SESSION_REDIS = {
     "host": "115.85.181.9",
     "port": 6379,
     "db": 0,
+    "password": env("REDIS_PASSWORD"),  # Update the password
     "prefix": "session",
     "socket_timeout": 1,
-    "retry_on_timeout": False,
+    "retry_on_timeout": True,
 }
