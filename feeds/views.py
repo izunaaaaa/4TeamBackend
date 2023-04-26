@@ -806,7 +806,7 @@ class GroupFeedSearch(APIView):
             feeds = Feed.objects.order_by("-created_at").filter(
                 group__pk=group_id, title__icontains=keyword
             )[:5]
-            data = {"result": [[feed.pk, feed.title] for feed in feeds]}
+            data = {"result": [{"id": feed.pk, "title": feed.title} for feed in feeds]}
             return Response(data)
         else:
             return Response(status=200)
