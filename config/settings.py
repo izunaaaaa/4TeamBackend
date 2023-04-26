@@ -208,22 +208,22 @@ if os.environ.get("SERVER") == "NAVER":
     #     }
     # }
 else:
-    # DATABASES = {
-    #     "default": {
-    #         "ENGINE": "django.db.backends.sqlite3",
-    #         "NAME": BASE_DIR / "db.sqlite3",
-    #     }
-    # }
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": env("POSTGRES_NAME"),
-            "USER": env("POSTGRES_USER"),
-            "PASSWORD": env("POSTGRES_PASSWORD"),
-            "HOST": env("POSTGRES_HOST"),
-            "PORT": env("POSTGRES_PORT"),
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+    # DATABASES = {
+    #     "default": {
+    #         "ENGINE": "django.db.backends.postgresql",
+    #         "NAME": env("POSTGRES_NAME"),
+    #         "USER": env("POSTGRES_USER"),
+    #         "PASSWORD": env("POSTGRES_PASSWORD"),
+    #         "HOST": env("POSTGRES_HOST"),
+    #         "PORT": env("POSTGRES_PORT"),
+    #     }
+    # }
 
 
 from datetime import timedelta
@@ -260,7 +260,7 @@ if os.environ.get("SERVER") == "NAVER":
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": "redis://redis:6379",
-            "TIMEOUT": 60 * 30,
+            "TIMEOUT": 60 * 60,
             "OPTIONS": {
                 "DB": 1,
             },
@@ -286,7 +286,6 @@ SESSION_REDIS = {
     "host": "115.85.181.9",
     "port": 6379,
     "db": 0,
-    # "password": "password",
     "prefix": "session",
     "socket_timeout": 1,
     "retry_on_timeout": False,
