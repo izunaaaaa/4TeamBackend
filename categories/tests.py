@@ -72,3 +72,4 @@ class CategoryPost(APITestCase):
         # 응답 코드가 403인지 확인
         response = self.client.get(f"{self.URL}{self.GROUP.pk}")
         self.assertEqual(response.status_code, 403)
+

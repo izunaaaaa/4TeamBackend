@@ -15,8 +15,9 @@ from medias.models import Image
 from comments.serializers import CommentSerializer
 from comments.serializers import RecommentSerializer
 from comments.models import Comment
-from django.db.models import F
+from django.db.models import F, Q
 from rest_framework import permissions
+from django.core.cache import cache
 
 
 class IsCoachOrStaff(permissions.BasePermission):
@@ -239,6 +240,9 @@ class Feeds(APIView):
             .all()
             .order_by("-created_at")
         )
+
+        # feeds = cache.get_or_set("feed", feed)
+        # print(feeds)
         # feed = Feed.objects.all().order_by("-created_at")
 
         # 최신순
@@ -329,6 +333,7 @@ class FeedDetail(APIView):
     )
     def get(self, request, pk):
         feed = get_object_or_404(Feed, pk=pk)
+
         if feed.group != request.user.group:
             if not request.user.is_staff:
                 raise PermissionDenied
@@ -514,7 +519,7 @@ class GroupFeedCategory(APIView):
             group=group,
             category=category,
         ).order_by("-created_at")
-        items_per_page = 24
+        items_per_page = 12
         current_page = request.GET.get("page", 1)
         paginator = Paginator(feed, items_per_page)
         try:
@@ -759,7 +764,7 @@ class GroupFeedSearch(APIView):
     permission_classes = [IsAuthenticated, IsCoachOrStaff]
 
     @swagger_auto_schema(
-        operation_summary="그룹 피드 검색",
+        operation_summary="그룹 피드 연관 검색어 5개",
         manual_parameters=[
             openapi.Parameter(
                 "group_id",
@@ -773,6 +778,7 @@ class GroupFeedSearch(APIView):
                 openapi.IN_QUERY,
                 description="검색하는 키워드",
                 type=openapi.TYPE_STRING,
+                required=True,
             ),
         ],
         responses={
@@ -801,6 +807,88 @@ class GroupFeedSearch(APIView):
                 group__pk=group_id, title__icontains=keyword
             )[:5]
             data = {"result": [[feed.pk, feed.title] for feed in feeds]}
+            return Response(data)
+        else:
+            return Response(status=200)
+
+
+class GroupFeedSearchResult(APIView):
+    permission_classes = [IsAuthenticated, IsCoachOrStaff]
+
+    @swagger_auto_schema(
+        operation_summary="그룹 피드 검색 결과",
+        manual_parameters=[
+            openapi.Parameter(
+                "group_id",
+                openapi.IN_QUERY,
+                description="그룹의 pk 값",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            ),
+            openapi.Parameter(
+                "keyword",
+                openapi.IN_QUERY,
+                description="검색하는 키워드",
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
+            openapi.Parameter(
+                "page",
+                openapi.IN_QUERY,
+                description="페이지 수",
+                default=1,
+                type=openapi.TYPE_INTEGER,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="성공",
+                examples={
+                    "application/json": {
+                        "result": [
+                            [1, "Feed 1 title"],
+                            [2, "Feed 2 title"],
+                            [3, "Feed 3 title"],
+                            [4, "Feed 4 title"],
+                            [5, "Feed 5 title"],
+                        ]
+                    }
+                },
+            ),
+            403: "유저가 속한 그룹이 아닌 데이터를 요청",
+        },
+    )
+    def get(self, request):
+        group_id = request.GET.get("group_id")
+        keyword = request.GET.get("keyword")
+        if keyword:
+            feed = (
+                Feed.objects.filter(group__pk=group_id)
+                .filter(Q(title__icontains=keyword) | Q(description__icontains=keyword))
+                .order_by("-created_at")
+            )
+            items_per_page = 24
+            current_page = request.GET.get("page", 1)
+            paginator = Paginator(feed, items_per_page)
+            try:
+                page = paginator.page(current_page)
+            except:
+                page = paginator.page(paginator.num_pages)
+
+            if int(current_page) > int(paginator.num_pages):
+                raise ParseError("that page is out of range")
+
+            serializer = serializers.FeedSerializer(
+                page,
+                many=True,
+                context={"request": request},
+            )
+            data = {
+                "total_pages": paginator.num_pages,
+                "now_page": page.number,
+                "count": paginator.count,
+                "results": serializer.data,
+            }
             return Response(data)
         else:
             return Response(status=200)

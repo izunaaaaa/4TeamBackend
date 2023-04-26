@@ -3,15 +3,16 @@ from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 from .models import AccessInfo
 from .serializers import AccessListSerializer
 from django.shortcuts import get_object_or_404
 from groups.models import Group
-from django.db.transaction import atomic
+from django.db import transaction
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import authentication, permissions
+from django.core.cache import cache
 
 
 class IsCoachOrStaff(permissions.BasePermission):
@@ -20,21 +21,21 @@ class IsCoachOrStaff(permissions.BasePermission):
 
 
 class AllAccessInfo(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsCoachOrStaff]
 
-    @swagger_auto_schema(
-        operation_summary="엑세스 가능한 리스트 (임시 테스트용)",
-        responses={
-            200: openapi.Response(
-                schema=AccessListSerializer(many=True),
-                description="Successful Response",
-            ),
-        },
-    )
-    def get(self, request):
-        all_access_info = AccessInfo.objects.all()
-        serializer = AccessListSerializer(all_access_info, many=True)
-        return Response(serializer.data)
+    # @swagger_auto_schema(
+    #     operation_summary="엑세스 가능한 리스트 (임시 테스트용)",
+    #     responses={
+    #         200: openapi.Response(
+    #             schema=AccessListSerializer(many=True),
+    #             description="Successful Response",
+    #         ),
+    #     },
+    # )
+    # def get(self, request):
+    #     all_access_info = AccessInfo.objects.all()
+    #     serializer = AccessListSerializer(all_access_info, many=True)
+    #     return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_summary="그룹과 엑세스 가능한 유저 생성",
@@ -75,31 +76,41 @@ class AllAccessInfo(APIView):
                             type=openapi.TYPE_BOOLEAN,
                             default=False,
                         ),
-                        "group": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "group": openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                                "name": openapi.Schema(type=openapi.TYPE_STRING),
+                                "members_count": openapi.Schema(
+                                    type=openapi.TYPE_INTEGER
+                                ),
+                            },
+                        ),
                     },
                 ),
             ),
             400: openapi.Response(description="Bad Request"),
-            500: openapi.Response(description="Internal Server Error"),
         },
     )
     def post(self, request):
         try:
-            with atomic():
+            with transaction.atomic():
                 group = request.data.get("group")
                 members = request.data.get("members")
                 if group:
-                    group, created = Group.objects.get_or_create(name=group)
                     serializer = AccessListSerializer(data=members, many=True)
                     if serializer.is_valid():
+                        group, created = Group.objects.get_or_create(name=group)
                         serializer = serializer.save(group=group)
                         return Response(
                             AccessListSerializer(serializer, many=True).data
                         )
-
-                return Response(serializer.errors, status=400)
+                    else:
+                        return Response(serializer.errors, status=400)
+                else:
+                    raise ParseError("Does not exist group", 400)
         except Exception as e:
-            return Response({"error": str(e)}, status=500)
+            return Response({"error": str(e)}, status=400)
 
 
 class AccessInfoDetail(APIView):
@@ -115,9 +126,16 @@ class AccessInfoDetail(APIView):
         },
     )
     def get(self, request, group_pk):
+        if not request.user.is_staff:
+            if not request.user.group.pk == group_pk:
+                raise PermissionDenied
+        group = cache.get(f"group_{group_pk}_access_list")
+        if group:
+            return Response(group)
         group = get_object_or_404(Group, pk=group_pk)
         access_info = AccessInfo.objects.filter(group=group)
         serializer = AccessListSerializer(access_info, many=True)
+        cache.set(f"group_{group_pk}_access_list", serializer.data)
         return Response(serializer.data)
 
     @swagger_auto_schema(
@@ -144,10 +162,17 @@ class AccessInfoDetail(APIView):
         },
     )
     def post(self, request, group_pk):
+        if not request.user.is_staff:
+            if not request.user.group.pk == group_pk:
+                raise PermissionDenied
         group = get_object_or_404(Group, pk=group_pk)
-        serializer = AccessListSerializer(data=request.data, many=True)
+        if isinstance(request.data, dict):
+            serializer = AccessListSerializer(data=request.data)
+        elif isinstance(request.data, list):
+            serializer = AccessListSerializer(data=request.data, many=True)
         if serializer.is_valid():
             serializer.save(group=group)
+            cache.delete(f"group_{group_pk}_access_list")
             return Response("success response")
 
         else:
@@ -190,6 +215,7 @@ class AccessInfoDetailUser(APIView):
         serializer = AccessListSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            cache.delete(f"group_{group_pk}_access_list")
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=400)
@@ -209,4 +235,5 @@ class AccessInfoDetailUser(APIView):
             raise NotFound
 
         user.delete()
+        cache.delete(f"group_{group_pk}_access_list")
         return Response(status=204)
