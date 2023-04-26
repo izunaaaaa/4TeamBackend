@@ -3,12 +3,12 @@ from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 from .models import AccessInfo
 from .serializers import AccessListSerializer
 from django.shortcuts import get_object_or_404
 from groups.models import Group
-from django.db.transaction import atomic
+from django.db import transaction
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import authentication, permissions
@@ -90,18 +90,17 @@ class AllAccessInfo(APIView):
                 ),
             ),
             400: openapi.Response(description="Bad Request"),
-            500: openapi.Response(description="Internal Server Error"),
         },
     )
     def post(self, request):
         try:
-            with atomic():
+            with transaction.atomic():
                 group = request.data.get("group")
                 members = request.data.get("members")
                 if group:
-                    group, created = Group.objects.get_or_create(name=group)
                     serializer = AccessListSerializer(data=members, many=True)
                     if serializer.is_valid():
+                        group, created = Group.objects.get_or_create(name=group)
                         serializer = serializer.save(group=group)
                         return Response(
                             AccessListSerializer(serializer, many=True).data
@@ -109,9 +108,9 @@ class AllAccessInfo(APIView):
                     else:
                         return Response(serializer.errors, status=400)
                 else:
-                    raise ParseError("Does not exist group")
+                    raise ParseError("Does not exist group", 400)
         except Exception as e:
-            return Response({"error": str(e)}, status=500)
+            return Response({"error": str(e)}, status=400)
 
 
 class AccessInfoDetail(APIView):
@@ -127,6 +126,9 @@ class AccessInfoDetail(APIView):
         },
     )
     def get(self, request, group_pk):
+        if not request.user.is_staff:
+            if not request.user.group.pk == group_pk:
+                raise PermissionDenied
         group = cache.get(f"group_{group_pk}_access_list")
         if group:
             return Response(group)
@@ -160,6 +162,9 @@ class AccessInfoDetail(APIView):
         },
     )
     def post(self, request, group_pk):
+        if not request.user.is_staff:
+            if not request.user.group.pk == group_pk:
+                raise PermissionDenied
         group = get_object_or_404(Group, pk=group_pk)
         if isinstance(request.data, dict):
             serializer = AccessListSerializer(data=request.data)
