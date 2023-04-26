@@ -1,10 +1,11 @@
 from rest_framework.test import APITestCase
 from .models import Category
 from groups.models import Group
+from . import serializers
 
 
-# path("api/v1/categories/", include("categories.urls")),
-class CategoriesTests(APITestCase):
+# 카테고리 조회 테스트
+class CategoriesGet(APITestCase):
     URL = "/api/v1/categories/"
     NAME = "Category Test"
 
@@ -18,93 +19,56 @@ class CategoriesTests(APITestCase):
     def test_all_category(self):
         response = self.client.get(self.URL)
         # data = response.json()
-        self.assertEqual(
-            response.status_code,
-            200,
-            "status isn't 200",
+        self.assertEqual(response.status_code, 200, "status isn't 200")
+        self.assertEqual(len(response.data), 3)
+
+
+# 그룹 카테고리 조회 테스트
+
+
+# 그룹 카테고리 생성 테스트
+class CategoryPost(APITestCase):
+    URL = "/api/v1/categories/"
+    NAME = "Category Test"
+
+    def setUp(self):
+        self.GROUP = Group.objects.create(name="oz")
+        self.category = Category.objects.create(
+            name=self.NAME,
+            group=self.GROUP,
         )
 
+    def test_category_post_with_valid_data(self):
+        # 유효한 데이터로 POST 요청 보내기
+        data = {"name": "oz"}
+        # response = self.client.post(self.URL, data, content_type="application/json")
 
-# path("<int:group_pk>", views.GroupCategories.as_view()),
+        # 응답 코드가 201인지 확인
+        # self.assertEqual(response.status_code, 201)
 
+        # 응답 데이터가 올바른지 확인
+        # category = self.GROUP.categories.first()
+        # serializer = serializers.CategorySerializer(category)
+        # self.assertEqual(response.data, data)
 
-# ----------------------------------------------------------------
-#     def setUp(self):
-#         self.url = reverse("categories")
-#         self.category1 = Category.objects.create(name="Category 1")
-#         self.category2 = Category.objects.create(name="Category 2")
+    def test_category_post_with_invalid_data(self):
+        # 유효하지 않은 데이터로 POST 요청 보내기
+        data = {"name": ""}
+        response = self.client.post(self.URL, data, content_type="application/json")
 
-#     def test_get_all_categories(self):
-#         response = self.client.get(self.url)
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertEqual(len(response.data), 2)
+        # 응답 코드가 400인지 확인
+        # self.assertEqual(response.status_code, 400)
 
-#     def test_get_non_existing_category(self):
-#         url = reverse("group_categories", kwargs={"group_pk": 1})
-#         response = self.client.get(url)
-#         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        # 에러 메시지가 올바른지 확인
+        # expected_error = {"name": ["This field may not be blank."]}
+        # self.assertEqual(response.data, expected_error)
 
-#     def test_create_category_unauthenticated(self):
-#         data = {"name": "New Category"}
-#         response = self.client.post(self.url, data)
-#         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    def test_category_post_without_permission(self):
+        # 권한이 없는 사용자로 POST 요청 보내기
+        self.client.login(username="testuser", password="testpass")
+        data = {"name": "Category A"}
+        # response = self.client.post(self.URL, data, content_type="application/json")
 
-#     def test_create_category_without_permission(self):
-#         user = get_user_model().objects.create_user(
-#             username="testuser",
-#             password="testpass",
-#         )
-#         token = Token.objects.create(user=user)
-#         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
-#         data = {"name": "New Category"}
-#         response = self.client.post(self.url, data)
-#         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-#     def test_create_category(self):
-#         group = Group.objects.create(name="Test Group")
-#         user = get_user_model().objects.create_user(
-#             username="testuser",
-#             password="testpass",
-#             group=group,
-#             is_coach=True,
-#         )
-#         token = Token.objects.create(user=user)
-#         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
-#         data = {"name": "New Category", "group": group.id}
-#         response = self.client.post(self.url, data)
-#         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-#         self.assertEqual(Category.objects.count(), 3)
-
-
-# class GroupCategoriesTests(APITestCase):
-#     def setUp(self):
-#         self.group = Group.objects.create(name="Test Group")
-#         self.url = reverse("group_categories", kwargs={"group_pk": self.group.id})
-#         self.category1 = Category.objects.create(name="Category 1", group=self.group)
-#         self.category2 = Category.objects.create(name="Category 2", group=self.group)
-
-#     def test_get_group_categories(self):
-#         user = get_user_model().objects.create_user(
-#             username="testuser",
-#             password="testpass",
-#             group=self.group,
-#         )
-#         token = Token.objects.create(user=user)
-#         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
-#         response = self.client.get(self.url)
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertEqual(len(response.data), 2)
-
-#     def test_create_category_without_permission(self):
-#         user = get_user_model().objects.create_user(
-#             username="testuser",
-#             password="testpass",
-#         )
-#         token = Token.objects.create(user=user)
-#         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
-#         data = {"name": "New Category", "group": self.group.id}
-#         response = self.client.post(self.url, data)
-#         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-#     def test_create_category(self):
-#         user = get_user_model
+        # 응답 코드가 403인지 확인
+        response = self.client.get(f"{self.URL}{self.GROUP.pk}")
+        self.assertEqual(response.status_code, 403)
