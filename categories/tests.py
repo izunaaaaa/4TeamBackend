@@ -43,9 +43,10 @@ class CategoriesPost(APITestCase):
     def test_category_post_with_valid_data(self):
         # 유효한 데이터로 POST 요청 보내기
         data = {"name": "study"}
+        self.client.force_login(self.user)
         response = self.client.post(f"{self.URL}{self.GROUP.pk}", data, format="json")
         # 응답 코드가 201인지 확인
-        # self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 201)
 
         # 응답 데이터가 올바른지 확인
         # category = self.GROUP.categories.first()
@@ -55,11 +56,10 @@ class CategoriesPost(APITestCase):
     def test_category_post_with_invalid_data(self):
         # 유효하지 않은 데이터로 POST 요청 보내기
         data = {"name": ""}
-        response = self.client.post(self.URL, data, content_type="application/json")
-
+        self.client.force_login(self.user)
+        response = self.client.post(f"{self.URL}{self.GROUP.pk}", data, format="json")
         # 응답 코드가 400인지 확인
-        # response = self.client.get(f"{self.URL}{self.GROUP.pk}")
-        # self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 400)
 
         # 에러 메시지가 올바른지 확인
         # expected_error = {"name": ["This field may not be blank."]}
