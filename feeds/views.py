@@ -519,9 +519,10 @@ class GroupFeedCategory(APIView):
             feed = Feed.objects.filter(group=group).order_by("-created_at")
         elif category.name == "인기글":
             feed = (
-                Feed.objects.annotate(like_count=Count("feedlike"))
-                .order_by("-like_count")
-                .order_by(-"created_at")
+                Feed.objects.filter(group=group)
+                .annotate(count_like=Count("feedlike"))
+                .order_by("-count_like")
+                .order_by("-created_at")
             )
         else:
             feed = Feed.objects.filter(
