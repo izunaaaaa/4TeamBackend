@@ -12,7 +12,7 @@ class FeedAdmin(admin.ModelAdmin):
         "group",
         "title",
         "description",
-        "comments_count",
+        # "comments_count",
     )
 
     list_display_links = ("id",)

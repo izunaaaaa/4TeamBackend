@@ -236,7 +236,12 @@ class Feeds(APIView):
     )
     def get(self, request):
         feed = (
-            Feed.objects.prefetch_related("user", "group", "comment", "images")
+            Feed.objects.prefetch_related(
+                "user",
+                "group",
+                "comment",
+                "images",
+            )
             .all()
             .order_by("-created_at")
         )
@@ -510,24 +515,36 @@ class GroupFeedCategory(APIView):
     def get(self, request):
         group_pk = request.GET.get("group_id")
         category_pk = request.GET.get("category_id")
-        group = get_object_or_404(Group, pk=group_pk)
-        if request.user.group != group:
-            if not request.user.is_staff:
+        # group = get_object_or_404(Group, pk=group_pk)
+        if not request.user.is_staff:
+            if request.user.group.pk != group_pk:
                 raise PermissionDenied
         category = get_object_or_404(Category, pk=category_pk)
         if category.name == "전체글":
-            feed = Feed.objects.filter(group=group).order_by("-created_at")
+            feed = (
+                Feed.objects.select_related("user", "group")
+                .prefetch_related("images", "comment", "feedlike")
+                .filter(group__pk=group_pk)
+                .order_by("-created_at")
+            )
         elif category.name == "인기글":
             feed = (
-                Feed.objects.filter(group=group)
+                Feed.objects.select_related("user", "group")
+                .prefetch_related("images", "comment", "feedlike")
+                .filter(group__pk=group_pk)
                 .annotate(count_like=Count("feedlike"))
                 .order_by("-count_like")
             )
         else:
-            feed = Feed.objects.filter(
-                group=group,
-                category=category,
-            ).order_by("-created_at")
+            feed = (
+                Feed.objects.select_related("user", "group")
+                .prefetch_related("images", "comment", "feedlike")
+                .filter(
+                    group__pk=group_pk,
+                    category=category,
+                )
+                .order_by("-created_at")
+            )
         items_per_page = 12
         current_page = request.GET.get("page", 1)
         paginator = Paginator(feed, items_per_page)
@@ -681,9 +698,13 @@ class FeedComment(APIView):
     def get(self, request, pk):
         feed = get_object_or_404(Feed, pk=pk)
         if feed.group != request.user.group:
-            raise PermissionDenied
+            if not request.user.is_staff:
+                raise PermissionDenied
+        comments = feed.comment.select_related("user").prefetch_related(
+            "recomment", "commentlike"
+        )
         serializer = CommentSerializer(
-            feed.comment.all(),
+            comments,
             many=True,
             context={"request": request},
         )

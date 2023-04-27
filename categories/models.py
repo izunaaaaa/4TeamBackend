@@ -14,6 +14,7 @@ class Category(CommonModel):
         return f"{self.group}의 {self.name}"
 
     class Meta:
+        ordering = ["-created_at"]
         verbose_name_plural = "categories"
         constraints = [
             models.UniqueConstraint(
@@ -21,6 +22,10 @@ class Category(CommonModel):
                 name="unique_category_name_group",
             )
         ]
+
+    @property
+    def feed_count(self):
+        return self.feeds.count()
 
     # def add_default_data():
     #     Category.objects.get_or_create(name='전체글')
