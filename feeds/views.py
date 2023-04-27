@@ -876,7 +876,7 @@ class GroupFeedSearchResult(APIView):
                 .filter(Q(title__icontains=keyword) | Q(description__icontains=keyword))
                 .order_by("-created_at")
             )
-            items_per_page = 24
+            items_per_page = 12
             current_page = request.GET.get("page", 1)
             paginator = Paginator(feed, items_per_page)
             try:
@@ -887,7 +887,7 @@ class GroupFeedSearchResult(APIView):
             if int(current_page) > int(paginator.num_pages):
                 raise ParseError("that page is out of range")
 
-            serializer = serializers.FeedSerializer(
+            serializer = serializers.TinyFeedSerializer(
                 page,
                 many=True,
                 context={"request": request},
