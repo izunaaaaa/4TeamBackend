@@ -48,7 +48,7 @@ class AccessInfoAll(APITestCase):
         group = Group.objects.count()
         self.assertEqual(group, 1, "Add group")
         group = Group.objects.get(pk=1)
-        self.assertEqual(group.categories.count(), 2, "Add category when create group")
+        self.assertEqual(group.categories.count(), 3, "Add category when create group")
         self.assertNotEqual(AccessInfo.objects.count(), 0, "Access User Post")
         for i in AccessInfo.objects.all():
             self.assertEqual(i.group, group, "Access User Group Check")
