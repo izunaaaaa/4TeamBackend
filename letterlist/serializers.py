@@ -66,7 +66,6 @@ class MessageSerialzier(ModelSerializer):
         validated_data["receiver"] = get_object_or_404(
             User, pk=validated_data.get("receiver")
         )
-        print(1)
 
         chatroom = (
             Letterlist.objects.filter(user__in=[validated_data.get("sender")])

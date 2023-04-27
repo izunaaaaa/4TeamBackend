@@ -19,6 +19,7 @@ class Feed(CommonModel):
     category = models.ForeignKey(
         "categories.Category",
         on_delete=models.CASCADE,
+        related_name="feeds",
     )
     title = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
@@ -34,13 +35,25 @@ class Feed(CommonModel):
     def like_count(self):
         return self.feedlike.count()
 
+    # @property
+    # def comments_count(self):
+    #     count = self.comment.count()
+    #     for i in self.comment.all():
+    #         count += i.recomment.count()
+    #     return count
+
+    # @property
+    # def comments_count(self):
+    #     count = self.comment.count()
+    #     for i in self.comment.prefetch_related("recomment"):
+    #         count += i.recomment.count()
+    #     return count
+
     @property
     def comments_count(self):
-        recomment = 0
-        for i in self.comment.all():
-            recomment += i.recomment.count()
-        # print(Recomment.objects.filter(comment=self.comment).count())
-        return self.comment.count() + recomment
+        return self.comment.count() + self.comment.aggregate(
+            recomment_count=Count("recomment")
+        ).get("recomment_count")
 
     @property
     def highest_like_comments(self):
@@ -48,10 +61,23 @@ class Feed(CommonModel):
             "-like_count"
         )[:1]
 
+    # @property
+    # def thumbnail(self):
+    #     if self.images.exists():
+    #         return self.images.value_list("url", flat=True).first()
+    #     else:
+    #         return None
+    # @property
+    # def thumbnail(self):
+    #     if self.images.exists():
+    #         return self.images.all()[0].url
+    #     else:
+    #         return None
     @property
     def thumbnail(self):
-        if self.images.exists():
-            return self.images.all()[0].url
+        image = self.images.first()
+        if image:
+            return image.url
         else:
             return None
 

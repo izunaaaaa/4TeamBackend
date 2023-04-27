@@ -12,6 +12,7 @@ import re
 from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
 from categories.models import Category
+from django.core.cache import cache
 
 
 class TinyFeedSerializer(ModelSerializer):
@@ -31,24 +32,23 @@ class FeedSerializer(ModelSerializer):
     user = TinyUserSerializer(read_only=True)
     # images = MediaSerializer(many=True, read_only=True)
     is_like = SerializerMethodField()
-    group = GroupSerializer(read_only=True)
-    category = CategorySerializer(read_only=True)
-    highest_like_comments = CommentSerializer(many=True, read_only=True)
+    # group = GroupSerializer(read_only=True)
+    # category = CategorySerializer(read_only=True)
     is_writer = SerializerMethodField()
+    # user = SerializerMethodField()
 
     class Meta:
         model = Feed
         fields = (
             "id",
             "user",
-            "group",
-            "category",
+            # "group",
+            # "category",
             "title",
             "visited",
             "created_at",
             "like_count",
             "comments_count",
-            "highest_like_comments",
             "is_like",
             "thumbnail",
             "is_writer",
@@ -57,12 +57,8 @@ class FeedSerializer(ModelSerializer):
 
     def get_is_like(self, data):
         request = self.context.get("request")
-        if request:
-            if request.user.is_authenticated:
-                return Feedlike.objects.filter(
-                    user=request.user,
-                    feed__pk=data.pk,
-                ).exists()
+        if request and request.user.is_authenticated:
+            return Feedlike.objects.filter(user=request.user, feed=data).exists()
         return False
 
     def get_is_writer(self, data):
