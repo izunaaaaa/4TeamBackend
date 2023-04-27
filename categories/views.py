@@ -163,6 +163,8 @@ class GroupCategoryDetail(APIView):
                 raise PermissionDenied
 
         category = get_object_or_404(Category, pk=pk, group__pk=group_pk)
+        if category.name == "전체글" or category.name == "인기글":
+            raise ParseError("Can't delete this category")
         category.delete()
         cache.delete(f"category_of_{group_pk}")
         return Response({"result": "delete success"}, status=204)
