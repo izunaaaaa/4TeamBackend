@@ -190,10 +190,13 @@ class FeedDetailSerializer(ModelSerializer):
             except KeyError:
                 pass
             category = validated_data.get("category", instance.category)
-            if category != instance.category:
-                category = get_object_or_404(Category, pk=category)
-                if category.group != instance.category.group:
-                    raise ValidationError("Wrong Category")
-                instance.category = category
+            if category:
+                if category != instance.category:
+                    category = get_object_or_404(Category, pk=category)
+                    if category.group != instance.category.group:
+                        raise ValidationError("Wrong Category")
+                    if category.name == "전체글" or category.name == "인기글":
+                        raise ValidationError("전체글과 인기글 카테고리는 선택할수 없습니다.")
+                    instance.category = category
             instance.save()
         return instance
