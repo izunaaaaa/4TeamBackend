@@ -2,6 +2,7 @@ from rest_framework.test import APITestCase
 from .models import Category
 from groups.models import Group
 from . import serializers
+from users.models import User
 
 
 # 카테고리 조회 테스트
@@ -18,7 +19,7 @@ class CategoriesGet(APITestCase):
 
     def test_all_category(self):
         response = self.client.get(self.URL)
-        # data = response.json()
+        data = response.json()
         self.assertEqual(response.status_code, 200, "status isn't 200")
         self.assertEqual(len(response.data), 3)
 
@@ -27,7 +28,7 @@ class CategoriesGet(APITestCase):
 
 
 # 그룹 카테고리 생성 테스트
-class CategoryPost(APITestCase):
+class CategoriesPost(APITestCase):
     URL = "/api/v1/categories/"
     NAME = "Category Test"
 
@@ -37,12 +38,12 @@ class CategoryPost(APITestCase):
             name=self.NAME,
             group=self.GROUP,
         )
+        self.user = User.objects.create(is_coach=True)
 
     def test_category_post_with_valid_data(self):
         # 유효한 데이터로 POST 요청 보내기
-        data = {"name": "oz"}
-        # response = self.client.post(self.URL, data, content_type="application/json")
-
+        data = {"name": "study"}
+        response = self.client.post(f"{self.URL}{self.GROUP.pk}", data, format="json")
         # 응답 코드가 201인지 확인
         # self.assertEqual(response.status_code, 201)
 
@@ -57,6 +58,7 @@ class CategoryPost(APITestCase):
         response = self.client.post(self.URL, data, content_type="application/json")
 
         # 응답 코드가 400인지 확인
+        # response = self.client.get(f"{self.URL}{self.GROUP.pk}")
         # self.assertEqual(response.status_code, 400)
 
         # 에러 메시지가 올바른지 확인
