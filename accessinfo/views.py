@@ -184,11 +184,11 @@ class AccessInfoDetail(APIView):
             serializer = AccessListSerializer(data=request.data)
         elif isinstance(request.data, list):
             serializer = AccessListSerializer(data=request.data, many=True)
-        if serializer.is_valid():
-            phone_numbers = [i.get("phone_number") for i in request.data]
             emails = [i.get("email") for i in request.data]
+            phone_numbers = [i.get("phone_number") for i in request.data]
             self.check_duplicate(phone_numbers)
             self.check_duplicate(emails)
+        if serializer.is_valid():
             serializer.save(group=group)
             cache.delete(f"group_{group_pk}_access_list")
             return Response("success response")
@@ -228,6 +228,9 @@ class AccessInfoDetailUser(APIView):
         },
     )
     def put(self, request, group_pk, user_pk):
+        if not request.user.is_staff:
+            if not request.user.group.pk == group_pk:
+                raise PermissionDenied
         try:
             user = AccessInfo.objects.get(group__pk=group_pk, pk=user_pk)
         except AccessInfo.DoesNotExist:
@@ -250,6 +253,9 @@ class AccessInfoDetailUser(APIView):
         },
     )
     def delete(self, request, group_pk, user_pk):
+        if not request.user.is_staff:
+            if not request.user.group.pk == group_pk:
+                raise PermissionDenied
         try:
             user = AccessInfo.objects.get(group__pk=group_pk, pk=user_pk)
         except AccessInfo.DoesNotExist:
