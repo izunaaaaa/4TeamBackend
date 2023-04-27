@@ -678,14 +678,7 @@ class NewPassword(APIView):
             },
         ),
         responses={
-            200: openapi.Response(
-                description="Successful Response",
-                examples={
-                    "application/json": {
-                        "id": "kimduhong",
-                    }
-                },
-            ),
+            200: openapi.Response(description="Successful Response"),
             400: openapi.Response(description="Invalid Value"),
             404: openapi.Response(description="Not Found User"),
         },

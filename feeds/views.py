@@ -515,10 +515,13 @@ class GroupFeedCategory(APIView):
             if not request.user.is_staff:
                 raise PermissionDenied
         category = get_object_or_404(Category, pk=category_pk)
-        feed = Feed.objects.filter(
+        if category.name == "전체글":
+            feed = Feed.objects.filter(group=group).order_by("-created_at")
+        else:
+            feed = Feed.objects.filter(
             group=group,
             category=category,
-        ).order_by("-created_at")
+            ).order_by("-created_at")
         items_per_page = 12
         current_page = request.GET.get("page", 1)
         paginator = Paginator(feed, items_per_page)
