@@ -67,13 +67,13 @@ class ChattingRoom(APIView):
         raise NotFound
 
     @swagger_auto_schema(
-        operation_summary="쪽지 ",
+        operation_summary="쪽지방 차단",
         responses={
             204: openapi.Response(
                 description="Successful Response",
             ),
-            400: openapi.Response(description="Not Found Pk"),
             403: openapi.Response(description="Sender != request.user"),
+            404: openapi.Response(description="Not Found Pk"),
         },
     )
     def delete(self, request, pk):

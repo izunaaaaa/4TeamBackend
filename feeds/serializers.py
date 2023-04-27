@@ -97,6 +97,7 @@ class FeedSerializer(ModelSerializer):
 class FeedDetailSerializer(ModelSerializer):
     user = TinyUserSerializer(read_only=True)
     group = GroupSerializer(read_only=True)
+    # comment = SerializerMethodField()
     comment = CommentSerializer(many=True, read_only=True)
     is_like = SerializerMethodField()
     highest_like_comments = CommentSerializer(many=True, read_only=True)
@@ -124,6 +125,13 @@ class FeedDetailSerializer(ModelSerializer):
             "is_like",
             "is_writer",
         )
+
+    # def get_comment(self, obj):
+    #     result = CommentSerializer(obj.comment.all(), many=True).data
+    #     tmp = [i for i in result]
+    #     for i in tmp:
+    #         print(type(i))
+    #     return CommentSerializer(obj.comment.all(), many=True).data
 
     def get_is_like(self, data):
         request = self.context.get("request")

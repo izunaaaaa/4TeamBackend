@@ -11,6 +11,7 @@ class RecommentSerializer(ModelSerializer):
     is_like = SerializerMethodField()
     is_writer = SerializerMethodField()
     # anonymous_number = SerializerMethodField()
+    feed_writer = SerializerMethodField()
 
     class Meta:
         model = Recomment
@@ -21,10 +22,13 @@ class RecommentSerializer(ModelSerializer):
             "created_at",
             "commentlikeCount",
             "description",
-            # "anonymous_number",
+            "feed_writer",
             "is_like",
             "is_writer",
         )
+
+    def get_feed_writer(self, obj):
+        return obj.user == obj.comment.feed.user
 
     def get_is_like(self, data):
         request = self.context.get("request")
@@ -58,6 +62,7 @@ class CommentSerializer(ModelSerializer):
     recomment = serializers.RecommentSerializer(read_only=True, many=True)
     is_like = SerializerMethodField()
     is_writer = SerializerMethodField()
+    feed_writer = SerializerMethodField()
 
     class Meta:
         model = Comment
@@ -70,7 +75,11 @@ class CommentSerializer(ModelSerializer):
             "recomment",
             "is_like",
             "is_writer",
+            "feed_writer",
         )
+
+    def get_feed_writer(self, obj):
+        return obj.user == obj.feed.user
 
     def get_is_like(self, data):
         request = self.context.get("request")
