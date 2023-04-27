@@ -691,7 +691,7 @@ class NewPassword(APIView):
         },
     )
     def put(self, request):
-        username = request.data.get("id")
+        username = request.data.get("username")
         name = request.data.get("name")
         email = request.data.get("email")
         phone_number = request.data.get("phone_number")
