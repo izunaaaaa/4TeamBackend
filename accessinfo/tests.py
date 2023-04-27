@@ -343,5 +343,68 @@ class AccessInfoGroupDetail(APITestCase):
     def test_edit_access_info_group_detail_login_normal_user(self):
         self.client.force_login(self.test_user)
         response = self.client.put(self.URL)
-        self.assertEqual(response.status_code, 403, "Non login user")
+        self.assertEqual(response.status_code, 403, "login normar user")
+        self.client.logout()
+
+    def test_edit_access_info_group_detail_login_other_coach_user(self):
+        self.client.force_login(self.test_user_other_coach)
+        response = self.client.put(self.URL)
+        self.assertEqual(response.status_code, 403, "login Other Coach user")
+        self.client.logout()
+
+    def test_edit_access_info_group_detail_login_coach_user(self):
+        self.client.force_login(self.test_user_group_coach)
+        response = self.client.put(self.URL)
+        self.assertEqual(response.status_code, 200, "login Coach user")
+        self.client.logout()
+
+    def test_edit_access_info_group_detail_sucessful_for_coach(self):
+        self.client.force_login(self.test_user_group_coach)
+        response = self.client.put(self.URL, {"name": "TEST"})
+        self.assertEqual(AccessInfo.objects.get(pk=1).name, "TEST", "Check Update")
+        self.client.logout()
+
+    def test_edit_access_info_group_detail_duplicate_value_for_coach(self):
+        self.client.force_login(self.test_user_group_coach)
+        self.client.put(self.URL, {"email": "TEST@naver.com"})
+        # AccessInfo.objects.get(pk=1)
+        tmp = AccessInfo.objects.get(pk=2).email
+        response = self.client.put(
+            "/api/v1/access/group/1/2",
+            {"email": "TEST@naver.com"},
+        )
+        self.assertEqual(response.status_code, 400, "Duplicate Name")
+        self.client.logout()
+
+    def test_delete_access_info_group_detail_non_login_user(self):
+        res = self.client.delete(self.URL)
+        self.assertEqual(res.status_code, 403, "non login when delete")
+        self.client.logout()
+
+    def test_delete_access_info_group_detail_login_normal_user(self):
+        self.client.force_login(self.test_user)
+        res = self.client.delete(self.URL)
+        self.assertEqual(res.status_code, 403, "login normal when delete")
+        self.client.logout()
+
+    def test_delete_access_info_group_detail_login_other_coach_user(self):
+        self.client.force_login(self.test_user_other_coach)
+        res = self.client.delete(self.URL)
+        self.assertEqual(res.status_code, 403, "login coach when delete")
+        self.client.logout()
+
+    def test_delete_access_info_group_detail_login_coach_user(self):
+        self.client.force_login(self.test_user_group_coach)
+        res = self.client.delete(self.URL)
+        self.assertEqual(res.status_code, 204, "login coach when delete")
+        self.client.logout()
+
+    def test_delete_access_info_group_detail_login_coach_user_check_delete(self):
+        self.client.force_login(self.test_user_group_coach)
+        before = AccessInfo.objects.count()
+        res = self.client.delete(self.URL)
+        after = AccessInfo.objects.count()
+        self.assertNotEqual(before, after, "delete check")
+        res = self.client.get(self.URL)
+        self.assertEqual(res.status_code, 404, "delete check")
         self.client.logout()

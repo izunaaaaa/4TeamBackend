@@ -78,7 +78,9 @@ class CommentDetail(APIView):
     def delete(self, request, pk):
         comment = get_object_or_404(Comment, pk=pk)
         if comment.user != request.user:
-            raise PermissionDenied
+            if not request.user.is_coach:
+                if not request.user.is_staff:
+                    raise PermissionDenied
         comment.delete()
         return Response(status=204)
 
@@ -156,8 +158,9 @@ class DeleteRecomment(APIView):
     )
     def delete(self, request, recomment_pk):
         recomment = get_object_or_404(Recomment, pk=recomment_pk)
-        if recomment.user == request.user:
-            recomment.delete()
-            return Response(status=204)
-        else:
-            raise PermissionDenied
+        if recomment.user != request.user:
+            if not request.user.is_coach:
+                if not request.user.is_staff:
+                    raise PermissionDenied
+        recomment.delete()
+        return Response(status=204)
