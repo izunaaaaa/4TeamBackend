@@ -522,7 +522,6 @@ class GroupFeedCategory(APIView):
                 Feed.objects.filter(group=group)
                 .annotate(count_like=Count("feedlike"))
                 .order_by("-count_like")
-                .order_by("-created_at")
             )
         else:
             feed = Feed.objects.filter(
