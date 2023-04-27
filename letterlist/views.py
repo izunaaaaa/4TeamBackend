@@ -27,6 +27,7 @@ class ChattingList(APIView):
     )
     def get(self, request):
         chatlist = Letterlist.objects.filter(user=request.user).order_by("-updated_at")
+        chatlist = [i for i in chatlist if request.user not in i.ignore_by.all()]
         serializer = serializers.ChatroomSerialzier(
             chatlist,
             many=True,
@@ -47,11 +48,14 @@ class ChattingRoom(APIView):
                 schema=serializers.MessageSerialzier(),
             ),
             400: openapi.Response(description="Not Found Pk"),
+            403: openapi.Response(description="Permission Denied"),
         },
     )
     def get(self, request, pk):
         chat = Letter.objects.filter(room__pk=pk)
         if chat:
+            if request.user not in chat[0].room.user.all():
+                raise PermissionDenied
             chat = [i for i in chat if request.user not in i.delete_by.all()]
             serializer = serializers.MessageSerialzier(
                 chat,
@@ -61,6 +65,28 @@ class ChattingRoom(APIView):
 
             return Response(serializer.data)
         raise NotFound
+
+    @swagger_auto_schema(
+        operation_summary="쪽지 ",
+        responses={
+            204: openapi.Response(
+                description="Successful Response",
+            ),
+            400: openapi.Response(description="Not Found Pk"),
+            403: openapi.Response(description="Sender != request.user"),
+        },
+    )
+    def delete(self, request, pk):
+        letter = get_object_or_404(Letterlist, pk=pk)
+        user = [i for i in letter.user.all()]
+        if request.user in user:
+            letter.ignore_user.add(request.user)
+            letter.save()
+            # if letter.sender == request.user:
+            #     # letter.delete()
+            return Response("Ok", status=204)
+        else:
+            raise PermissionDenied
 
 
 # /message/ POST -> 메세지 전송

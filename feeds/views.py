@@ -787,11 +787,11 @@ class GroupFeedSearch(APIView):
                 examples={
                     "application/json": {
                         "result": [
-                            {"pk":1, "title":"Feed 1 title"},
-                            {"pk":2, "title":"Feed 2 title"},
-                            {"pk":3, "title":"Feed 3 title"},
-                            {"pk":4, "title":"Feed 4 title"},
-                            {"pk":5, "title":"Feed 5 title"},
+                            {"pk": 1, "title": "Feed 1 title"},
+                            {"pk": 2, "title": "Feed 2 title"},
+                            {"pk": 3, "title": "Feed 3 title"},
+                            {"pk": 4, "title": "Feed 4 title"},
+                            {"pk": 5, "title": "Feed 5 title"},
                         ]
                     }
                 },

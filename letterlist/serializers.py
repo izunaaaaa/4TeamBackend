@@ -51,6 +51,7 @@ class MessageSerialzier(ModelSerializer):
             "id",
             "text",
             "is_sender",
+            "created_at",
         )
 
     def get_is_sender(self, data):

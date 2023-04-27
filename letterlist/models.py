@@ -9,6 +9,19 @@ class Letterlist(CommonModel):
         related_name="letterlist",
     )
 
+    ignore_by = models.ManyToManyField(
+        "users.User",
+        related_name="deleted_letter_list",
+        blank=True,
+    )
+
+    @property
+    def ignore_user(self):
+        if self.delete_by.exists():
+            return "".join([i.username for i in self.ignore_user.all()])
+        else:
+            return None
+
     def __str__(self) -> str:
         return str(self.pk) + "'st "
 
