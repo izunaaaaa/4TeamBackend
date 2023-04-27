@@ -11,6 +11,6 @@ urlpatterns = [
     path("group/search/", views.GroupFeedSearch.as_view()),
     path("group/search/result", views.GroupFeedSearchResult.as_view()),
     path("group/category/", views.GroupFeedCategory.as_view()),
-    path("toplike/", views.TopLikeView.as_view()),
+    # path("toplike/", views.TopLikeView.as_view()),
     # path("group/", views.GroupFeeds.as_view()),
 ]

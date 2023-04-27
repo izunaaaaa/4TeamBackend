@@ -517,10 +517,16 @@ class GroupFeedCategory(APIView):
         category = get_object_or_404(Category, pk=category_pk)
         if category.name == "전체글":
             feed = Feed.objects.filter(group=group).order_by("-created_at")
+        elif category.name == "인기글":
+            feed = (
+                Feed.objects.annotate(like_count=Count("feedlike"))
+                .order_by("-like_count")
+                .order_by(-"created_at")
+            )
         else:
             feed = Feed.objects.filter(
-            group=group,
-            category=category,
+                group=group,
+                category=category,
             ).order_by("-created_at")
         items_per_page = 12
         current_page = request.GET.get("page", 1)

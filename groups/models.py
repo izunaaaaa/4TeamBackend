@@ -44,4 +44,5 @@ class Group(CommonModel):
         super().save(*args, **kwargs)
         if not self.categories.exists():
             Category.objects.create(name="전체글", group=self)
+            Category.objects.create(name="일반글", group=self)
             Category.objects.create(name="인기글", group=self)
