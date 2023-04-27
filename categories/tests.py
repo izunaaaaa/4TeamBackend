@@ -21,7 +21,7 @@ class CategoriesGet(APITestCase):
         response = self.client.get(self.URL)
         data = response.json()
         self.assertEqual(response.status_code, 200, "status isn't 200")
-        self.assertEqual(len(response.data), 3)
+        self.assertEqual(len(response.data), 4)
 
 
 # 그룹 카테고리 조회 테스트
@@ -74,4 +74,3 @@ class CategoriesPost(APITestCase):
         # 응답 코드가 403인지 확인
         response = self.client.get(f"{self.URL}{self.GROUP.pk}")
         self.assertEqual(response.status_code, 403)
-
