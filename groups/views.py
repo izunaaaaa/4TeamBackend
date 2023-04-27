@@ -90,6 +90,10 @@ class GroupDetail(APIView):
     )
     def put(self, request, pk):
         group = get_object_or_404(Group, pk=pk)
+        if not request.user.group == group:
+            if not request.user.is_coach:
+                if not request.user.is_staff:
+                    raise PermissionDenied
         serializer = serializers.GroupDetailSerializer(
             group,
             data=request.data,
