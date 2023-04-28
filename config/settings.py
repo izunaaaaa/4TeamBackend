@@ -287,6 +287,9 @@ else:
         }
     }
 
+if not DEBUG:
+    SESSION_COOKIE_DOMAIN = ".curb.site, localhost"
+    CSRF_COOKIE_DOMAIN = ".curb.site"
 
 SESSION_CACHE_ALIAS = "default"
 
