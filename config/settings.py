@@ -32,7 +32,7 @@ CF_TOKEN = env("CF_TOKEN")
 CF_ID = env("CF_ID")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False if os.environ.get("SERVER") else True
+DEBUG = False if os.environ.get("SERVER") == "NAVER" else True
 
 ALLOWED_HOSTS = ["*"]
 

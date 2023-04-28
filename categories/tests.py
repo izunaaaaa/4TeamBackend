@@ -108,9 +108,8 @@ class CategoriesPut(APITestCase):
     def test_edit_category_detail_not_create_user(self):
         user = User.objects.create(name="OtherUser", email="user@example.com")
         self.client.force_login(user)
-        print(f"{self.URL}{self.GROUP.pk}{self.category.pk}")
         response = self.client.put(
-            f"{self.URL}{self.GROUP.pk}{self.category.pk}",
+            f"{self.URL}{self.GROUP.pk}/{self.category.pk}/",
             data={"name": "Change test"},
             format="json",
         )
