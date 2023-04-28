@@ -56,7 +56,7 @@ class ChattingRoom(APIView):
         if chat:
             if request.user not in chat[0].room.user.all():
                 raise PermissionDenied
-            chat = [i for i in chat if request.user not in i.ignore_user.all()]
+            chat = [i for i in chat if request.user not in i.delete_by.all()]
             serializer = serializers.MessageSerialzier(
                 chat,
                 many=True,
