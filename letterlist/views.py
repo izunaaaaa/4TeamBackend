@@ -80,10 +80,8 @@ class ChattingRoom(APIView):
         letter = get_object_or_404(Letterlist, pk=pk)
         user = [i for i in letter.user.all()]
         if request.user in user:
-            letter.ignore_user.add(request.user)
+            letter.ignore_by.add(request.user)
             letter.save()
-            # if letter.sender == request.user:
-            #     # letter.delete()
             return Response("Ok", status=204)
         else:
             raise PermissionDenied

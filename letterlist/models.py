@@ -17,8 +17,8 @@ class Letterlist(CommonModel):
 
     @property
     def ignore_user(self):
-        if self.delete_by.exists():
-            return "".join([i.username for i in self.ignore_user.all()])
+        if self.ignore_by.exists():
+            return "".join([i.username for i in self.ignore_by.all()])
         else:
             return None
 
