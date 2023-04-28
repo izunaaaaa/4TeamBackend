@@ -24,6 +24,9 @@ class Comment(CommonModel):
     def commentlikeCount(self):
         return self.commentlike.count()
 
+    class Meta:
+        ordering = ["created_at"]
+
 
 class Recomment(CommonModel):
     user = models.ForeignKey(
