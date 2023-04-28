@@ -34,11 +34,11 @@ class CategoriesPost(APITestCase):
 
     def setUp(self):
         self.GROUP = Group.objects.create(name="oz")
+        self.user = User.objects.create(is_coach=True)
         self.category = Category.objects.create(
             name=self.NAME,
             group=self.GROUP,
         )
-        self.user = User.objects.create(is_coach=True)
 
     def test_category_post_with_valid_data(self):
         # 유효한 데이터로 POST 요청 보내기
@@ -74,3 +74,45 @@ class CategoriesPost(APITestCase):
         # 응답 코드가 403인지 확인
         response = self.client.get(f"{self.URL}{self.GROUP.pk}")
         self.assertEqual(response.status_code, 403)
+
+
+# 그룹 카테고리 수정 테스트
+class CategoriesPut(APITestCase):
+    URL = "/api/v1/categories/"
+    NAME = "Category Test"
+
+    def setUp(self):
+        self.GROUP = Group.objects.create(name="oz")
+        self.upload_user = User.objects.create(username="Test User")
+        self.category = Category.objects.create(
+            name=self.NAME,
+            group=self.GROUP,
+        )
+
+    # 존재하지 않는 url 접근
+    def test_view_category_detail_not_found_url(self):
+        self.client.force_login(self.upload_user)
+        response = self.client.get(f"{self.URL}/10", format="json")
+        self.assertEqual(response.status_code, 404, "존재하지 않는 url")
+        self.client.logout()
+
+    # 비 로그인 유저가 수정
+    def test_edit_category_detail_non_login_user(self):
+        data = {"name": "study"}
+        response = self.client.put(
+            f"{self.URL}{self.GROUP.pk}{self.category.pk}", data, format="json"
+        )
+        self.assertEqual(response.status_code, 403, "비 로그인 수정")
+
+    # 생성한 유저가 아닌 유저가 수정
+    def test_edit_category_detail_not_create_user(self):
+        user = User.objects.create(name="OtherUser", email="user@example.com")
+        self.client.force_login(user)
+        print(f"{self.URL}{self.GROUP.pk}{self.category.pk}")
+        response = self.client.put(
+            f"{self.URL}{self.GROUP.pk}{self.category.pk}",
+            data={"name": "Change test"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 403, "로그인 (업로드 유저가 아닌 유저) 후 수정")
+        self.client.logout()
