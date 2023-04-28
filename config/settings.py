@@ -158,6 +158,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:3000",
     "https://curb.site",
+    "https://www.curb.site",
     "https://backend.curb.site",
 ]
 
@@ -286,9 +287,9 @@ else:
         }
     }
 
-# if not DEBUG:
-#     SESSION_COOKIE_DOMAIN = ".curb.site, backend.curb.site"
-#     CSRF_COOKIE_DOMAIN = ".curb.site, backend.curb.site"
+if not DEBUG:
+    SESSION_COOKIE_DOMAIN = ".curb.site"
+    CSRF_COOKIE_DOMAIN = ".curb.site"
 
 SESSION_CACHE_ALIAS = "default"
 
