@@ -157,8 +157,12 @@ CSRF_TRUSTED_ORIGINS = [
     "http://115.85.181.9",
     "http://127.0.0.1:3000",
     "http://localhost:3000",
-    "https://curb.onrender.com/",
+    "https://curb.site",
 ]
+
+# if not DEBUG:
+# SESSION_COOKIE_DOMAIN = ".curb.site"
+# CSRF_COOKIE_DOMAIN = ".curb.site"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
