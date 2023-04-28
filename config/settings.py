@@ -288,7 +288,6 @@ else:
     }
 
 if not DEBUG:
-    SESSION_COOKIE_DOMAIN = ".curb.site"
     CSRF_COOKIE_DOMAIN = ".curb.site"
 
 SESSION_CACHE_ALIAS = "default"
