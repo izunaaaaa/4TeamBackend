@@ -157,6 +157,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://115.85.181.9",
     "http://127.0.0.1:3000",
     "http://localhost:3000",
+    "https://curb.onrender.com/",
 ]
 
 REST_FRAMEWORK = {
