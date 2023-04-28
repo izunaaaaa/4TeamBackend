@@ -153,10 +153,12 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
-    "http://115.85.181.9",
+    "https://115.85.181.9",
+    "https://115.85.181.9",
     "http://127.0.0.1:3000",
     "http://localhost:3000",
     "https://curb.site",
+    "https://backend.curb.site",
 ]
 
 # if not DEBUG:
