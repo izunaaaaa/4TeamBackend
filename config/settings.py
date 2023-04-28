@@ -32,10 +32,9 @@ CF_TOKEN = env("CF_TOKEN")
 CF_ID = env("CF_ID")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False if os.environ.get("SERVER") else True
 
 ALLOWED_HOSTS = ["*"]
-
 
 # Application definition
 
