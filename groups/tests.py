@@ -82,3 +82,6 @@ class GroupDetailTestCase(APITestCase):
         self.assertEqual(response.status_code, 403, "Permission denied")
 
         self.client.logout()
+
+    def test_delete_group_detail_non_login_user(self):
+        response = self.client.delete(self.URL)
