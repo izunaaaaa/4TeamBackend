@@ -164,9 +164,9 @@ CSRF_TRUSTED_ORIGINS = [
     "https://backend.curb.site",
 ]
 
-if os.environ.get("SERVER") == "NAVER":
-    SESSION_COOKIE_DOMAIN = ".curb.site"
-    CSRF_COOKIE_DOMAIN = ".curb.site"
+# if os.environ.get("SERVER") == "NAVER":
+# SESSION_COOKIE_DOMAIN = ".curb.site"
+# CSRF_COOKIE_DOMAIN = ".curb.site"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
