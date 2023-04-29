@@ -42,8 +42,8 @@ urlpatterns = [
     path("api/v1/likes/", include("likes.urls")),
     path("api/v1/access/", include("accessinfo.urls")),
     path("api/v1/media/", include("medias.urls")),
-    path("api/v1/auth/", include("auth_sms.urls")),
     path("api/v1/letterlist/", include("letterlist.urls")),
+    path("api/v1/auth/", include("auth_sms.urls")),
     path(
         "swagger/",
         schema_view.with_ui("swagger", cache_timeout=0),
