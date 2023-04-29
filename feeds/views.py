@@ -791,7 +791,7 @@ class FeedRecomment(APIView):
 
 
 class GroupFeedSearch(APIView):
-    permission_classes = [IsAuthenticated, IsCoachOrStaff]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_summary="그룹 피드 연관 검색어 5개",
