@@ -164,7 +164,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://backend.curb.site",
 ]
 
-if os.environ.get("DEV") != "DEV":
+if os.environ.get("DEPLOY") == "DEPLOY":
     SESSION_COOKIE_DOMAIN = ".curb.site"
     CSRF_COOKIE_DOMAIN = ".curb.site"
 
@@ -217,22 +217,22 @@ if os.environ.get("SERVER") == "NAVER":
     #     }
     # }
 else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
     # DATABASES = {
     #     "default": {
-    #         "ENGINE": "django.db.backends.postgresql",
-    #         "NAME": env("POSTGRES_NAME"),
-    #         "USER": env("POSTGRES_USER"),
-    #         "PASSWORD": env("POSTGRES_PASSWORD"),
-    #         "HOST": env("POSTGRES_HOST"),
-    #         "PORT": env("POSTGRES_PORT"),
+    #         "ENGINE": "django.db.backends.sqlite3",
+    #         "NAME": BASE_DIR / "db.sqlite3",
     #     }
     # }
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env("POSTGRES_NAME"),
+            "USER": env("POSTGRES_USER"),
+            "PASSWORD": env("POSTGRES_PASSWORD"),
+            "HOST": env("POSTGRES_HOST"),
+            "PORT": env("POSTGRES_PORT"),
+        }
+    }
 
 
 from datetime import timedelta
@@ -289,9 +289,6 @@ else:
         }
     }
 
-# if not DEBUG:
-#     SESSION_COOKIE_DOMAIN = ".curb.site, localhost"
-#     CSRF_COOKIE_DOMAIN = ".curb.site"
 
 SESSION_CACHE_ALIAS = "default"
 
