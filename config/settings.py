@@ -146,15 +146,17 @@ STATIC_URL = "/static/"
 STATIC_ROOT = "/srv/docker-data/static/"
 
 CORS_ALLOW_ALL_ORIGINS = True
+
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:3080",
 #     "http://127.0.0.1:3000",
 # ]
 
 CORS_ALLOW_CREDENTIALS = True
+
 CSRF_TRUSTED_ORIGINS = [
     "https://115.85.181.9",
-    "https://115.85.181.9",
+    "http://115.85.181.9",
     "http://127.0.0.1:3000",
     "http://localhost:3000",
     "https://curb.site",
@@ -162,9 +164,9 @@ CSRF_TRUSTED_ORIGINS = [
     "https://backend.curb.site",
 ]
 
-# if not DEBUG:
-# SESSION_COOKIE_DOMAIN = ".curb.site"
-# CSRF_COOKIE_DOMAIN = ".curb.site"
+if not DEBUG:
+    SESSION_COOKIE_DOMAIN = ".curb.site"
+    CSRF_COOKIE_DOMAIN = ".curb.site"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -287,9 +289,9 @@ else:
         }
     }
 
-if not DEBUG:
-    SESSION_COOKIE_DOMAIN = ".curb.site, localhost"
-    CSRF_COOKIE_DOMAIN = ".curb.site"
+# if not DEBUG:
+#     SESSION_COOKIE_DOMAIN = ".curb.site, localhost"
+#     CSRF_COOKIE_DOMAIN = ".curb.site"
 
 SESSION_CACHE_ALIAS = "default"
 
