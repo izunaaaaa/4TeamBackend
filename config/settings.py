@@ -164,7 +164,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://backend.curb.site",
 ]
 
-if not DEBUG:
+if os.environ.get("SERVER") == "NAVER":
     SESSION_COOKIE_DOMAIN = ".curb.site"
     CSRF_COOKIE_DOMAIN = ".curb.site"
 
