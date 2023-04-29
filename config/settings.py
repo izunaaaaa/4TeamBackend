@@ -33,7 +33,7 @@ CF_ID = env("CF_ID")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = False if os.environ.get("SERVER") == "NAVER" else True
-DEBUG = True
+DEBUG = os.environ.get("DEPLOY") != "DEPLOY"
 ALLOWED_HOSTS = ["*"]
 
 # Application definition
@@ -55,8 +55,8 @@ CUSTOM_APPS = [
     "comments.apps.CommentsConfig",
     "likes.apps.LikesConfig",
     "medias.apps.MediasConfig",
-    # "chattings.apps.ChattingsConfig",
     "letterlist.apps.LetterlistConfig",
+    "auth_sms.apps.AuthSmsConfig",
 ]
 
 SYSTEM_APPS = [
