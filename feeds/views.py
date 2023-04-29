@@ -517,7 +517,7 @@ class GroupFeedCategory(APIView):
         category_pk = request.GET.get("category_id")
         # group = get_object_or_404(Group, pk=group_pk)
         if not request.user.is_staff:
-            if request.user.group.pk != group_pk:
+            if str(request.user.group.pk) != group_pk:
                 raise PermissionDenied
         category = get_object_or_404(Category, pk=category_pk)
         if category.name == "전체글":
