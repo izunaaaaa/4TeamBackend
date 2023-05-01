@@ -111,6 +111,7 @@ class CheckNumber(APIView):
             return Response({"message": "Bad Request"}, status=400)
         else:
             if cache.get(p_num) == a_num or str(cache.get(p_num)) == a_num:
+                cache.delete(p_num)
                 return Response({"message": "OK"})
             else:
                 return Response({"message": "인증번호 틀림"}, status=400)

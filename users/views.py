@@ -57,15 +57,15 @@ class Me(APIView):
         request_body=serializers.PrivateUserSerializer(),
     )
     def put(self, request):
-        serilaizer = serializers.PrivateUserSerializer(
+        serializer = serializers.PrivateUserSerializer(
             request.user,
             data=request.data,
             partial=True,
         )
-        if serilaizer.is_valid():
+        if serializer.is_valid():
             updated_user = serializer.save()
             serializer = serializers.PrivateUserSerializer(updated_user)
-            return Response(serilaizer.data)
+            return Response(serializer.data)
         else:
             return Response(serializer.errors, status=400)
 
@@ -463,6 +463,7 @@ class CoachSignUp(APIView):
 
         serializer = serializers.PrivateUserSerializer(data=request.data)
         if serializer.is_valid():
+            group = get_object_or_404(Group, pk=request.data.get("group"))
             self.validate_password(password)
             user = serializer.save()
             if request.data.get("avatar"):

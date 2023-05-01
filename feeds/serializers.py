@@ -93,9 +93,9 @@ class FeedDetailSerializer(ModelSerializer):
     user = TinyUserSerializer(read_only=True)
     group = GroupSerializer(read_only=True)
     # comment = SerializerMethodField()
-    comment = CommentSerializer(many=True, read_only=True)
+    # comment = CommentSerializer(many=True, read_only=True)
     is_like = SerializerMethodField()
-    highest_like_comments = CommentSerializer(many=True, read_only=True)
+    # highest_like_comments = CommentSerializer(many=True, read_only=True)
     # images = MediaSerializer(many=True, read_only=True)
     is_writer = SerializerMethodField()
 
@@ -114,8 +114,8 @@ class FeedDetailSerializer(ModelSerializer):
             "like_count",
             "thumbnail",
             "comments_count",
-            "highest_like_comments",
-            "comment",
+            # "highest_like_comments",
+            # "comment",
             # "images",
             "is_like",
             "is_writer",
