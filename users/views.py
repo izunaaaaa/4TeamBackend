@@ -402,7 +402,7 @@ class SignUp(APIView):
             login(request, user)
             # set_password 후 다시 저장
             serializer = serializers.PrivateUserSerializer(user)
-            refresh = RefreshToken.for_user(user)
+            # refresh = RefreshToken.for_user(user)
             return Response(
                 {
                     # "access": str(refresh.access_token),
@@ -457,29 +457,30 @@ class CoachSignUp(APIView):
         ),
     )
     def post(self, request):
-        password = str(request.data.get("password"))
+        password = request.data.get("password")
         if not password:
             raise ParseError("password 가 입력되지 않았습니다.")
 
         serializer = serializers.PrivateUserSerializer(data=request.data)
         if serializer.is_valid():
-            group = get_object_or_404(Group, pk=request.data.get("group"))
             self.validate_password(password)
+            print(request.data.get("group"))
+            group, created = Group.objects.get_or_create(name=request.data.get("group"))
             user = serializer.save()
             if request.data.get("avatar"):
                 user.avatar = request.data.get("avatar")
             user.set_password(password)
             user.is_coach = True
+            user.group = group
             # user.password = password 시에는 raw password로 저장
             user.save()
             login(request, user)
             # set_password 후 다시 저장
-            serializer = serializers.PrivateUserSerializer(user)
-            refresh = RefreshToken.for_user(user)
+            # serializer = serializers.PrivateUserSerializer(user)
+            # refresh = RefreshToken.for_user(user)
             return Response(
                 {
-                    "access": str(refresh.access_token),
-                    "refresh": str(refresh),
+                    "new_group": created,
                     "data": serializer.data,
                 },
                 status=201,
