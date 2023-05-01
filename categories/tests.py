@@ -1,7 +1,6 @@
 from rest_framework.test import APITestCase
 from .models import Category
 from groups.models import Group
-from . import serializers
 from users.models import User
 
 
@@ -86,7 +85,11 @@ class GroupCategoriesPut(APITestCase):
 
     def setUp(self):
         self.group = Group.objects.create(name="oz")
-        self.upload_user = User.objects.create(username="Test User")
+        self.upload_user = User.objects.create(
+            username="Test User",
+            is_coach=True,
+            group=self.group,
+        )
         self.category = Category.objects.create(
             name=self.NAME,
             group=self.group,
@@ -110,7 +113,9 @@ class GroupCategoriesPut(APITestCase):
 
     # 생성한 유저가 아닌 유저가 수정
     def test_edit_category_detail_not_create_user(self):
-        user = User.objects.create(name="OtherUser", email="user@example.com")
+        user = User.objects.create(
+            name="OtherUser", email="user@example.com", is_coach=True
+        )
         self.client.force_login(user)
         response = self.client.put(
             f"{self.URL}{self.group.pk}/{self.category.pk}/",
@@ -121,15 +126,15 @@ class GroupCategoriesPut(APITestCase):
         self.client.logout()
 
     # 생성한 유저가 수정
-    # def test_edit_category_detail_create_user(self):
-    #     self.client.force_login(self.upload_user)
-    #     response = self.client.put(
-    #         f"{self.URL}{self.group.pk}/{self.category.pk}/",
-    #         data={"name": "Change test"},
-    #         format="json",
-    #     )
-    #     self.assertEqual(response.status_code, 200, "로그인 (업로드 유저) 후 수정")
-    #     self.client.logout()
+    def test_edit_category_detail_create_user(self):
+        self.client.force_login(self.upload_user)
+        response = self.client.put(
+            f"{self.URL}{self.group.pk}/{self.category.pk}/",
+            data={"name": "Change test"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, "로그인 (업로드 유저) 후 수정")
+        self.client.logout()
 
     # 수정 확인
     def test_edit_task_detail_create_user_change_value(self):
