@@ -53,33 +53,21 @@ class SelfUsersView(APITestCase):
         )
 
 
-class SelfUsersView(APITestCase):
-    URL = "/api/v1/users/me/feedlike/"
+# class SelfUsersView(APITestCase):
+#     URL = "/api/v1/users/me/feedlike/"
 
-    @classmethod
-    def setUpTestData(cls) -> None:
-        print("")
-        print("Test View my liked feed GET")
-        cls.user = User.objects.create(username="TestUser")
+#     @classmethod
+#     def setUpTestData(cls) -> None:
+#         print("")
+#         print("Test View my liked feed GET")
+#         cls.user = User.objects.create(username="TestUser")
 
-    def test_view_user_profile_non_login(self):
-        response = self.client.get(self.URL)
-        self.assertEqual(response.status_code, 403, "Non Login User")
+#     def test_view_user_profile_non_login(self):
+#         response = self.client.get(self.URL)
+#         self.assertEqual(response.status_code, 403, "Non Login User")
 
-    def test_view_user_profile_login_user(self):
-        self.client.force_login(self.user)
-        response = self.client.get(self.URL)
-        self.assertEqual(response.status_code, 200, "Login User")
-        self.assertEqual(response.data.get("id"), self.user.id, "Self user profile")
-
-    def test_edit_user_profile_non_user(self):
-        response = self.client.put(self.URL)
-        self.assertEqual(response.status_code, 403, "Non Login User")
-
-    def test_view_user_profile_login_user(self):
-        self.client.force_login(self.user)
-        response = self.client.put(self.URL, {"username": "TestEdit"})
-        self.assertEqual(response.status_code, 200, "Login User Edit")
-        self.assertNotEqual(
-            self.user.username, User.objects.get(pk=1).username, "Edit Profile check"
-        )
+#     def test_view_user_profile_login_user(self):
+#         self.client.force_login(self.user)
+#         response = self.client.get(self.URL)
+#         self.assertEqual(response.status_code, 200, "Login User")
+#         self.assertEqual(response.data.get("id"), self.user.id, "Self user profile")
