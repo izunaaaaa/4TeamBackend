@@ -452,7 +452,9 @@ class CoachSignUp(APIView):
                     type=openapi.TYPE_STRING,
                     enum=User.GenderChoices.values,
                 ),
-                "group": openapi.Schema(type=openapi.TYPE_INTEGER),
+                "group": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="없는 그룹이름이면 생성"
+                ),
             },
         ),
     )
@@ -464,8 +466,10 @@ class CoachSignUp(APIView):
         serializer = serializers.PrivateUserSerializer(data=request.data)
         if serializer.is_valid():
             self.validate_password(password)
-            print(request.data.get("group"))
-            group, created = Group.objects.get_or_create(name=request.data.get("group"))
+            if request.data.get("group"):
+                group, created = Group.objects.get_or_create(name=request.data.get("group"))
+            else:
+                raise ParseError("Group 이 입력되지 않았습니다.")
             user = serializer.save()
             if request.data.get("avatar"):
                 user.avatar = request.data.get("avatar")
@@ -481,7 +485,7 @@ class CoachSignUp(APIView):
             return Response(
                 {
                     "new_group": created,
-                    "data": serializer.data,
+                    "user": serializer.data,
                 },
                 status=201,
             )
