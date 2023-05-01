@@ -79,7 +79,7 @@ class CategoriesPost(APITestCase):
 # 그룹 카테고리 수정 테스트
 class CategoriesPut(APITestCase):
     URL = "/api/v1/categories/"
-    NAME = "Category Test"
+    NAME = "Change test"
 
     def setUp(self):
         self.GROUP = Group.objects.create(name="oz")
@@ -114,4 +114,30 @@ class CategoriesPut(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 403, "로그인 (업로드 유저가 아닌 유저) 후 수정")
+        self.client.logout()
+
+    # 생성한 유저가 수정
+    # def test_edit_category_detail_create_user(self):
+    #     self.client.force_login(self.upload_user)
+    #     response = self.client.put(
+    #         f"{self.URL}{self.GROUP.pk}/{self.category.pk}/",
+    #         data={"name": "Change test"},
+    #         format="json",
+    #     )
+    #     self.assertEqual(response.status_code, 200, "로그인 (업로드 유저) 후 수정")
+    #     self.client.logout()
+
+    # 수정 확인
+    def test_edit_task_detail_create_user_change_value(self):
+        self.client.force_login(self.upload_user)
+        response = self.client.put(
+            f"{self.URL}{self.GROUP.pk}/{self.category.pk}/",
+            data={"name": "Change test"},
+            format="json",
+        )
+        self.assertEqual(
+            Category.objects.get(pk=self.category.pk).name,
+            "Change test",
+            "수정 여부 확인",
+        )
         self.client.logout()
