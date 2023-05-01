@@ -53,21 +53,21 @@ class SelfUsersView(APITestCase):
         )
 
 
-# class SelfUsersView(APITestCase):
-#     URL = "/api/v1/users/me/feedlike/"
+class SelfUsersView(APITestCase):
+    URL = "/api/v1/users/me/feedlike/"
 
-#     @classmethod
-#     def setUpTestData(cls) -> None:
-#         print("")
-#         print("Test View my liked feed GET")
-#         cls.user = User.objects.create(username="TestUser")
+    @classmethod
+    def setUpTestData(cls) -> None:
+        print("")
+        print("Test View my liked feed GET / POST")
+        cls.user = User.objects.create(username="TestUser")
 
-#     def test_view_user_profile_non_login(self):
-#         response = self.client.get(self.URL)
-#         self.assertEqual(response.status_code, 403, "Non Login User")
+    def test_view_user_profile_non_login(self):
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 403, "Non Login User")
 
-#     def test_view_user_profile_login_user(self):
-#         self.client.force_login(self.user)
-#         response = self.client.get(self.URL)
-#         self.assertEqual(response.status_code, 200, "Login User")
-#         self.assertEqual(response.data.get("id"), self.user.id, "Self user profile")
+    def test_view_user_profile_login_user(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 200, "Login User")
+        self.assertEqual(response.data.get("id"), self.user.id, "Self user profile")
