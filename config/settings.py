@@ -162,6 +162,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://curb.site",
     "https://www.curb.site",
     "https://backend.curb.site",
+    "https://dev.curb.site",
 ]
 
 if os.environ.get("DEPLOY") == "DEPLOY":
