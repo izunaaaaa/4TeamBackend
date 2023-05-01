@@ -63,6 +63,7 @@ class CommentSerializer(ModelSerializer):
     is_like = SerializerMethodField()
     is_writer = SerializerMethodField()
     feed_writer = SerializerMethodField()
+    # annoy_number = SerializerMethodField()
 
     class Meta:
         model = Comment
@@ -76,10 +77,17 @@ class CommentSerializer(ModelSerializer):
             "is_like",
             "is_writer",
             "feed_writer",
+            # "annoy_number",
         )
 
     def get_feed_writer(self, obj):
         return obj.user == obj.feed.user
+
+    # def get_annoy_number(self, obj):
+    #     if self.get_feed_writer(obj):
+    #         return "익명(작성자)"
+    #     else:
+    #         return "익명1"
 
     def get_is_like(self, data):
         request = self.context.get("request")
