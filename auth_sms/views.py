@@ -2,10 +2,60 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Auth_sms
+
+# from .models import Auth_sms
+from django.core.cache import cache
+import requests
+import time
+from random import randint
 
 
 class SmsSend(APIView):
+    def check_auth_number(cls, p_num, c_num):
+        result = cls.objects.filter(phone_number=p_num, auth_number=c_num).exists()
+        if result:
+            return True
+        return False
+
+    def send_sms(self):
+        self.serviceId = "ncp:sms:kr:306207594347:curb-dev"
+        self.url = "https://sens.apigw.ntruss.com"
+        self.uri = f"/sms/v2/services/{self.serviceId}/messages"
+        self.timestamp = str(int(time.time() * 1000))
+        self.access_key = "B1EaHVNUwRPkQ3PTspyn"
+        signature = self.make_signature()
+        data = {
+            "type": "SMS",
+            "from": "01062848167",
+            "to": [self.p_num],
+            "content": "[테스트] 인증 번호 [{}]를 입력해주세요.".format(self.auth_number),
+            "messages": [{"to": self.p_num}],
+        }
+        headers = {
+            "Content-Type": "application/json; charset=utf-8",
+            "x-ncp-apigw-timestamp": self.timestamp,
+            "x-ncp-iam-access-key": self.access_key,
+            "x-ncp-apigw-signature-v2": signature,
+        }
+        requests.post(self.url + self.uri, json=data, headers=headers)
+
+    def make_signature(self):
+        import base64
+        import hashlib
+        import hmac
+
+        secret_key = "XWYSYWDfx6HjptZBTR0wPcPvlv9NdNNgsYXZwgd7"  # secret key (from portal or Sub Account)
+        secret_key = bytes(secret_key, "UTF-8")
+
+        message = (
+            "POST" + " " + self.uri + "\n" + self.timestamp + "\n" + self.access_key
+        )
+        message = bytes(message, "UTF-8")
+        signingKey = base64.b64encode(
+            hmac.new(secret_key, message, digestmod=hashlib.sha256).digest()
+        )
+        return signingKey
+
     @swagger_auto_schema(
         operation_summary="phone_number 만 보내면 됨 (나중에 자세히 씀)",
         request_body=openapi.Schema(
@@ -24,17 +74,19 @@ class SmsSend(APIView):
     )
     def post(self, request):
         try:
-            p_num = request.data["phone_number"]
+            self.p_num = request.data["phone_number"]
         except KeyError:
             return Response({"message": "Bad Request"}, status=400)
         else:
-            Auth_sms.objects.update_or_create(phone_number=p_num)
+            self.auth_number = randint(1000, 10000)
+            self.send_sms()
+            cache.set(self.p_num, self.auth_number, timeout=60 * 5)
             return Response({"message": "OK"})
 
 
 class CheckNumber(APIView):
     @swagger_auto_schema(
-        operation_summary="phone_number 만 보내면 됨 (나중에 자세히 씀)",
+        operation_summary="phone_number, auth_number 만 보내면 됨 (나중에 자세히 씀)",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             required=["phone_number", "auth_number"],
@@ -43,7 +95,7 @@ class CheckNumber(APIView):
                     type=openapi.TYPE_STRING, description="전화번호"
                 ),
                 "auth_number": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="인증번호"
+                    type=openapi.TYPE_INTEGER, description="인증번호"
                 ),
             },
         ),
@@ -59,8 +111,7 @@ class CheckNumber(APIView):
         except KeyError:
             return Response({"message": "Bad Request"}, status=400)
         else:
-            result = Auth_sms.check_auth_number(p_num, a_num)
-            if result:
-                return Response({"message": "OK", "result": result})
+            if cache.get(p_num) == a_num or str(cache.get(p_num)) == a_num:
+                return Response({"message": "OK"})
             else:
                 return Response({"message": "인증번호 틀림"}, status=400)
