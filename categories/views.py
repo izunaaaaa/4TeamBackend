@@ -11,25 +11,25 @@ from groups.models import Group
 from django.core.cache import cache
 
 
-class Categories(APIView):
-    # permission_classes = [IsAuthenticated]
+# class Categories(APIView):
+#     # permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_summary="전체 카테고리 조회 api",
-        responses={
-            200: openapi.Response(
-                description="Successful Response",
-                schema=serializers.CategorySerializer(),
-            )
-        },
-    )
-    def get(self, request):
-        category = Category.objects.all()
-        serializer = serializers.CategorySerializer(
-            category,
-            many=True,
-        )
-        return Response(serializer.data)
+#     @swagger_auto_schema(
+#         operation_summary="전체 카테고리 조회 api",
+#         responses={
+#             200: openapi.Response(
+#                 description="Successful Response",
+#                 schema=serializers.CategorySerializer(),
+#             )
+#         },
+#     )
+#     def get(self, request):
+#         category = Category.objects.all()
+#         serializer = serializers.CategorySerializer(
+#             category,
+#             many=True,
+#         )
+#         return Response(serializer.data)
 
 
 class GroupCategories(APIView):
