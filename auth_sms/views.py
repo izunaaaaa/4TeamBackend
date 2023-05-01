@@ -9,26 +9,25 @@ import requests
 import time
 from random import randint
 
+import os
+import environ
+
+env = environ.Env()
+
 
 class SmsSend(APIView):
-    def check_auth_number(cls, p_num, c_num):
-        result = cls.objects.filter(phone_number=p_num, auth_number=c_num).exists()
-        if result:
-            return True
-        return False
-
     def send_sms(self):
-        self.serviceId = "ncp:sms:kr:306207594347:curb-dev"
+        self.serviceId = os.environ.get("NCP_serviceID")
         self.url = "https://sens.apigw.ntruss.com"
         self.uri = f"/sms/v2/services/{self.serviceId}/messages"
         self.timestamp = str(int(time.time() * 1000))
-        self.access_key = "B1EaHVNUwRPkQ3PTspyn"
+        self.access_key = os.environ.get("NCP_accessKey")
         signature = self.make_signature()
         data = {
             "type": "SMS",
             "from": "01062848167",
             "to": [self.p_num],
-            "content": "[테스트] 인증 번호 [{}]를 입력해주세요.".format(self.auth_number),
+            "content": "인증 번호 [{}]를 입력해주세요.".format(self.auth_number),
             "messages": [{"to": self.p_num}],
         }
         headers = {
@@ -44,7 +43,7 @@ class SmsSend(APIView):
         import hashlib
         import hmac
 
-        secret_key = "XWYSYWDfx6HjptZBTR0wPcPvlv9NdNNgsYXZwgd7"  # secret key (from portal or Sub Account)
+        secret_key = os.environ.get("NCP_secretKey")
         secret_key = bytes(secret_key, "UTF-8")
 
         message = (
