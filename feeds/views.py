@@ -721,13 +721,12 @@ class FeedComment(APIView):
             for recomment in comment.get("recomment", []):
                 if recomment.get("feed_writer"):
                     recomment["anonymous_number"] = "익명(작성자)"
-                
+
                 else:
                     user_pk = recomment["user"]["pk"]
                     if user_pk not in anonymous_numbers:
                         anonymous_numbers[user_pk] = len(anonymous_numbers) + 1
                     recomment["anonymous_number"] = f"익명{anonymous_numbers[user_pk]}"
-
 
             # Check if the comment has already been assigned an anonymous number
             # if comment["id"] not in anonymous_numbers:
