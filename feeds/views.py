@@ -413,49 +413,49 @@ class FeedDetail(APIView):
         return Response(status=204)
 
 
-class GroupFeeds(APIView):
-    permission_classes = [IsAuthenticated]
+# class GroupFeeds(APIView):
+#     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_summary="그룹 피드 전체 조회",
-        responses={
-            200: openapi.Response(
-                description="Successful Response",
-                schema=serializers.FeedSerializer(),
-            )
-        },
-    )
-    def get(self, request):
-        group_pk = request.GET.get("group_id")
-        group = get_object_or_404(Group, pk=group_pk)
-        if request.user.group != group:
-            if request.user.is_staff:
-                raise PermissionDenied
-        feed = Feed.objects.filter(group=group)
-        feed = feed.order_by("-created_at")
-        current_page = request.GET.get("page", 1)
-        items_per_page = 10
-        paginator = Paginator(feed, items_per_page)
-        try:
-            page = paginator.page(current_page)
-        except:
-            page = paginator.page(paginator.num_pages)
+#     @swagger_auto_schema(
+#         operation_summary="그룹 피드 전체 조회",
+#         responses={
+#             200: openapi.Response(
+#                 description="Successful Response",
+#                 schema=serializers.FeedSerializer(),
+#             )
+#         },
+#     )
+#     def get(self, request):
+#         group_pk = request.GET.get("group_id")
+#         group = get_object_or_404(Group, pk=group_pk)
+#         if request.user.group != group:
+#             if request.user.is_staff:
+#                 raise PermissionDenied
+#         feed = Feed.objects.filter(group=group)
+#         feed = feed.order_by("-created_at")
+#         current_page = request.GET.get("page", 1)
+#         items_per_page = 10
+#         paginator = Paginator(feed, items_per_page)
+#         try:
+#             page = paginator.page(current_page)
+#         except:
+#             page = paginator.page(paginator.num_pages)
 
-        if int(current_page) > int(paginator.num_pages):
-            raise ParseError("that page is out of range")
+#         if int(current_page) > int(paginator.num_pages):
+#             raise ParseError("that page is out of range")
 
-        serializer = serializers.FeedSerializer(
-            page,
-            many=True,
-            context={"request": request},
-        )
-        data = {
-            "total_pages": paginator.num_pages,
-            "now_page": page.number,
-            "count": paginator.count,
-            "results": serializer.data,
-        }
-        return Response(data)
+#         serializer = serializers.FeedSerializer(
+#             page,
+#             many=True,
+#             context={"request": request},
+#         )
+#         data = {
+#             "total_pages": paginator.num_pages,
+#             "now_page": page.number,
+#             "count": paginator.count,
+#             "results": serializer.data,
+#         }
+#         return Response(data)
 
 
 class GroupFeedCategory(APIView):
