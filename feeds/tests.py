@@ -3,14 +3,7 @@ from .models import Feed
 from groups.models import Group
 from users.models import User
 from categories.models import Category
-
-
-# 게시글 디테일 삭제 테스트
-# 댓글 생성 테스트
-# 대댓글 생성 테스트
-# 게시글 검색
-# 게시글 검색 결과
-# 그룹 카테고리 게시글 조회
+from comments.models import Comment, Recomment
 
 
 # 게시글 조회 테스트
@@ -78,12 +71,6 @@ class FeedDetailPut(APITestCase):
     def setUp(self):
         self.group = Group.objects.create(name="oz")
         self.user = User.objects.create(is_coach=True, group=self.group)
-        self.upload_user = User.objects.create(
-            username="Test User",
-            is_coach=True,
-            group=self.group,
-            email="test@example.com",
-        )
         self.category = Category.objects.create(group=self.group)
         self.feed = Feed.objects.create(
             user=self.user,
@@ -168,3 +155,77 @@ class FeedDetailPut(APITestCase):
             "수정 여부 확인",
         )
         self.client.logout()
+
+
+# 게시글 디테일 삭제 테스트
+# class FeedDetailDelete(APITestCase):
+#     URL = "/api/v1/feeds/"
+#     TITLE = "feed get test"
+
+#     def setUp(self):
+#         self.group = Group.objects.create(name="oz")
+#         self.user = User.objects.create(
+#             name="OtherUser",
+#             is_coach=True,
+#             group=self.group,
+#             email="user@example.com",
+#         )
+#         self.other_user = User.objects.create(
+#             username="Test User",
+#             is_coach=True,
+#             group=self.group,
+#             email="test@example.com",
+#         )
+#         self.category = Category.objects.create(group=self.group)
+#         self.feed = Feed.objects.create(
+#             user=self.user,
+#             title=self.TITLE,
+#             category=self.category,
+#         )
+
+
+# 댓글 생성 테스트
+# class CommentGet(APITestCase):
+#     URL = "/api/v1/feeds/"
+#     TITLE = "feed get test"
+
+#     def setUp(self):
+#         self.group = Group.objects.create(name="oz")
+#         self.user = User.objects.create(is_coach=True, group=self.group)
+#         self.category = Category.objects.create(group=self.group)
+#         self.comment = Comment.objects.create(user=self.user)
+#         self.recomment = Recomment.objects.create(user=self.user, comment=self.comment)
+#         self.feed = Feed.objects.create(
+#             user=self.user,
+#             title=self.TITLE,
+#             category=self.category,
+#         )
+
+
+# 대댓글 생성 테스트
+# 게시글 검색
+# 게시글 검색 결과
+# 그룹 카테고리 게시글 조회
+class GroupCategoryFeedGet(APITestCase):
+    URL = "/api/v1/feeds/"
+    TITLE = "feed get test"
+
+    def setUp(self):
+        self.group = Group.objects.create(name="oz")
+        self.user = User.objects.create(is_coach=True, group=self.group)
+        self.category = Category.objects.create(group=self.group)
+        self.feed = Feed.objects.create(
+            user=self.user,
+            title=self.TITLE,
+            category=self.category,
+        )
+
+    def get_all_feed(self):
+        self.client.force_login(self.user)
+        # response = self.client.get(f"{self.URL}/group/category/", args=[self.group.id])
+        response = self.client.get(
+            f"{self.URL}/group/category/",
+            f"?group_id={self.group_id}&keyword=test",
+        )
+        self.assertEqual(response.status_code, 200, "status isn't 200")
+        self.assertEqual(len(response.data), 4)
