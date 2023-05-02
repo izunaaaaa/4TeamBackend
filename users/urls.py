@@ -7,7 +7,7 @@ urlpatterns = [
     path("me/feedlike/", views.FeedLikes.as_view()),
     # path("me/commentlike/", views.CommentLikes.as_view()),
     path("me/feedlist/", views.FeedList.as_view()),
-    path("me/commentlist/", views.CommentList.as_view()),
+    # path("me/commentlist/", views.CommentList.as_view()),
     # path("me/likelist/", views.LikeList.as_view()),
     # path("@<str:username>/", views.UserDetail.as_view()),
     path("login/", views.LogIn.as_view()),
