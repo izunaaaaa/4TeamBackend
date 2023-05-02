@@ -89,6 +89,8 @@ class ChattingRoom(APIView):
 
 # /message/ POST -> 메세지 전송
 class MessageSend(APIView):
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         operation_summary="쪽지 전송",
         request_body=openapi.Schema(
@@ -119,7 +121,7 @@ class MessageSend(APIView):
             receiver = request.data.get("receiver")
             if not receiver:
                 raise ParseError("required receiver")
-            if receiver == request.user.pk:
+            if receiver == str(request.user.pk):
                 raise ParseError("can't send to yourself")
             message = serializer.save(sender=request.user, receiver=receiver)
             return Response("Successful Response", status=201)

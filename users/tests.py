@@ -1,6 +1,6 @@
 from rest_framework.test import APITestCase
 from .models import User
-from likes.models import Feedlike, Commentlike
+from likes.models import Feedlike
 from feeds.models import Feed
 from groups.models import Group
 from categories.models import Category
