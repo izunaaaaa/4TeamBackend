@@ -15,7 +15,7 @@ from django.core.cache import cache
 #     # permission_classes = [IsAuthenticated]
 
 #     @swagger_auto_schema(
-#         operation_summary="전체 카테고리 조회 api",
+#         operation_summary="전체 카테고리 조회",
 #         responses={
 #             200: openapi.Response(
 #                 description="Successful Response",
@@ -36,7 +36,7 @@ class GroupCategories(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_summary="그룹 카테고리 조회 api",
+        operation_summary="그룹 카테고리 조회",
         responses={
             200: openapi.Response(
                 description="Successful Response",
@@ -66,7 +66,7 @@ class GroupCategories(APIView):
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        operation_summary="그룹 카테고리 생성 api",
+        operation_summary="그룹 카테고리 생성",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             required=["name"],
@@ -112,7 +112,7 @@ class GroupCategoryDetail(APIView):
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        operation_summary="그룹 카테고리 수정 api",
+        operation_summary="그룹 카테고리 수정",
         request_body=serializers.CategorySerializer(),
         responses={
             200: openapi.Response(
@@ -147,7 +147,7 @@ class GroupCategoryDetail(APIView):
             return Response(serializer.errors, status=400)
 
     @swagger_auto_schema(
-        operation_summary="그룹 카테고리 삭제 api",
+        operation_summary="그룹 카테고리 삭제",
         responses={
             204: openapi.Response(
                 description="Successful response",
