@@ -211,8 +211,6 @@ class FeedLikes(APIView):
         },
     )
     def post(self, request):
-        # feed_pk = request.data.get("feed")
-        # feed = self.Feed.objects.get(pk=feed_pk)
         feed = self.get_object(request.data.get("feed"))
         serializer = FeedLikeSerializer(data=request.data)
         if serializer.is_valid():
@@ -467,7 +465,9 @@ class CoachSignUp(APIView):
         if serializer.is_valid():
             self.validate_password(password)
             if request.data.get("group"):
-                group, created = Group.objects.get_or_create(name=request.data.get("group"))
+                group, created = Group.objects.get_or_create(
+                    name=request.data.get("group")
+                )
             else:
                 raise ParseError("Group 이 입력되지 않았습니다.")
             user = serializer.save()
