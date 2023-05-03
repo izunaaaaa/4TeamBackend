@@ -41,8 +41,12 @@ class Me(APIView):
         },
     )
     def get(self, request):
+        data = cache.get(request.user)
+        if data:
+            return Response(data)
         user = request.user
         serializer = serializers.PrivateUserSerializer(user)
+        cache.set(request.user, serializer.data)
         return Response(serializer.data)
 
     @swagger_auto_schema(
@@ -415,7 +419,10 @@ class SignUp(APIView):
 
 class CoachSignUp(APIView):
     def validate_password(self, password):
-        REGEX_PASSWORD = "^(?=.*[\d])(?=.*[a-z])(?=.*[!@#$%^&*()])[\w\d!@#$%^&*()]{8,}$"
+        REGEX_PASSWORD = (
+            "^(?=.*[\d])(?=.*[a-z])(?=.*[!@#$%^&*~()])[\w\d!@#$%^~&*()]{8,}$"
+        )
+
         if not re.fullmatch(REGEX_PASSWORD, password):
             raise ParseError(
                 "비밀번호를 확인하세요. 최소 1개 이상의 소문자, 숫자, 특수문자로 구성되어야 하며 길이는 8자리 이상이어야 합니다."
