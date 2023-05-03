@@ -236,12 +236,8 @@ class Feeds(APIView):
     )
     def get(self, request):
         feed = (
-            Feed.objects.prefetch_related(
-                "user",
-                "group",
-                "comment",
-                "images",
-            )
+            Feed.objects.select_related("user", "group")
+            .prefetch_related("images", "comment", "feedlike")
             .all()
             .order_by("-created_at")
         )
@@ -883,7 +879,7 @@ class GroupFeedSearch(APIView):
 
 
 class GroupFeedSearchResult(APIView):
-    permission_classes = [IsAuthenticated, IsCoachOrStaff]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_summary="그룹 피드 검색 결과",
