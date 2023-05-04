@@ -149,7 +149,7 @@ class AccessInfoDetail(APIView):
         group = get_object_or_404(Group, pk=group_pk)
         access_info = AccessInfo.objects.filter(group=group)
         serializer = AccessListSerializer(access_info, many=True)
-        cache.set(f"group_{group_pk}_access_list", serializer.data)
+        cache.set(f"group_{group_pk}_access_list", serializer.data, timeout=30)
         return Response(serializer.data)
 
     @swagger_auto_schema(
