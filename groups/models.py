@@ -3,6 +3,7 @@ from common.models import CommonModel
 from categories.models import Category
 from django.db.models import Count, Case, When, Q
 
+
 class Group(CommonModel):
     name = models.CharField(max_length=100, unique=True)
     # coach = models.OneToOneField(
@@ -45,5 +46,3 @@ class Group(CommonModel):
             Category.objects.create(name="전체글", group=self)
             Category.objects.create(name="일반글", group=self)
             Category.objects.create(name="인기글", group=self)
-
-
