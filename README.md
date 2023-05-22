@@ -1,7 +1,7 @@
 ## CurB Backend 
 <img src="https://user-images.githubusercontent.com/125422608/236654783-d526562d-e48a-43b2-b798-575cdd2d79d3.png" width="20%"/>
 
-  **개발기간: 2022.03 ~ 2022.03**
+개발기간: 2023.05 ~ 2023.05
 
 [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fizunaaaaa%2F&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
 
