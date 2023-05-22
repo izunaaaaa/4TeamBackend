@@ -20,6 +20,19 @@ Django와 Django Rest Framework를 이용한 부트캠프 커뮤니티
 
 ---
 
+## ARCHITECTURE
+
+
+![image](https://user-images.githubusercontent.com/125422608/236492105-0b2f5f0c-fef8-4b83-984a-aa4545a15580.png)
+
+---
+
+## CI/CD
+
+![image](https://user-images.githubusercontent.com/125422608/236626272-bfd4c546-6f91-43f2-afdd-fbb92e890c7b.png)
+
+---
+
 ## 개발 인원
 
 
