@@ -1,4 +1,4 @@
-# CurB Backend 
+## CurB Backend 
 <img src="https://user-images.githubusercontent.com/125422608/236654783-d526562d-e48a-43b2-b798-575cdd2d79d3.png" width="20%"/>
 
   **개발기간: 2022.03 ~ 2022.03**
@@ -32,24 +32,24 @@ Django와 Django Rest Framework를 이용한 부트캠프 커뮤니티
 
 ## STACKS
 
-### Environment
+Environment
 
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-007ACC?style=for-the-badge&logo=Visual%20Studio%20Code&logoColor=white)
 ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=Git&logoColor=white)
 ![Github](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white)     
 
-### Hosting
+Hosting
 
 ![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=Render&logoColor=white)
 
-### Dev Tools
+Dev Tools
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white)
 ![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=Django&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=PostgreSQL&logoColor=white)
 ![Poetry](https://img.shields.io/badge/Poetry-60A5FA?style=for-the-badge&logo=Poetry&logoColor=white)
 
-### Library
+Library
 
 ![DjanoRestFramework](https://img.shields.io/badge/DRF-F44336?style=for-the-badge&logo=DRF&logoColor=white)
 ![Gunicorn](https://img.shields.io/badge/Gunicorn-499848?style=for-the-badge&logo=Gunicorn&logoColor=white)
@@ -59,7 +59,7 @@ Django와 Django Rest Framework를 이용한 부트캠프 커뮤니티
 ![Sentry](https://img.shields.io/badge/Sentry-362D59?style=for-the-badge&logo=Sentry&logoColor=white)
 
 
-### Communication
+Communication
 ![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=Discord&logoColor=white)
 ![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white)
 
