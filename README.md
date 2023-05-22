@@ -7,6 +7,8 @@
 
 ![image](https://user-images.githubusercontent.com/125422608/236626272-bfd4c546-6f91-43f2-afdd-fbb92e890c7b.png)
 
+---
+
 ## 개발 인원
 
 
