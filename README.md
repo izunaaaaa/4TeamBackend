@@ -20,6 +20,10 @@ Django와 Django Rest Framework를 이용한 부트캠프 커뮤니티
 
 ---
 
+## DB DIAGRAM
+
+<img width="1110" alt="cur_b(수정후)" src="https://github.com/goeasyonng/CurB_Backend/assets/121272470/2e30ef40-6fe7-4185-b741-f34fcb3a12d6">
+
 ## ARCHITECTURE
 
 
